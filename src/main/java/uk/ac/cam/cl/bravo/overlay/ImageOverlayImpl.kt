@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.bravo
+package uk.ac.cam.cl.bravo.overlay
 
 import org.apache.commons.math3.analysis.MultivariateFunction
 import org.apache.commons.math3.optim.InitialGuess

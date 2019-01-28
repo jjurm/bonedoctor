@@ -4,6 +4,7 @@ import uk.ac.cam.cl.bravo.dataset.Bodypart
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.dataset.Normality
 import uk.ac.cam.cl.bravo.gui.DisplayImage
+import uk.ac.cam.cl.bravo.overlay.ImageOverlayImpl
 import java.io.File
 import javax.imageio.ImageIO
 

@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.bravo;
+package uk.ac.cam.cl.bravo.classify;
 
 import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.Bodypart;

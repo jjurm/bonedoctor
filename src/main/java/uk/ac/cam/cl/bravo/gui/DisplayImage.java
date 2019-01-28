@@ -1,4 +1,4 @@
-package uk.ac.cam.cl.bravo;
+package uk.ac.cam.cl.bravo.gui;
 
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 
