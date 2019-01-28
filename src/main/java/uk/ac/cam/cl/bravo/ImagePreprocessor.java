@@ -1,5 +1,7 @@
 package uk.ac.cam.cl.bravo;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.awt.image.BufferedImage;
 
 /**
@@ -12,5 +14,6 @@ import java.awt.image.BufferedImage;
  * Responsible: Nicole Joseph (nmj33)
  */
 interface ImagePreprocessor {
-    BufferedImage preprocess(BufferedImage input);
+    @NotNull
+    BufferedImage preprocess(@NotNull BufferedImage input);
 }
