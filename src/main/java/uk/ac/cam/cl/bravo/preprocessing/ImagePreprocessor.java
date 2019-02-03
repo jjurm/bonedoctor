@@ -15,5 +15,5 @@ import java.awt.image.BufferedImage;
  */
 interface ImagePreprocessor {
     @NotNull
-    BufferedImage preprocess(@NotNull BufferedImage input);
+    BufferedImage preprocess(@NotNull String filePath);
 }
