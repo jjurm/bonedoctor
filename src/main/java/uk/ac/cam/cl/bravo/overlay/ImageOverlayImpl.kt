@@ -44,7 +44,8 @@ class ImageOverlayImpl : ImageOverlay {
         private fun copyToPlane(image: BufferedImage, affineTransform: AffineTransform? = null): BufferedImage {
             val plane = BufferedImage(
                 PLANE_WIDTH,
-                PLANE_HEIGHT, BufferedImage.TYPE_BYTE_GRAY)
+                PLANE_HEIGHT, BufferedImage.TYPE_BYTE_GRAY
+            )
             val g2d = plane.createGraphics()
             if (affineTransform == null) {
                 g2d.drawImage(
@@ -57,11 +58,13 @@ class ImageOverlayImpl : ImageOverlay {
                     null
                 )
             } else {
-                g2d.drawImage(image,
+                g2d.drawImage(
+                    image,
                     calculateInPlaneTransform(
                         image,
                         affineTransform
-                    ), null)
+                    ), null
+                )
             }
             g2d.dispose()
             return plane
@@ -76,7 +79,8 @@ class ImageOverlayImpl : ImageOverlay {
 
             val plane = BufferedImage(
                 PLANE_WIDTH,
-                PLANE_HEIGHT, BufferedImage.TYPE_INT_RGB)
+                PLANE_HEIGHT, BufferedImage.TYPE_INT_RGB
+            )
             for (y in 0 until PLANE_HEIGHT) {
                 for (x in 0 until PLANE_WIDTH) {
                     plane.setRGB(
@@ -102,14 +106,14 @@ class ImageOverlayImpl : ImageOverlay {
             fun BufferedImage.pixel(x: Int, y: Int) = Color(getRGB(x, y)).red
 
             var sum = BigDecimal.ZERO
-            for (y in 0 until PLANE_HEIGHT) {
+            for (y in 0 until (PLANE_HEIGHT * 0.8).toInt()) {
                 for (x in 0 until PLANE_WIDTH) {
                     val basePixel = basePlane.pixel(x, y)
                     val samplePixel = samplePlane.pixel(x, y)
 
                     val over = max(samplePixel - basePixel, 0).toDouble()
                     val under = max(basePixel - samplePixel, 0).toDouble()
-                    val value = Math.pow(over + under, 2.0) / 100.0
+                    val value = Math.pow(over + under, 2.0) / 100.0 * (1 - y / PLANE_HEIGHT / 4 * 5)
                     sum += BigDecimal.valueOf(value.toLong())
                 }
             }
