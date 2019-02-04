@@ -36,7 +36,7 @@ class ImageOverlayImpl(
     override fun findBestOverlay(base: BufferedImage, sample: BufferedImage): PointValuePair {
         val optimizer = BOBYQAOptimizer(
             parameterCount * 2 + 1,
-            15.0,
+            0.3,
             precision
         )
         val baseInPlane = ImageTools.copyToPlane(base)

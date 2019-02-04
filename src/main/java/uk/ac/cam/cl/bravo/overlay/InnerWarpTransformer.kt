@@ -12,6 +12,8 @@ class InnerWarpTransformer : AbstractTransformer() {
         // number of flexible points in one dimension
         const val RESOLUTION = 3
 
+        const val PARAMETER_SCALE = 0.8
+
         // number of flexible+fixed points in one dimension (points at the edges are fixed)
         private val SIZE = RESOLUTION + 2
         // flexible points (in principle RESOLUTION in two dimensions)
@@ -28,26 +30,26 @@ class InnerWarpTransformer : AbstractTransformer() {
         get() =
             (1..RESOLUTION).flatMap { y ->
                 (1..RESOLUTION).map { x ->
-                    SOURCE_GRID.xGrid[y * SIZE + x].toDouble() / ImageTools.PLANE_WIDTH
+                    SOURCE_GRID.xGrid[y * SIZE + x].toDouble() / ImageTools.PLANE_WIDTH / PARAMETER_SCALE
                 }
             } + (1..RESOLUTION).flatMap { y ->
                 (1..RESOLUTION).map { x ->
-                    SOURCE_GRID.yGrid[y * SIZE + x].toDouble() / ImageTools.PLANE_HEIGHT
+                    SOURCE_GRID.yGrid[y * SIZE + x].toDouble() / ImageTools.PLANE_HEIGHT / PARAMETER_SCALE
                 }
             }
     override val minBounds get() = List(FLEXIBLE * 2) { 0.0 }
     override val maxBounds
         get() =
             //List(FLEXIBLE) { (ImageTools.PLANE_WIDTH).toDouble() } + List(FLEXIBLE) { (ImageTools.PLANE_HEIGHT).toDouble() }
-            List(FLEXIBLE * 2) {1.0}
+            List(FLEXIBLE * 2) {1.0 / PARAMETER_SCALE}
 
     private fun paramsToGrid(parameters: DoubleArray): WarpGrid {
         val dstGrid = WarpGrid(SIZE, SIZE, ImageTools.PLANE_WIDTH, ImageTools.PLANE_HEIGHT)
         (0 until FLEXIBLE).forEach { i ->
             val x = i % RESOLUTION
             val y = i / RESOLUTION
-            dstGrid.xGrid[(y + 1) * SIZE + (x + 1)] = (parameters[i] * ImageTools.PLANE_WIDTH).toFloat()
-            dstGrid.yGrid[(y + 1) * SIZE + (x + 1)] = (parameters[FLEXIBLE + i] * ImageTools.PLANE_HEIGHT).toFloat()
+            dstGrid.xGrid[(y + 1) * SIZE + (x + 1)] = (parameters[i] * ImageTools.PLANE_WIDTH * PARAMETER_SCALE).toFloat()
+            dstGrid.yGrid[(y + 1) * SIZE + (x + 1)] = (parameters[FLEXIBLE + i] * ImageTools.PLANE_HEIGHT * PARAMETER_SCALE).toFloat()
         }
         return dstGrid
     }
