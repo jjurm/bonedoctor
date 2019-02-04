@@ -2,7 +2,6 @@ package uk.ac.cam.cl.bravo.overlay;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 /**
@@ -13,5 +12,5 @@ import java.awt.image.BufferedImage;
  */
 public interface ImageOverlay {
     @NotNull
-    AffineTransform findBestOverlay(@NotNull BufferedImage base, @NotNull BufferedImage sample);
+    BufferedImage findBestOverlay(@NotNull BufferedImage base, @NotNull BufferedImage sample);
 }

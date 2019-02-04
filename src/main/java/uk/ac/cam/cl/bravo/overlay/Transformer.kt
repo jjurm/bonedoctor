@@ -1,0 +1,15 @@
+package uk.ac.cam.cl.bravo.overlay
+
+import java.awt.image.BufferedImage
+
+interface Transformer {
+
+    val parameterCount: Int
+
+    val initialGuess: List<Double>
+    val minBounds: List<Double>
+    val maxBounds: List<Double>
+
+    fun transform(image: BufferedImage, parameters: DoubleArray): BufferedImage
+
+}
