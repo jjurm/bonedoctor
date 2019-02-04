@@ -12,7 +12,8 @@ import java.awt.image.BufferedImage
 
 class ImageOverlayImpl(
     private val transformers: Array<Transformer>,
-    private val f: SimilarityFunction
+    private val f: SimilarityFunction,
+    private val precision: Double = 1e-5
 ) : ImageOverlay {
 
     private val parameterCount = transformers.map { it.parameterCount }.sum()
@@ -24,7 +25,7 @@ class ImageOverlayImpl(
 
     fun Array<Transformer>.transformAll(image: BufferedImage, parameters: DoubleArray): BufferedImage {
         // for each transformer, extract the appropriate parameters and transform the image
-        val (_, transformed) = transformers.fold(Pair(0, image)) { (paramOffset, image), transformer ->
+        val (_, transformed) = this.fold(Pair(0, image)) { (paramOffset, image), transformer ->
             val sliced = parameters.slice(paramOffset until (transformer.parameterCount + paramOffset))
             val transformed = transformer.transform(image, sliced.toDoubleArray())
             Pair(paramOffset + transformer.parameterCount, transformed)
@@ -32,33 +33,33 @@ class ImageOverlayImpl(
         return transformed
     }
 
-    fun find(
-        base: BufferedImage,
-        sample: BufferedImage
-    ): PointValuePair {
-        val optimizer = BOBYQAOptimizer(parameterCount * 2 + 1, 15.0, 1e-9)
+    override fun findBestOverlay(base: BufferedImage, sample: BufferedImage): PointValuePair {
+        val optimizer = BOBYQAOptimizer(
+            parameterCount * 2 + 1,
+            15.0,
+            precision
+        )
         val baseInPlane = ImageTools.copyToPlane(base)
-
+        val sampleInPlane = ImageTools.copyToPlane(sample)
         val result = optimizer.optimize(
             ObjectiveFunction { params ->
-                f.value(baseInPlane, transformers.transformAll(sample, params))
+                f.value(baseInPlane, transformers.transformAll(sampleInPlane, params))
             },
             GoalType.MINIMIZE,
             initialGuess,
             bounds,
-            MaxEval(1000)
+            MaxEval(2000)
         )
 
         println("Evaluations: ${optimizer.evaluations}")
+        println("Parameters: ${result.point.toList().map { "%.3f".format(it) }}")
+        println("Similarity: ${result.value}")
         return result
     }
 
-    override fun findBestOverlay(base: BufferedImage, sample: BufferedImage): BufferedImage {
-        val result = find(base, sample)
-        val parameters = result.point.toList().map { "%.3f".format(it) }
-        println("Transform: ${parameters}")
-        println("Similarity: ${result.value}")
-        return transformers.transformAll(sample, result.point)
+    fun applyTransformations(image: BufferedImage, parameters: DoubleArray): BufferedImage {
+        val inPlane = ImageTools.copyToPlane(image)
+        return transformers.transformAll(inPlane, parameters)
     }
 
 }
