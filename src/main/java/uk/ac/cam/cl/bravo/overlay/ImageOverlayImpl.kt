@@ -33,6 +33,18 @@ class ImageOverlayImpl(
         return transformed
     }
 
+    fun penaltyScaledParameters(parameters: DoubleArray): Iterable<Double> {
+        val accParams = ArrayList<Double>(parameterCount)
+        transformers.fold(0) { paramOffset, transformer ->
+            val s = transformer.parameterScale * transformer.parameterPenaltyScale
+            for (i in paramOffset until (paramOffset + transformer.parameterCount)) {
+                accParams.add(parameters[i] * s)
+            }
+            paramOffset + transformer.parameterCount
+        }
+        return accParams
+    }
+
     override fun findBestOverlay(base: BufferedImage, sample: BufferedImage): PointValuePair {
         val optimizer = BOBYQAOptimizer(
             parameterCount * 2 + 1,
@@ -43,7 +55,7 @@ class ImageOverlayImpl(
         val sampleInPlane = ImageTools.copyToPlane(sample)
         val result = optimizer.optimize(
             ObjectiveFunction { params ->
-                f.value(baseInPlane, transformers.transformAll(sampleInPlane, params))
+                f.value(baseInPlane, transformers.transformAll(sampleInPlane, params), penaltyScaledParameters(params))
             },
             GoalType.MINIMIZE,
             initialGuess,

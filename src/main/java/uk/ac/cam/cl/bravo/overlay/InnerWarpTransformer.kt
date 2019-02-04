@@ -6,49 +6,35 @@ import uk.ac.cam.cl.bravo.util.ImageTools
 import java.awt.Color
 import java.awt.image.BufferedImage
 
-class InnerWarpTransformer : AbstractTransformer() {
+class InnerWarpTransformer(
+    parameterScale: Double,
+    parameterPenaltyScale: Double,
+    /** number of flexible points in one dimension */
+    private val RESOLUTION: Int
+) : AbstractTransformer(parameterScale, parameterPenaltyScale) {
 
-    companion object {
-        // number of flexible points in one dimension
-        const val RESOLUTION = 3
+    // number of flexible+fixed points in one dimension (points at the edges are fixed)
+    private val SIZE = RESOLUTION + 2
+    // flexible points (in principle RESOLUTION in two dimensions)
+    private val FLEXIBLE = RESOLUTION * RESOLUTION
+    // total number of points in the grid
+    private val GRID_POINTS = SIZE * SIZE
+    private val SOURCE_GRID = WarpGrid(SIZE, SIZE, ImageTools.PLANE_WIDTH, ImageTools.PLANE_HEIGHT)
 
-        // number of flexible+fixed points in one dimension (points at the edges are fixed)
-        private val SIZE = RESOLUTION + 2
-        // flexible points (in principle RESOLUTION in two dimensions)
-        private val FLEXIBLE = RESOLUTION * RESOLUTION
-        // total number of points in the grid
-        private val GRID_POINTS = SIZE * SIZE
-
-        private val SOURCE_GRID = WarpGrid(SIZE, SIZE, ImageTools.PLANE_WIDTH, ImageTools.PLANE_HEIGHT)
-    }
-
-    override val parameterScale get() = 0.8
     override val parameterCount get() = FLEXIBLE * 2 // X, Y coordinates for each grid point
 
     override val initialGuess0
-        get() =
-            (1..RESOLUTION).flatMap { y ->
-                (1..RESOLUTION).map { x ->
-                    SOURCE_GRID.xGrid[y * SIZE + x].toDouble() / ImageTools.PLANE_WIDTH
-                }
-            } + (1..RESOLUTION).flatMap { y ->
-                (1..RESOLUTION).map { x ->
-                    SOURCE_GRID.yGrid[y * SIZE + x].toDouble() / ImageTools.PLANE_HEIGHT
-                }
-            }
-    override val minBounds0 get() = List(FLEXIBLE * 2) { 0.0 }
-    override val maxBounds0
-        get() =
-            //List(FLEXIBLE) { (ImageTools.PLANE_WIDTH).toDouble() } + List(FLEXIBLE) { (ImageTools.PLANE_HEIGHT).toDouble() }
-            List(FLEXIBLE * 2) {1.0}
+        get() = List(FLEXIBLE * 2) { 0.0 }
+    override val minBounds0 get() = List(FLEXIBLE * 2) { -1.0 }
+    override val maxBounds0 get() = List(FLEXIBLE * 2) { 1.0 }
 
     private fun paramsToGrid(parameters: DoubleArray): WarpGrid {
         val dstGrid = WarpGrid(SIZE, SIZE, ImageTools.PLANE_WIDTH, ImageTools.PLANE_HEIGHT)
         (0 until FLEXIBLE).forEach { i ->
             val x = i % RESOLUTION
             val y = i / RESOLUTION
-            dstGrid.xGrid[(y + 1) * SIZE + (x + 1)] = (parameters[i] * ImageTools.PLANE_WIDTH).toFloat()
-            dstGrid.yGrid[(y + 1) * SIZE + (x + 1)] = (parameters[FLEXIBLE + i] * ImageTools.PLANE_HEIGHT).toFloat()
+            dstGrid.xGrid[(y + 1) * SIZE + (x + 1)] += (parameters[i] * ImageTools.PLANE_WIDTH).toFloat()
+            dstGrid.yGrid[(y + 1) * SIZE + (x + 1)] += (parameters[FLEXIBLE + i] * ImageTools.PLANE_HEIGHT).toFloat()
         }
         return dstGrid
     }
@@ -86,7 +72,6 @@ class InnerWarpTransformer : AbstractTransformer() {
                     drawLine(pointX(x, y), pointY(x, y), pointX(x, y + 1), pointY(x, y + 1))
                 }
             }
-            color = Color.yellow
             // horizontal lines
             for (y in 0 until SIZE) {
                 for (x in 0 until (SIZE - 1)) {

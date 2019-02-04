@@ -8,7 +8,11 @@ import uk.ac.cam.cl.bravo.util.ImageTools.withGraphics
 import java.awt.Color
 import java.awt.image.BufferedImage
 
-class WarpTransformer : AbstractTransformer() {
+@Deprecated("Use InnerWarpTransformer, this class is not kept up to date.")
+class WarpTransformer(
+    parameterScale: Double,
+    parameterPenaltyScale: Double
+) : AbstractTransformer(parameterScale, parameterPenaltyScale) {
 
     companion object {
         const val RESOLUTION = 4
@@ -17,7 +21,6 @@ class WarpTransformer : AbstractTransformer() {
         private val SOURCE_GRID = WarpGrid(RESOLUTION, RESOLUTION, PLANE_WIDTH, PLANE_HEIGHT)
     }
 
-    override val parameterScale get() = 1.0
     override val parameterCount get() = GRID_POINTS * 2 // X, Y coordinates for each grid point
 
     override val initialGuess0 get() = (SOURCE_GRID.xGrid + SOURCE_GRID.yGrid).map { it.toDouble() }
@@ -61,7 +64,6 @@ class WarpTransformer : AbstractTransformer() {
                     drawLine(pointX(x, y), pointY(x, y), pointX(x, y + 1), pointY(x, y + 1))
                 }
             }
-            color = Color.yellow
             // horizontal lines
             for (y in 0 until RESOLUTION) {
                 for (x in 0 until (RESOLUTION - 1)) {

@@ -7,17 +7,20 @@ import uk.ac.cam.cl.bravo.util.ImageTools.withGraphics
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
 
-class AffineTransformer : AbstractTransformer() {
+class AffineTransformer(
+    parameterScale: Double,
+    parameterPenaltyScale: Double
+) : AbstractTransformer(parameterScale, parameterPenaltyScale) {
 
     companion object {
-        private const val REL_BOUND = 3.0
+        private const val REL_BOUND = 1.0
         private const val ABS_BOUND = (PLANE_WIDTH / 2).toDouble()
     }
 
-    override val parameterScale get() = 1.0
     override val parameterCount get() = 6
 
-    override val initialGuess0 get() = listOf(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
+    val identity = listOf(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
+    override val initialGuess0 get() = listOf(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     override val minBounds0
         get() = listOf(
             -REL_BOUND,
@@ -47,8 +50,10 @@ class AffineTransformer : AbstractTransformer() {
 
     override fun transform0(image: BufferedImage, parameters: DoubleArray): BufferedImage {
         val plane = getPlaneImage()
+        val matrix = (parameters zip identity).map { (a, b) -> a + b }.toDoubleArray()
+        val transform = calculateInPlaneTransform(image, AffineTransform(matrix))
         withGraphics(plane) {
-            drawImage(image, calculateInPlaneTransform(image, AffineTransform(parameters)), null)
+            drawImage(image, transform, null)
         }
         return plane
     }

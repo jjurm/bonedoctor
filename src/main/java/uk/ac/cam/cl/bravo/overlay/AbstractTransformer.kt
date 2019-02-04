@@ -2,10 +2,12 @@ package uk.ac.cam.cl.bravo.overlay
 
 import java.awt.image.BufferedImage
 
-abstract class AbstractTransformer : Transformer {
-
+abstract class AbstractTransformer(
     /** Higher scale means lower absolute values, hence higher weight when minimising */
-    protected abstract val parameterScale: Double
+    override val parameterScale: Double,
+    /** Higher value means higher penalisation for adjusting parameters of this transformer */
+    override val parameterPenaltyScale: Double
+) : Transformer {
 
     protected fun rescaleOut(parameters: List<Double>) = parameters.map { it / parameterScale }
     protected fun rescaleIn(parameters: DoubleArray) = parameters.map { it * parameterScale }.toDoubleArray()

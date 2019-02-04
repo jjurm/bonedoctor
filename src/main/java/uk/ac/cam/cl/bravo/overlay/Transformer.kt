@@ -5,6 +5,8 @@ import java.awt.image.BufferedImage
 interface Transformer {
 
     val parameterCount: Int
+    val parameterScale: Double
+    val parameterPenaltyScale: Double
 
     val initialGuess: List<Double>
     val minBounds: List<Double>
