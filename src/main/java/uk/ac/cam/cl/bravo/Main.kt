@@ -66,7 +66,7 @@ fun tryOverlay(file1: String, file2: String) {
             warper,
             AffineTransformer(parameterScale = 1.0, parameterPenaltyScale = 0.1)
         ),
-        PixelSimilarity(parameterPenaltyWeight = 1.0),
+        PixelSimilarity(parameterPenaltyWeight = 1.0, ignoreBorderWidth = 0.15),
         precision = 1e-4
     )
 
