@@ -17,16 +17,17 @@ class WarpTransformer : AbstractTransformer() {
         private val SOURCE_GRID = WarpGrid(RESOLUTION, RESOLUTION, PLANE_WIDTH, PLANE_HEIGHT)
     }
 
+    override val parameterScale get() = 1.0
     override val parameterCount get() = GRID_POINTS * 2 // X, Y coordinates for each grid point
 
-    override val initialGuess get() = (SOURCE_GRID.xGrid + SOURCE_GRID.yGrid).map { it.toDouble() }
-    override val minBounds get() = List(GRID_POINTS * 2) { -50.0 }
-    override val maxBounds
+    override val initialGuess0 get() = (SOURCE_GRID.xGrid + SOURCE_GRID.yGrid).map { it.toDouble() }
+    override val minBounds0 get() = List(GRID_POINTS * 2) { -50.0 }
+    override val maxBounds0
         get() =
             List(GRID_POINTS) { (PLANE_WIDTH + 50).toDouble() } + List(GRID_POINTS) { (PLANE_HEIGHT + 100).toDouble() }
 
 
-    override fun transform(image: BufferedImage, parameters: DoubleArray): BufferedImage {
+    override fun transform0(image: BufferedImage, parameters: DoubleArray): BufferedImage {
         val dstGrid = WarpGrid(RESOLUTION, RESOLUTION, PLANE_WIDTH, PLANE_HEIGHT)
 
         dstGrid.xGrid = parameters.slice(0 until GRID_POINTS).map { it.toFloat() }.toFloatArray()

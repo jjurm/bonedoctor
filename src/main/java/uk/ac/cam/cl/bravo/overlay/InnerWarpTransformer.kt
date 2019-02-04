@@ -12,8 +12,6 @@ class InnerWarpTransformer : AbstractTransformer() {
         // number of flexible points in one dimension
         const val RESOLUTION = 3
 
-        const val PARAMETER_SCALE = 0.8
-
         // number of flexible+fixed points in one dimension (points at the edges are fixed)
         private val SIZE = RESOLUTION + 2
         // flexible points (in principle RESOLUTION in two dimensions)
@@ -24,37 +22,38 @@ class InnerWarpTransformer : AbstractTransformer() {
         private val SOURCE_GRID = WarpGrid(SIZE, SIZE, ImageTools.PLANE_WIDTH, ImageTools.PLANE_HEIGHT)
     }
 
+    override val parameterScale get() = 0.8
     override val parameterCount get() = FLEXIBLE * 2 // X, Y coordinates for each grid point
 
-    override val initialGuess
+    override val initialGuess0
         get() =
             (1..RESOLUTION).flatMap { y ->
                 (1..RESOLUTION).map { x ->
-                    SOURCE_GRID.xGrid[y * SIZE + x].toDouble() / ImageTools.PLANE_WIDTH / PARAMETER_SCALE
+                    SOURCE_GRID.xGrid[y * SIZE + x].toDouble() / ImageTools.PLANE_WIDTH
                 }
             } + (1..RESOLUTION).flatMap { y ->
                 (1..RESOLUTION).map { x ->
-                    SOURCE_GRID.yGrid[y * SIZE + x].toDouble() / ImageTools.PLANE_HEIGHT / PARAMETER_SCALE
+                    SOURCE_GRID.yGrid[y * SIZE + x].toDouble() / ImageTools.PLANE_HEIGHT
                 }
             }
-    override val minBounds get() = List(FLEXIBLE * 2) { 0.0 }
-    override val maxBounds
+    override val minBounds0 get() = List(FLEXIBLE * 2) { 0.0 }
+    override val maxBounds0
         get() =
             //List(FLEXIBLE) { (ImageTools.PLANE_WIDTH).toDouble() } + List(FLEXIBLE) { (ImageTools.PLANE_HEIGHT).toDouble() }
-            List(FLEXIBLE * 2) {1.0 / PARAMETER_SCALE}
+            List(FLEXIBLE * 2) {1.0}
 
     private fun paramsToGrid(parameters: DoubleArray): WarpGrid {
         val dstGrid = WarpGrid(SIZE, SIZE, ImageTools.PLANE_WIDTH, ImageTools.PLANE_HEIGHT)
         (0 until FLEXIBLE).forEach { i ->
             val x = i % RESOLUTION
             val y = i / RESOLUTION
-            dstGrid.xGrid[(y + 1) * SIZE + (x + 1)] = (parameters[i] * ImageTools.PLANE_WIDTH * PARAMETER_SCALE).toFloat()
-            dstGrid.yGrid[(y + 1) * SIZE + (x + 1)] = (parameters[FLEXIBLE + i] * ImageTools.PLANE_HEIGHT * PARAMETER_SCALE).toFloat()
+            dstGrid.xGrid[(y + 1) * SIZE + (x + 1)] = (parameters[i] * ImageTools.PLANE_WIDTH).toFloat()
+            dstGrid.yGrid[(y + 1) * SIZE + (x + 1)] = (parameters[FLEXIBLE + i] * ImageTools.PLANE_HEIGHT).toFloat()
         }
         return dstGrid
     }
 
-    override fun transform(image: BufferedImage, parameters: DoubleArray): BufferedImage {
+    override fun transform0(image: BufferedImage, parameters: DoubleArray): BufferedImage {
         val filter = WarpFilter(SOURCE_GRID, paramsToGrid(parameters))
 
         return filter.filter(
@@ -64,7 +63,7 @@ class InnerWarpTransformer : AbstractTransformer() {
     }
 
     fun drawMarks(image: BufferedImage, params: DoubleArray) {
-        val grid = paramsToGrid(params)
+        val grid = paramsToGrid(rescaleIn(params))
         val size = 5
         fun pointX(x: Int, y: Int) = grid.xGrid[y * SIZE + x].toInt()
         fun pointY(x: Int, y: Int) = grid.yGrid[y * SIZE + x].toInt()
