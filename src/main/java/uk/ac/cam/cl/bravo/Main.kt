@@ -7,7 +7,8 @@ import uk.ac.cam.cl.bravo.dataset.Normality
 import uk.ac.cam.cl.bravo.gui.DisplayImage
 import uk.ac.cam.cl.bravo.overlay.AffineTransformer
 import uk.ac.cam.cl.bravo.overlay.ImageOverlayImpl
-import uk.ac.cam.cl.bravo.overlay.PixelSimilarity1
+import uk.ac.cam.cl.bravo.overlay.InnerWarpTransformer
+import uk.ac.cam.cl.bravo.overlay.PixelSimilarity
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
 import uk.ac.cam.cl.bravo.util.ImageTools
 import java.io.File
@@ -24,10 +25,10 @@ fun main(args: Array<String>) {
 fun preprocessPipeline() {
     val dataset = Dataset()
 
-    val imagePreprocessor : ImagePreprocessor = TODO()
-    val bodypartViewClassifier : BodypartViewClassifier = TODO()
+    val imagePreprocessor: ImagePreprocessor = TODO()
+    val bodypartViewClassifier: BodypartViewClassifier = TODO()
 
-    dataset.training.forEach {sample ->
+    dataset.training.forEach { sample ->
         //var image = sample.loadImage()
 
         // preprocessing
@@ -55,11 +56,24 @@ fun tryOverlay(file1: String, file2: String) {
     DisplayImage(base)
     DisplayImage(sample)
 
-    val overlay = ImageOverlayImpl(
-        arrayOf(AffineTransformer()),
-        PixelSimilarity1()
+    val warper = InnerWarpTransformer(
+        parameterScale = 0.8,
+        parameterPenaltyScale = 1.0,
+        RESOLUTION = 4
     )
-    val transformed = overlay.findBestOverlay(base, sample)
+    val overlay = ImageOverlayImpl(
+        arrayOf(
+            warper,
+            AffineTransformer(parameterScale = 1.0, parameterPenaltyScale = 0.1)
+        ),
+        PixelSimilarity(parameterPenaltyWeight = 1.0),
+        precision = 1e-4
+    )
 
-    DisplayImage(ImageTools.overlay(base, transformed))
+    val result = overlay.findBestOverlay(base, sample)
+    val parameters = result.point
+    val transformed = overlay.applyTransformations(sample, parameters)
+    val overlayed = ImageTools.overlay(base, transformed)
+    warper.drawMarks(overlayed, parameters)
+    DisplayImage(overlayed)
 }
