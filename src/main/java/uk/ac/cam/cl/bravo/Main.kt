@@ -14,11 +14,9 @@ import javax.imageio.ImageIO
 
 
 fun main(args: Array<String>) {
-    val dataset = Dataset()
-
     tryOverlay(
-        "MURA-v1.1/train/XR_HAND/patient09734/study1_positive/image1_edit.png",
-        "MURA-v1.1/train/XR_HAND/patient09734/study1_positive/image3_edit.png"
+        "images/in/train_XR_HAND_patient09734_study1_positive_image1_edit.png",
+        "images/in/train_XR_HAND_patient09734_study1_positive_image3_edit.png"
     )
 }
 
