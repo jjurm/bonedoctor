@@ -13,7 +13,7 @@ import java.awt.image.BufferedImage;
  * <p>
  * Responsible: Nicole Joseph (nmj33)
  */
-interface ImagePreprocessor {
+public interface ImagePreprocessor {
     @NotNull
-    BufferedImage preprocess(@NotNull BufferedImage input);
+    BufferedImage preprocess(@NotNull String filePath);
 }

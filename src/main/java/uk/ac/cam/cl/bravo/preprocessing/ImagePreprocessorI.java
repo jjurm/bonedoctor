@@ -15,36 +15,80 @@ class ImagePreprocessorI implements ImagePreprocessor
 
     @NotNull
     @Override
-    public BufferedImage preprocess(@NotNull BufferedImage input) {
-        HashMap<Pair<Integer, Integer>, Integer> img = imgMap(input);
+    public BufferedImage preprocess(@NotNull  String imageName){
 
-        BufferedImage outputFile = input;
+        BufferedImage srcFile = srcImg(imageName);
+        BufferedImage buffFile = buffImg(imageName);
 
-        if (shouldFlip(img, input.getWidth(), input.getHeight())) {
-            outputFile = invertImage(input);
+        BufferedImage outputFile;
+
+        if (shouldFlip(srcFile, buffFile)){
+            outputFile = invertImage(srcImg("invert-"+imageName), buffImg("invert-"+imageName));
+            writeImage("invert-"+imageName, outputFile);
         }
 
-        return constrast(outputFile);
+        if (fleshy)
+            outputFile = contrast(srcImg("invert-"+imageName), buffImg("invert-"+imageName));
+        else
+            outputFile = contrast(srcImg("invert-"+imageName));
+        writeImage("invert-"+imageName, outputFile);
+
+        outputFile = resize(srcImg("invert-"+imageName), buffImg("invert-"+imageName));
+
+        return outputFile;
+
     }
 
-    private static BufferedImage invertImage(BufferedImage inputFile) {
+    static boolean fleshy = false;
 
-        BufferedImage outputFile = new BufferedImage(inputFile.getWidth(), inputFile.getHeight(), inputFile.getType());
+    private static BufferedImage invertImage(BufferedImage srcFile, BufferedImage inputFile) {
+
+        inputFile.getGraphics().drawImage(srcFile, 0, 0, null);
 
         for (int x = 0; x < inputFile.getWidth(); x++) {
             for (int y = 0; y < inputFile.getHeight(); y++) {
                 int rgba = inputFile.getRGB(x, y);
                 Color col = new Color(rgba);
                 Color colF = new Color(255-col.getRed(), 255-col.getGreen(), 255-col.getBlue());
-                outputFile.setRGB(x, y, colF.getRGB());
+                inputFile.setRGB(x, y, colF.getRGB());
             }
         }
 
-        return outputFile;
+        return inputFile;
 
     }
 
-    private static BufferedImage constrast(BufferedImage inputFile) {
+    private static boolean shouldFlip(BufferedImage srcFile, BufferedImage inputFile){
+
+        inputFile.getGraphics().drawImage(srcFile, 0, 0, null);
+
+        HashMap<Pair<Integer, Integer>, Integer> img = imgMap(inputFile);
+
+        TreeMap<Integer, Integer> hist = histogram(img);
+        TreeMap<Integer, Integer> histo = hist;
+        for (int k: hist.keySet()){
+            if (hist.get(k) != 0)
+                histo.put(k, hist.get(k));
+        }
+
+        HashMap<Integer, Integer> diff = new HashMap<>();
+        for (int i=0; i<histo.size()-2; i++){
+            int a = (int) histo.keySet().toArray()[i];
+            int b = (int) histo.keySet().toArray()[i+1];
+            int d = Math.abs(histo.get(a) -
+                    histo.get(b));
+            diff.put(Math.max(a,b), d);
+        }
+        HashMap<Integer, Integer> sortDiff = sortByValue(diff);
+        int b = (Integer) sortDiff.keySet().toArray()[0];
+        if (b>=127)
+            return true;
+        return false;
+    }
+
+    private static BufferedImage contrast(BufferedImage srcFile, BufferedImage inputFile) {
+
+        inputFile.getGraphics().drawImage(srcFile, 0, 0, null);
 
         HashMap<Pair<Integer, Integer>, Integer> img = imgMap(inputFile);
 
@@ -52,8 +96,8 @@ class ImagePreprocessorI implements ImagePreprocessor
 
         HashMap<Integer, Integer> histoSorted = sortByValue(histo);
 
-        int bT = blackThreshold(histoSorted);
-        int wT = whiteThreshold(histo, img.size());
+        int bT = blackThreshold(histo);
+        int wT = whiteThreshold(histo, img.size(), bT);
 
         BufferedImage outputFile = new BufferedImage(inputFile.getWidth(), inputFile.getHeight(), inputFile.getType());
 
@@ -77,9 +121,89 @@ class ImagePreprocessorI implements ImagePreprocessor
         return outputFile;
     }
 
+    private static BufferedImage contrast(BufferedImage srcFile) {
+
+        HashMap<Pair<Integer, Integer>, Integer> img = imgMap(srcFile);
+
+        TreeMap<Integer, Integer> histo = histogram(img);
+
+        int bT = blackThreshold(histo);
+        int wT = whiteThreshold(histo, img.size(), bT);
+
+        BufferedImage outputFile = new BufferedImage(srcFile.getWidth(), srcFile.getHeight(), srcFile.getType());
+
+        for (int x = 0; x < srcFile.getWidth(); x++) {
+            for (int y = 0; y < srcFile.getHeight(); y++) {
+                int rgba = srcFile.getRGB(x, y);
+                Color col = new Color(rgba, true);
+                int gs = (int)(0.3*col.getRed() + 0.59*col.getGreen() + 0.11*col.getBlue());
+                if (gs<=bT)
+                    col = new Color(0,0,0);
+                else if (gs>=wT)
+                    col = new Color(255,255,255);
+                else{
+                    int c = (int) Math.floor(255.0/(wT-bT)*(gs-bT));
+                    col = new Color(c,c,c);
+                }
+                outputFile.setRGB(x, y, col.getRGB());
+            }
+        }
+
+        return outputFile;
+    }
+
+    private static int blackThreshold(TreeMap<Integer, Integer> hist){
+
+        TreeMap<Integer, Integer> histo = hist;
+        for (int k: hist.keySet()){
+            if (hist.get(k) != 0)
+                histo.put(k, hist.get(k));
+        }
+        HashMap<Integer, Integer> diff = new HashMap<>();
+        for (int i=0; i<histo.size()-2; i++){
+            int a = (int) histo.keySet().toArray()[i];
+            int b = (int) histo.keySet().toArray()[i+1];
+            int d = Math.abs(histo.get(a) -
+                    histo.get(b));
+            diff.put(Math.max(a,b), d);
+        }
+        HashMap<Integer, Integer> sortDiff = sortByValue(diff);
+        return (Integer) sortDiff.keySet().toArray()[0];
+    }
+
+    private static int whiteThreshold(TreeMap<Integer, Integer> histo, int size, int bT){
+
+        int sum=0;
+        for (int i=bT; i<=255; i++){
+            sum+=histo.get(histo.keySet().toArray()[i]);
+        }
+        int avg =  (int) (sum*1.0/(255-bT));
+        int w =255;
+        for (int i =250; i>=0; i--){
+            int x = histo.get(histo.keySet().toArray()[i]);
+            if (x>=avg) {
+                w = (Integer) histo.keySet().toArray()[i];
+                break;
+            }
+        }
+        return w+10;
+    }
+
     private static BufferedImage buffImg(String imageName){
         try {
-            return ImageIO.read(new File(imageName));
+            BufferedImage i = ImageIO.read(new File(imageName));
+            BufferedImage img = new BufferedImage(i.getWidth(), i.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+            return img;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static BufferedImage srcImg(String imageName){
+        try {
+            BufferedImage i = ImageIO.read(new File(imageName));
+            return i;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -108,6 +232,20 @@ class ImagePreprocessorI implements ImagePreprocessor
         }
     }
 
+    public static BufferedImage resize(BufferedImage srcFile, BufferedImage inputFile) {
+
+        inputFile.getGraphics().drawImage(srcFile, 0, 0, null);
+
+        Image img = inputFile.getScaledInstance(320, 320, Image.SCALE_SMOOTH);
+        BufferedImage buffImg = new BufferedImage(320, 320, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2d = buffImg.createGraphics();
+        g2d.drawImage(img, 0, 0, null);
+        g2d.dispose();
+
+        return buffImg;
+    }
+
     private static TreeMap<Integer, Integer> histogram(HashMap<Pair<Integer, Integer>, Integer> img){
 
         TreeMap<Integer, Integer> histo = new TreeMap<>();
@@ -125,30 +263,7 @@ class ImagePreprocessorI implements ImagePreprocessor
         return histo;
     }
 
-    private static int blackThreshold(HashMap<Integer, Integer> histoSorted){
-        int b = 200;
-        int i =0;
-        while (b>=200){
-            b = (Integer) histoSorted.keySet().toArray()[i];
-            i++;
-        }
-        return b;
-    }
-
-    private static int whiteThreshold(TreeMap<Integer, Integer> histo, int size){
-
-        int w =255;
-        for (int i =250; i>=0; i--){
-            int x = histo.get(histo.keySet().toArray()[i]);
-            if (x>=0.009*size) {
-                w = (Integer) histo.keySet().toArray()[i];
-                break;
-            }
-        }
-        return w;
-    }
-
-    public static HashMap<Integer, Integer> sortByValue(TreeMap<Integer, Integer> tm)
+    public static HashMap<Integer, Integer> sortByValue(Map<Integer, Integer> tm)
     {
         // Create a list from elements of HashMap
         List<Map.Entry<Integer, Integer> > list =
@@ -171,97 +286,5 @@ class ImagePreprocessorI implements ImagePreprocessor
         return temp;
     }
 
-    private  static boolean shouldFlip(HashMap<Pair<Integer, Integer>, Integer> img, int width, int height){
 
-        int flip = darkBones(0,0,img,  width) +
-                darkBones(0,height-1,img,  width)+
-                darkBones(width-1,0,img,  width)+
-                darkBones(width-1,height-1,img,  width) +
-                darkBones(width/2, 0, img, width);
-        if (flip>2)
-            return true;
-        else
-            return false;
-
-    }
-
-    //returns 1 if the bones are predicted to be dark and 0 otherwise (normal X-ray)
-    private static int darkBones(int x, int y, HashMap<Pair<Integer, Integer>, Integer> img, int width){
-        int height = img.size()/width;
-        int m=0,n=0; //m is x movements and n is y movements
-
-        int s =8;
-
-        if (x==0 && y==0){
-            m=s;
-            n=s;
-        }
-
-        else if(x!=0 && y!=0){
-            m=-s;
-            n=-s;
-        }
-
-        else if(y==0){
-            if (x<width-1) {
-                m = 0;
-                n=s;
-            }
-            else{
-                m=-s;
-                n=s;
-            }
-        }
-
-        else {
-            m=s;
-            n=-s;
-
-        }
-        ArrayList<Integer> changes = new ArrayList<>();
-        //lighter 0, darker 1
-        while(x>=0 && x<width && y>=0 && y<height){
-            int c1 = img.get(new Pair<>(x,y));
-            x+=m;
-            y+=n;
-            if (!(x>=0 && x<width && y>=0 && y<height))
-                break;
-            //System.out.println(x+" "+y);
-            int c2 = img.get(new Pair<>(x,y));
-            if (c2-c1>=8) {
-                changes.add(0);
-                if (changes.size()>=2){
-                    if (changes.get(changes.size()-1) == changes.get(changes.size()-2))
-                        break;
-                }
-            }
-            else if (c1-c2>=8) {
-                changes.add(1);
-                if (changes.size()>=2){
-                    if (changes.get(changes.size()-1) == changes.get(changes.size()-2))
-                        break;
-                }
-            }
-        }
-        if (changes.size()>=2 && changes.get(changes.size()-1) == changes.get(changes.size()-2))
-            return changes.get(changes.size()-1);
-        else
-            return 0;
-    }
-
-    private static void preProcessFromName(String imageName){
-        BufferedImage inputFile = buffImg(imageName);
-
-        HashMap<Pair<Integer, Integer>, Integer> img = imgMap(inputFile);
-
-        BufferedImage outputFile = inputFile;
-
-        if (shouldFlip(img, inputFile.getWidth(), inputFile.getHeight())) {
-            outputFile = invertImage(inputFile);
-        }
-
-        outputFile = constrast(outputFile);
-
-        writeImage(imageName, outputFile);
-    }
 }
