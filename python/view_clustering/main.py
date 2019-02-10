@@ -23,14 +23,6 @@ from keras.applications.inception_v3 import preprocess_input
 from keras.preprocessing import image
 
 
-"""
-
-TODO: Build checkpointing and graph freezing for inference in Java.
-
-TODO: Modularize the model building part since it might get very large.
-
-"""
-
 flags = tf.app.flags
 
 flags.DEFINE_string(
@@ -301,7 +293,6 @@ if __name__ == "__main__":
     # Default Parameters
     #====================
     # Image size required by pre-trained network of inception
-    # TODO: Add more to experiment on results
     IMAGE_SIZE = (299, 299) 
 
 
