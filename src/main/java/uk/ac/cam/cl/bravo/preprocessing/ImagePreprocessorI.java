@@ -250,7 +250,7 @@ class ImagePreprocessorI implements ImagePreprocessor
 
         TreeMap<Integer, Integer> histo = new TreeMap<>();
         for (Pair p: img.keySet()) {
-            int c = img.get(p);
+            int c = (img.get(p)/5)*5;
             if (histo.containsKey(c))
                 histo.put(c, histo.get(c) + 1);
             else
