@@ -17,18 +17,11 @@ from sklearn.metrics import silhouette_score
 import tensorflow as tf
 import keras as K
 from keras import layers
+from keras.models import Sequential
 from keras.applications.inception_v3 import InceptionV3
 from keras.applications.inception_v3 import preprocess_input
 from keras.preprocessing import image
 
-
-"""
-
-TODO: Build checkpointing and graph freezing for inference in Java.
-
-TODO: Modularize the model building part since it might get very large.
-
-"""
 
 flags = tf.app.flags
 
@@ -73,10 +66,8 @@ FLAGS = flags.FLAGS
 def build_model():
     """
     Builds InceptionV3 Model with pre-trained weights.
-
-    TODO: Implement the full deep cluster model for view prediction,
-          but might need low level tensorflow implementation.
     """
+
     model = InceptionV3(include_top=False, weights='imagenet')
 
     return model
@@ -171,7 +162,8 @@ def extract_features(model,
 def predict_and_eval(image_features,
                      image_features_names,
                      num_clusters=2,
-                     output_file=None):
+                     output_names_file=None,
+                     output_feats_file=None):
     """
     Cluster by image features using K-means.
 
@@ -182,7 +174,7 @@ def predict_and_eval(image_features,
         - image_features_names(list): A list of image filenames corresponding in index to features in
                                       image_features.
         - num_clusters(int): The number of clusters to use to group the image features.
-        - output_file(str): The output json file to write the results (label mapping to image filenames) to.
+        - output_names_file(str): The output json file to write the results (label mapping to image filenames) to.
 
     Returns:
         - pred(nd array): Numpy array of shape (N,), representing cluster labels ordered by index corresponding
@@ -199,16 +191,33 @@ def predict_and_eval(image_features,
     print("INFO: Silhouette Score ({} clusters): {}".format(
         num_clusters, silhouette_score(image_features, pred)))
 
-    # Map labels to the image filenames
+    # Map labels to the image filenames and image_features
     label_to_image_filenames_dict = defaultdict(list)
+    label_to_image_features_dict = defaultdict(list)
     for i in range(pred.shape[0]):
+        # Change pred label to string for json dumping
         label_to_image_filenames_dict[str(pred[i])].append(image_features_names[i])
 
-    if output_file:
+        label_to_image_features_dict[pred[i]].append(image_features[i])
+
+    if output_names_file:
         print("INFO: Saving labels to image filenames output...")
-        with open(output_file, 'w') as file:
+        with open(output_names_file, 'w') as file:
             json.dump(label_to_image_filenames_dict, file)
 
+    # Compute the average features for each cluster
+    label_to_mean_features_dict = {}
+    for label in label_to_image_features_dict:
+        features_list = label_to_image_features_dict[label]
+
+        # Find the mean of all features
+        mean_features = sum(features_list) / len(features_list)
+        label_to_mean_features_dict[label] = mean_features
+
+    if output_feats_file:
+        print("INFO: Saving labels to mean image_features...")
+        with open(output_feats_file, 'wb') as file:
+            pkl.dump(label_to_mean_features_dict, file)
 
     return pred, label_to_image_filenames_dict
 
@@ -276,14 +285,14 @@ if __name__ == "__main__":
     IMAGE_FEATURES_NAMES_FILE = os.path.join(IMAGE_FEATURES_DIR, FLAGS.body_part + "_features_names.pkl")
 
     # Path to output file mapping view labels to images
-    LABELS_TO_IMAGES_FILE = os.path.join(OUTPUT_JSON_DIR, "labels_to_images.json")
+    LABELS_TO_IMAGE_FILENAMES_FILE = os.path.join(OUTPUT_JSON_DIR, "labels_to_image_filenames.json")
+    LABELS_TO_IMAGE_MEAN_FEAT_FILE = os.path.join(OUTPUT_JSON_DIR, "labels_to_image_mean_feat.pkl")
 
 
     #====================
     # Default Parameters
     #====================
     # Image size required by pre-trained network of inception
-    # TODO: Add more to experiment on results
     IMAGE_SIZE = (299, 299) 
 
 
@@ -304,7 +313,8 @@ if __name__ == "__main__":
     pred, labels_to_image_filenames_dict = predict_and_eval(image_features=image_features,
                                                             image_features_names=image_features_names,
                                                             num_clusters=FLAGS.num_clusters,
-                                                            output_file=LABELS_TO_IMAGES_FILE)
+                                                            output_names_file=LABELS_TO_IMAGE_FILENAMES_FILE,
+                                                            output_feats_file=LABELS_TO_IMAGE_MEAN_FEAT_FILE)
 
     # Perform visualisation
     if FLAGS.visualise:
