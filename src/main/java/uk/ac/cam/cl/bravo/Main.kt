@@ -1,6 +1,6 @@
 package uk.ac.cam.cl.bravo
 
-import uk.ac.cam.cl.bravo.classify.BodypartViewClassifier
+import uk.ac.cam.cl.bravo.classify.BodypartViewClassifierImpl
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
 import uk.ac.cam.cl.bravo.overlay.AffineTransformer
@@ -24,7 +24,7 @@ fun preprocessPipeline() {
     val dataset = Dataset()
 
     val imagePreprocessor: ImagePreprocessor = TODO()
-    val bodypartViewClassifier: BodypartViewClassifier = TODO()
+    val bodypartViewClassifierImpl: BodypartViewClassifierImpl = TODO()
 
     dataset.training.forEach { sample ->
         //var image = sample.loadImage()
@@ -33,7 +33,7 @@ fun preprocessPipeline() {
         var image = imagePreprocessor.preprocess(sample.path)
 
         // classify view
-        val view = bodypartViewClassifier.classify(image, sample.bodypart)
+        val view = bodypartViewClassifierImpl.classify(image, sample.bodypart)
 
         val newPath = sample.path.removeSuffix(".png") + "_edit.png"
         ImageIO.write(image, "png", File(newPath))
