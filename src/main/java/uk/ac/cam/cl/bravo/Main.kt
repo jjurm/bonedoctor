@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo
 
+import com.jhlabs.image.GaussianFilter
 import uk.ac.cam.cl.bravo.classify.BodypartViewClassifierImpl
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
@@ -14,10 +15,11 @@ import javax.imageio.ImageIO
 
 
 fun main(args: Array<String>) {
-    tryOverlay(
-        "images/in/train_XR_HAND_patient09734_study1_positive_image1_edit.png",
-        "images/in/train_XR_HAND_patient09734_study1_positive_image3_edit.png"
-    )
+    val (file1, file2) =
+        "images/in/train_XR_FOREARM_patient02116_study1_negative_image1.png" to "images/in/train_XR_FOREARM_patient02132_study1_negative_image1.png"
+    //    "images/in/train_XR_HAND_patient09734_study1_positive_image1_edit.png" to "images/in/train_XR_HAND_patient09734_study1_positive_image3_edit.png"
+    //    "images/in/train_XR_SHOULDER_patient00037_study1_positive_image1_edit.png" to "images/in/train_XR_SHOULDER_patient01449_study1_negative_image2_edit.png"
+    tryOverlay(file1, file2)
 }
 
 fun preprocessPipeline() {
@@ -46,8 +48,13 @@ fun preprocessPipeline() {
 }*/
 
 fun tryOverlay(file1: String, file2: String) {
-    val base = ImageIO.read(File(file1))
-    val sample = ImageIO.read(File(file2))
+    var base = ImageIO.read(File(file1))
+    var sample = ImageIO.read(File(file2))
+
+    val blur = GaussianFilter(2.0f)
+    base = blur.filter(base, null)
+    sample = blur.filter(sample, null)
+
     DisplayImage(base)
     DisplayImage(sample)
 
@@ -57,13 +64,13 @@ fun tryOverlay(file1: String, file2: String) {
         arrayOf(
             InnerWarpTransformer(
                 parameterScale = 0.8,
-                parameterPenaltyScale = 1.0,
+                parameterPenaltyScale = 2.0,
                 RESOLUTION = 4
             ).also { warper = it },
             AffineTransformer(parameterScale = 1.0, parameterPenaltyScale = 0.1)
         ),
-        PixelSimilarity(parameterPenaltyWeight = 1.0, ignoreBorderWidth = 0.15),
-        precision = 1e-4
+        PixelSimilarity(parameterPenaltyWeight = 1.0, ignoreBorderWidth = 0.25),
+        precision = 1e-3
     )
 
     println("Fitting images...")
@@ -76,5 +83,6 @@ fun tryOverlay(file1: String, file2: String) {
     warper.drawMarks(overlaid, parameters)
     DisplayImage(overlaid)
 
+    ImageIO.write(overlaid, "png", File("output.png"))
     println("Done")
 }
