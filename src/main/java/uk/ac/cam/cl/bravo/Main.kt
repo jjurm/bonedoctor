@@ -1,7 +1,7 @@
 package uk.ac.cam.cl.bravo
 
 import com.jhlabs.image.GaussianFilter
-import uk.ac.cam.cl.bravo.classify.BodypartViewClassifierImpl
+import uk.ac.cam.cl.bravo.classify.BodypartViewClassifier
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
 import uk.ac.cam.cl.bravo.overlay.AffineTransformer
@@ -26,7 +26,7 @@ fun preprocessPipeline() {
     val dataset = Dataset()
 
     val imagePreprocessor: ImagePreprocessor = TODO()
-    val bodypartViewClassifierImpl: BodypartViewClassifierImpl = TODO()
+    val bodypartViewClassifierImpl: BodypartViewClassifier = TODO()
 
     dataset.training.forEach { sample ->
         //var image = sample.loadImage()
