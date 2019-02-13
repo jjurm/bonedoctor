@@ -20,20 +20,20 @@ class ImagePreprocessorI implements ImagePreprocessor
         BufferedImage srcFile = srcImg(imageName);
         BufferedImage buffFile = buffImg(imageName);
 
-        BufferedImage outputFile;
+        BufferedImage outputFile = srcFile;
 
         if (shouldFlip(srcFile, buffFile)){
-            outputFile = invertImage(srcImg("invert-"+imageName), buffImg("invert-"+imageName));
-            writeImage("invert-"+imageName, outputFile);
+            outputFile = invertImage(srcFile, new BufferedImage(srcFile.getWidth(),
+                    srcFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
         }
 
         if (fleshy)
-            outputFile = contrast(srcImg("invert-"+imageName), buffImg("invert-"+imageName));
+            outputFile = contrast(outputFile, new BufferedImage(outputFile.getWidth(),
+                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
         else
-            outputFile = contrast(srcImg("invert-"+imageName));
-        writeImage("invert-"+imageName, outputFile);
+            outputFile = contrast(outputFile);
 
-        outputFile = resize(srcImg("invert-"+imageName), buffImg("invert-"+imageName));
+        //writeImage("invert-"+imageName, outputFile);
 
         return outputFile;
 
