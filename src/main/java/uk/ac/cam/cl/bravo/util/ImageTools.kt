@@ -2,18 +2,14 @@ package uk.ac.cam.cl.bravo.util
 
 import java.awt.Color
 import java.awt.Graphics2D
+import java.awt.Point
 import java.awt.image.BufferedImage
+import kotlin.math.roundToInt
 
 object ImageTools {
 
-    const val PLANE_WIDTH = 550
-    const val PLANE_HEIGHT = PLANE_WIDTH
-
-    fun getPlaneImage() = BufferedImage(
-        PLANE_WIDTH,
-        PLANE_HEIGHT,
-        BufferedImage.TYPE_BYTE_GRAY
-    )
+    fun getPlaneImage(width: Int, height: Int) = BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY)
+    fun getPlaneImage(size: Point) = BufferedImage(size.x, size.y, BufferedImage.TYPE_BYTE_GRAY)
 
     fun withGraphics(image: BufferedImage, function: Graphics2D.() -> Unit) {
         val g2d = image.createGraphics()
@@ -24,14 +20,20 @@ object ImageTools {
         }
     }
 
-    fun copyToPlane(image: BufferedImage, plane: BufferedImage = getPlaneImage()): BufferedImage {
+    fun copyToPlane(
+        image: BufferedImage,
+        planeSize: Point,
+        plane: BufferedImage = getPlaneImage(planeSize),
+        downsampleImage: Double = 1.0
+    ): BufferedImage {
+        val size = Point(image.width, image.height) / downsampleImage
         withGraphics(plane) {
             drawImage(
                 image,
-                PLANE_WIDTH / 2 - image.width / 2,
-                PLANE_HEIGHT / 2 - image.height / 2,
-                image.width,
-                image.height,
+                planeSize.x / 2 - size.x / 2,
+                planeSize.y / 2 - size.y / 2,
+                size.x,
+                size.y,
                 Color.BLACK,
                 null
             )
@@ -42,13 +44,13 @@ object ImageTools {
     /**
      * Overlay two images, given the transform of the sample
      */
-    fun overlay(base: BufferedImage, transformedSample: BufferedImage): BufferedImage {
-        val plane1 = copyToPlane(base)
-        val plane2 = copyToPlane(transformedSample)
+    fun overlay(base: BufferedImage, transformedSample: BufferedImage, planeSize: Point): BufferedImage {
+        val plane1 = copyToPlane(base, planeSize)
+        val plane2 = copyToPlane(transformedSample, planeSize)
 
-        val plane = BufferedImage(PLANE_WIDTH, PLANE_HEIGHT, BufferedImage.TYPE_INT_RGB)
-        for (y in 0 until PLANE_HEIGHT) {
-            for (x in 0 until PLANE_WIDTH) {
+        val plane = BufferedImage(planeSize.x, planeSize.y, BufferedImage.TYPE_INT_RGB)
+        for (y in 0 until planeSize.y) {
+            for (x in 0 until planeSize.x) {
                 plane.setRGB(
                     x, y, Color(
                         Color(plane1.getRGB(x, y)).red,
@@ -63,4 +65,7 @@ object ImageTools {
 
 }
 
-
+operator fun Point.times(scale: Double) = Point((x * scale).toInt(), (y * scale).toInt())
+operator fun Point.div(scale: Int) = Point(x / scale, y / scale)
+operator fun Point.div(scale: Double) = Point((x / scale).roundToInt(), (y / scale).roundToInt())
+fun Point.area() = x * y

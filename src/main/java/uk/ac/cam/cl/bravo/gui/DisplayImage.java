@@ -21,6 +21,10 @@ public class DisplayImage {
     private static AtomicInteger xLocation = new AtomicInteger(5);
 
     public DisplayImage(BufferedImage img) {
+        this(img, "Bone doctor");
+    }
+
+    public DisplayImage(BufferedImage img, String title) {
         ImageIcon icon = new ImageIcon(img);
         JFrame frame = new JFrame();
         frame.setLayout(new FlowLayout());
@@ -37,6 +41,7 @@ public class DisplayImage {
             }
         });
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setTitle(title);
         frame.setVisible(true);
     }
 
