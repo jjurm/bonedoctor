@@ -58,7 +58,7 @@ dependencies {
 }
 
 javafx {
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    modules = [ 'javafx.fxml', 'javafx.controls', 'javafx.graphics']
     version = "11.0.2"
 }
 
@@ -69,4 +69,12 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package sample;
+package uk.ac.cam.cl.bravo.gui;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -13,8 +13,8 @@ public class Main extends Application {
         new UploadController().displayUploadController(stage);
     }
 
-    public static void main(String[] args) {
-        Application.launch(args);
+    public static void main() {
+        Application.launch();
     }
 
 }
