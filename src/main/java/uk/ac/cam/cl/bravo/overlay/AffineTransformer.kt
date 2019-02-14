@@ -14,7 +14,7 @@ class AffineTransformer(
 
     companion object {
         private const val REL_BOUND = 1.0
-        private const val ABS_BOUND = (PLANE_WIDTH / 2).toDouble()
+        private const val ABS_BOUND = 1.0
     }
 
     override val parameterCount get() = 6
@@ -51,6 +51,8 @@ class AffineTransformer(
     override fun transform0(image: BufferedImage, parameters: DoubleArray): BufferedImage {
         val plane = getPlaneImage()
         val matrix = (parameters zip identity).map { (a, b) -> a + b }.toDoubleArray()
+        matrix[4] *= PLANE_WIDTH.toDouble() / 2
+        matrix[5] *= PLANE_WIDTH.toDouble() / 2
         val transform = calculateInPlaneTransform(image, AffineTransform(matrix))
         withGraphics(plane) {
             drawImage(image, transform, null)
