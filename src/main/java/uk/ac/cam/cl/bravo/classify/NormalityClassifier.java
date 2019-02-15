@@ -1,7 +1,7 @@
 package uk.ac.cam.cl.bravo.classify;
 
 import org.jetbrains.annotations.NotNull;
-import uk.ac.cam.cl.bravo.dataset.Bodypart;
+import uk.ac.cam.cl.bravo.dataset.Normality;
 
 import java.awt.image.BufferedImage;
 
@@ -10,5 +10,5 @@ import java.awt.image.BufferedImage;
  */
 public interface NormalityClassifier {
     @NotNull
-    Bodypart classify(@NotNull BufferedImage image);
+    Normality classify(@NotNull BufferedImage image);
 }
