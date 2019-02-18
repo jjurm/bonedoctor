@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.overlay
 
+import java.awt.Point
 import java.awt.image.BufferedImage
 
 abstract class AbstractTransformer(
@@ -21,8 +22,8 @@ abstract class AbstractTransformer(
     protected abstract val maxBounds0: List<Double>
     override val maxBounds: List<Double> get() = rescaleOut(maxBounds0)
 
-    abstract fun transform0(image: BufferedImage, parameters: DoubleArray): BufferedImage
-    override fun transform(image: BufferedImage, parameters: DoubleArray): BufferedImage =
-        transform0(image, rescaleIn(parameters))
+    abstract fun transform0(image: BufferedImage, parameters: DoubleArray, planeSize: Point): BufferedImage
+    override fun transform(image: BufferedImage, parameters: DoubleArray, planeSize: Point): BufferedImage =
+        transform0(image, rescaleIn(parameters), planeSize)
 
 }

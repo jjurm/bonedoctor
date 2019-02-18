@@ -1,9 +1,8 @@
 package uk.ac.cam.cl.bravo.overlay
 
-import uk.ac.cam.cl.bravo.util.ImageTools.PLANE_HEIGHT
-import uk.ac.cam.cl.bravo.util.ImageTools.PLANE_WIDTH
 import uk.ac.cam.cl.bravo.util.ImageTools.getPlaneImage
 import uk.ac.cam.cl.bravo.util.ImageTools.withGraphics
+import java.awt.Point
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
 
@@ -36,24 +35,28 @@ class AffineTransformer(
      * When applying an affine transform, the centre of the transform is the top left point of the image. To apply
      * the transformation with (0,0) in the centre of the image, we must translate the transform first
      */
-    private fun calculateInPlaneTransform(image: BufferedImage, affineTransform: AffineTransform): AffineTransform {
+    private fun calculateInPlaneTransform(
+        image: BufferedImage,
+        affineTransform: AffineTransform,
+        planeSize: Point
+    ): AffineTransform {
         val transform = AffineTransform()
-        transform.translate((PLANE_WIDTH / 2).toDouble(), (PLANE_HEIGHT / 2).toDouble())
+        transform.translate((planeSize.x / 2).toDouble(), (planeSize.y / 2).toDouble())
         transform.concatenate(affineTransform)
-        transform.translate((-PLANE_WIDTH / 2).toDouble(), (-PLANE_HEIGHT / 2).toDouble())
+        transform.translate((-planeSize.x / 2).toDouble(), (-planeSize.y / 2).toDouble())
         transform.translate(
-            (PLANE_WIDTH / 2 - image.width / 2).toDouble(),
-            (PLANE_HEIGHT / 2 - image.height / 2).toDouble()
+            (planeSize.x / 2 - image.width / 2).toDouble(),
+            (planeSize.y / 2 - image.height / 2).toDouble()
         )
         return transform
     }
 
-    override fun transform0(image: BufferedImage, parameters: DoubleArray): BufferedImage {
-        val plane = getPlaneImage()
+    override fun transform0(image: BufferedImage, parameters: DoubleArray, planeSize: Point): BufferedImage {
+        val plane = getPlaneImage(planeSize)
         val matrix = (parameters zip identity).map { (a, b) -> a + b }.toDoubleArray()
-        matrix[4] *= PLANE_WIDTH.toDouble() / 2
-        matrix[5] *= PLANE_WIDTH.toDouble() / 2
-        val transform = calculateInPlaneTransform(image, AffineTransform(matrix))
+        matrix[4] *= planeSize.x.toDouble() / 2
+        matrix[5] *= planeSize.y.toDouble() / 2 + 200
+        val transform = calculateInPlaneTransform(image, AffineTransform(matrix), planeSize)
         withGraphics(plane) {
             drawImage(image, transform, null)
         }

@@ -1,23 +1,25 @@
 package uk.ac.cam.cl.bravo
 
 import com.jhlabs.image.GaussianFilter
+import org.apache.commons.lang3.time.StopWatch
 import uk.ac.cam.cl.bravo.classify.BodypartViewClassifier
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
-import uk.ac.cam.cl.bravo.overlay.AffineTransformer
-import uk.ac.cam.cl.bravo.overlay.ImageOverlayImpl
-import uk.ac.cam.cl.bravo.overlay.InnerWarpTransformer
-import uk.ac.cam.cl.bravo.overlay.PixelSimilarity
+import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
 import uk.ac.cam.cl.bravo.util.ImageTools
+import java.awt.Point
 import java.io.File
 import javax.imageio.ImageIO
 
+const val PLANE_WIDTH = 550
+const val PLANE_HEIGHT = PLANE_WIDTH
+val PLANE_SIZE = Point(PLANE_WIDTH, PLANE_HEIGHT)
 
 fun main(args: Array<String>) {
     val (file1, file2) =
-        "images/in/train_XR_FOREARM_patient02116_study1_negative_image1.png" to "images/in/train_XR_FOREARM_patient02132_study1_negative_image1.png"
-    //    "images/in/train_XR_HAND_patient09734_study1_positive_image1_edit.png" to "images/in/train_XR_HAND_patient09734_study1_positive_image3_edit.png"
+        "images/in/train_XR_HAND_patient09734_study1_positive_image1_edit.png" to "images/in/train_XR_HAND_patient09734_study1_positive_image3_edit.png"
+    //    "images/in/train_XR_FOREARM_patient02116_study1_negative_image1.png" to "images/in/train_XR_FOREARM_patient02132_study1_negative_image1.png"
     //    "images/in/train_XR_SHOULDER_patient00037_study1_positive_image1_edit.png" to "images/in/train_XR_SHOULDER_patient01449_study1_negative_image2_edit.png"
     tryOverlay(file1, file2)
 }
@@ -48,39 +50,52 @@ fun preprocessPipeline() {
 }*/
 
 fun tryOverlay(file1: String, file2: String) {
-    var base = ImageIO.read(File(file1))
-    var sample = ImageIO.read(File(file2))
+    println("Loading images...")
 
     val blur = GaussianFilter(2.0f)
-    base = blur.filter(base, null)
-    sample = blur.filter(sample, null)
 
-    DisplayImage(base)
-    DisplayImage(sample)
+    val (base, sample) =
+        listOf(file1, file2)
+            .map { ImageIO.read(File(it)) }
+            .map { blur.filter(it, null) }
+            .map { DisplayImage(it); it }
+
 
     lateinit var warper: InnerWarpTransformer
-
+    val downsample = 1.0
     val overlay = ImageOverlayImpl(
         arrayOf(
             InnerWarpTransformer(
                 parameterScale = 0.8,
-                parameterPenaltyScale = 2.0,
-                RESOLUTION = 4
+                parameterPenaltyScale = 1.0,
+                resolution = 4
             ).also { warper = it },
-            AffineTransformer(parameterScale = 1.0, parameterPenaltyScale = 0.1)
+            AffineTransformer(
+                parameterScale = 1.0,
+                parameterPenaltyScale = 0.1
+            )
         ),
-        PixelSimilarity(parameterPenaltyWeight = 1.0, ignoreBorderWidth = 0.25),
-        precision = 1e-3
+        PixelSimilarity(
+            ignoreBorderWidth = 0.25
+        ) + ParameterPenaltyFunction() * 0.05,
+        bigPlaneSize = PLANE_SIZE,
+        downsample = downsample,
+        precision = 1e-5
     )
 
     println("Fitting images...")
+    val sw = StopWatch()
+    sw.start()
     val result = overlay.findBestOverlay(base, sample)
+    sw.stop()
+    val time = "${"%.1f".format(sw.time.toDouble()/1000)}s"
+    println("  $time")
 
     println("Generating overlay...")
     val parameters = result.point
     val transformed = overlay.applyTransformations(sample, parameters)
-    val overlaid = ImageTools.overlay(base, transformed)
-    warper.drawMarks(overlaid, parameters)
+    val overlaid = ImageTools.overlay(base, transformed, PLANE_SIZE)
+    warper.drawMarks(overlaid, parameters, PLANE_SIZE)
     DisplayImage(overlaid)
 
     ImageIO.write(overlaid, "png", File("output.png"))

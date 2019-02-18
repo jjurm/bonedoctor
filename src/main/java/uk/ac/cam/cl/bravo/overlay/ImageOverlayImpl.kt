@@ -8,14 +8,19 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer
 import uk.ac.cam.cl.bravo.util.ImageTools
+import uk.ac.cam.cl.bravo.util.div
+import java.awt.Point
 import java.awt.image.BufferedImage
 
 class ImageOverlayImpl(
     private val transformers: Array<Transformer>,
-    private val f: SimilarityFunction,
-    private val precision: Double = 1e-5
+    private val f: OverlayFunction,
+    private val bigPlaneSize: Point,
+    private val downsample: Double = 1.0,
+    private val precision: Double = 1e-4
 ) : ImageOverlay {
 
+    private val smallPlaneSize = bigPlaneSize / downsample
     private val parameterCount = transformers.map { it.parameterCount }.sum()
     private val initialGuess = InitialGuess(transformers.map { it.initialGuess }.flatten().toDoubleArray())
     private val bounds = SimpleBounds(
@@ -23,11 +28,11 @@ class ImageOverlayImpl(
         transformers.map { it.maxBounds }.flatten().toDoubleArray()
     )
 
-    fun Array<Transformer>.transformAll(image: BufferedImage, parameters: DoubleArray): BufferedImage {
+    fun Array<Transformer>.transformAll(image: BufferedImage, parameters: DoubleArray, planeSize: Point): BufferedImage {
         // for each transformer, extract the appropriate parameters and transform the image
         val (_, transformed) = this.fold(Pair(0, image)) { (paramOffset, image), transformer ->
             val sliced = parameters.slice(paramOffset until (transformer.parameterCount + paramOffset))
-            val transformed = transformer.transform(image, sliced.toDoubleArray())
+            val transformed = transformer.transform(image, sliced.toDoubleArray(), planeSize)
             Pair(paramOffset + transformer.parameterCount, transformed)
         }
         return transformed
@@ -51,11 +56,12 @@ class ImageOverlayImpl(
             0.3,
             precision
         )
-        val baseInPlane = ImageTools.copyToPlane(base)
-        val sampleInPlane = ImageTools.copyToPlane(sample)
+        val baseInPlane = ImageTools.copyToPlane(base, smallPlaneSize, downsampleImage = downsample)
+        val sampleInPlane = ImageTools.copyToPlane(sample, smallPlaneSize, downsampleImage = downsample)
         val result = optimizer.optimize(
             ObjectiveFunction { params ->
-                f.value(baseInPlane, transformers.transformAll(sampleInPlane, params), penaltyScaledParameters(params))
+                val transformed = transformers.transformAll(sampleInPlane, params, smallPlaneSize)
+                f.value(baseInPlane, transformed, smallPlaneSize, penaltyScaledParameters(params))
             },
             GoalType.MINIMIZE,
             initialGuess,
@@ -69,9 +75,12 @@ class ImageOverlayImpl(
         return result
     }
 
+    /**
+     * Applies the given transformation without downscaling the image or the underlying plane.
+     */
     fun applyTransformations(image: BufferedImage, parameters: DoubleArray): BufferedImage {
-        val inPlane = ImageTools.copyToPlane(image)
-        return transformers.transformAll(inPlane, parameters)
+        val inPlane = ImageTools.copyToPlane(image, bigPlaneSize)
+        return transformers.transformAll(inPlane, parameters, bigPlaneSize)
     }
 
 }

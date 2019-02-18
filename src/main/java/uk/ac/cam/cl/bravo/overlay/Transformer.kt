@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.overlay
 
+import java.awt.Point
 import java.awt.image.BufferedImage
 
 interface Transformer {
@@ -12,6 +13,6 @@ interface Transformer {
     val minBounds: List<Double>
     val maxBounds: List<Double>
 
-    fun transform(image: BufferedImage, parameters: DoubleArray): BufferedImage
+    fun transform(image: BufferedImage, parameters: DoubleArray, planeSize: Point): BufferedImage
 
 }
