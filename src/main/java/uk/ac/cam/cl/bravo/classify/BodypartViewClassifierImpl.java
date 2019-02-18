@@ -5,7 +5,11 @@ import org.tensorflow.*;
 import uk.ac.cam.cl.bravo.dataset.Bodypart;
 import uk.ac.cam.cl.bravo.dataset.BodypartView;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.File;
+import java.io.IOException;
 
 
 public class BodypartViewClassifierImpl implements BodypartViewClassifier {
@@ -52,7 +56,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
      * We perform standard mean normalization used in inception networks.
      *
      * @param imageBytes input image to be preprocessed
-     * @return
+     * @return PreprocessedTensor tensor representing preprocessed image
      */
     public Tensor<Float> preprocessingGraph(byte[] imageBytes){
         try (Graph g = new Graph()) {
@@ -77,6 +81,32 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
             }
 
         }
+    }
+
+    /**
+     * Reads an image into a byte array for processing in the graph.
+     * @param ImageName
+     * @return byteArray
+     */
+    private static byte[] imageToByteArray(String ImageName){
+        // Open the file
+        File imgPath = new File(ImageName);
+        BufferedImage bufferedImage = null;
+        try {
+            bufferedImage = ImageIO.read(imgPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Get the data in bytes form from the rastered image
+        DataBufferByte data = (DataBufferByte) bufferedImage.getRaster().getDataBuffer();
+
+        return data.getData();
+
+    }
+
+    public static void main(String[] args){
+        System.out.println("lol123");
     }
 
 }
