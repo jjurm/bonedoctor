@@ -145,9 +145,13 @@ public class AnalysisController {
 
         // ------ CREATE SCROLLABLE LIST VIEW --------
 
-        Image img1 = new Image(getClass().getResourceAsStream("bell.jpg"));
-        Image img2 = new Image(getClass().getResourceAsStream("bell.jpg"));
-        Image img3 = new Image(getClass().getResourceAsStream("bell.jpg"));
+        Image img1 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
+        Image img2 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/bowtie.jpg"));
+        Image img3 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
+
+        ObservableList<String> items =FXCollections.observableArrayList (
+                "RUBY", "APPLE", "VISTA");
+        matches.setItems(items);
 
         matches.setCellFactory(param -> new ListCell<String>() {
             private ImageView matchView = new ImageView();
@@ -159,13 +163,11 @@ public class AnalysisController {
                     setGraphic(null);
                 } else {
                     if(name.equals("RUBY"))
-                        matchView.setImage(listOfImages[0]);
+                        matchView.setImage(img1);
                     else if(name.equals("APPLE"))
-                        matchView.setImage(listOfImages[1]);
+                        matchView.setImage(img2);
                     else if(name.equals("VISTA"))
-                        matchView.setImage(listOfImages[2]);
-                    else if(name.equals("TWITTER"))
-                        matchView.setImage(listOfImages[3]);
+                        matchView.setImage(img3);
                     setText(name);
                     setGraphic(matchView);
                 }
