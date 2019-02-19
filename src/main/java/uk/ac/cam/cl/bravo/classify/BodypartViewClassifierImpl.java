@@ -10,6 +10,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 
 public class BodypartViewClassifierImpl implements BodypartViewClassifier {
@@ -58,7 +61,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
      * @param imageBytes input image to be preprocessed
      * @return PreprocessedTensor tensor representing preprocessed image
      */
-    public Tensor<Float> preprocessingGraph(byte[] imageBytes){
+    public Tensor<Float> executePreprocessingGraph(byte[] imageBytes){
         try (Graph g = new Graph()) {
             GraphBuilder b = new GraphBuilder(g);
 
@@ -83,30 +86,86 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         }
     }
 
-    /**
-     * Reads an image into a byte array for processing in the graph.
-     * @param ImageName
-     * @return byteArray
-     */
-    private static byte[] imageToByteArray(String ImageName){
-        // Open the file
-        File imgPath = new File(ImageName);
-        BufferedImage bufferedImage = null;
-        try {
-            bufferedImage = ImageIO.read(imgPath);
-        } catch (IOException e) {
-            e.printStackTrace();
+
+    private static byte[] readBytesFromFile(String filename){
+        try{
+            return Files.readAllBytes(new File(filename).toPath());
+        }catch (IOException e){
+            System.err.println("Cannot find [" + filename + "]: " + e.getMessage());
+            System.exit(1);
+        }
+        return null;
+    }
+
+    private float[] executeInferenceGraph(byte[] graphDef,
+                                          Tensor<Float> image,
+                                          String inputNodeName,
+                                          String outputNodeName){
+        try(Graph g = new Graph()){
+            // First restore the graph definition from frozen graph
+            g.importGraphDef(graphDef);
+
+            // Initiate a session to perform inference and try to get the res
+            try(Session s = new Session(g);
+                Tensor<Float> result = s.runner().feed(
+                        inputNodeName, image).fetch(outputNodeName).run().get(0).expect(Float.class)){
+                // Obtain shape of the result
+                final long[] shape = result.shape();
+
+                // Output result is shape [1, 8, 8, 2048] tensor, so we flatten it.
+                float[][][][] retArray = result.copyTo(new float [(int) shape[0]][(int) shape[1]][(int) shape[2]][(int) shape[3]]);
+                float[] flattenedArray = flattenArray(retArray);
+
+                return flattenedArray;
+
+            }
+        }
+    }
+
+    private float[] flattenArray(float[][][][] retArray){
+        // Build output array
+        float[] ret = new float[(int) (retArray.length
+                                        * retArray[0].length
+                                        * retArray[0][0].length
+                                        * retArray[0][0][0].length)];
+
+        // Start flattening it
+        // TODO: check mathematics.
+        for (int i=0; i<retArray.length; i++){
+            for (int j=0; j<retArray[0].length; j++){
+                for (int k=0; k<retArray[0][0].length; k++){
+                    for (int l=0; l<retArray[0][0][0].length; l++){
+                        // Compute index for each float element
+                        int index = i * retArray[0].length * retArray[0][0].length * retArray[0][0][0].length
+                                + j * retArray[0][0].length * retArray[0][0][0].length
+                                + k * retArray[0][0][0].length
+                                + l;
+
+                        ret[index] = retArray[i][j][k][l];
+                    }
+                }
+            }
         }
 
-        // Get the data in bytes form from the rastered image
-        DataBufferByte data = (DataBufferByte) bufferedImage.getRaster().getDataBuffer();
-
-        return data.getData();
-
+        return ret;
     }
 
     public static void main(String[] args){
-        System.out.println("lol123");
+//        // Test with one image
+//        String imageFilename = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1/image_by_class/XR_HUMERUS/train_XR_HUMERUS_patient03225_study1_negative_image2.png";
+//        byte[] imageBytes = readBytesFromFile(imageFilename);
+//        BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
+//
+//        Tensor<Float> preprocessedImage = classifier.executePreprocessingGraph(imageBytes);
+//        System.out.println(preprocessedImage); // gives float tensor of shape [1, 299, 299, 3]
+//
+//        // Inference with PB file
+//        String graphDefFilename = "/home/kwotsin/Desktop/group_project/java/bonedoctor/python/view_clustering/InceptionV3.pb";
+//        byte[] graphDef = readBytesFromFile(graphDefFilename);
+//        String inputNodeName = "input_1"; // based on python nodes inspection
+//        String outputNodeName = "mixed10/concat"; // based on python nodes inspection.
+//
+//        classifier.executeInferenceGraph(graphDef, preprocessedImage, inputNodeName, outputNodeName);
     }
 
 }
