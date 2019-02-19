@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.Region;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -28,6 +29,10 @@ public class Main extends Application {
 
         ((MainController) loader.getController()).setStage(mainStage);
         mainStage.setScene(new Scene(mainWindow));
+
+        ((Region) mainWindow).prefWidthProperty().bind(mainStage.widthProperty());
+        ((Region) mainWindow).prefHeightProperty().bind(mainStage.heightProperty());
+
         mainStage.setTitle(APP_NAME);
         mainStage.show();
     }

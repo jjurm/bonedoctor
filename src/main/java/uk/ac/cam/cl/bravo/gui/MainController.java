@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
         loadUpload();
     }
 
@@ -34,6 +36,10 @@ public class MainController implements Initializable {
         try {
             FXMLLoader analysisLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/analysis.fxml"));
             Parent analysisFXML = analysisLoader.load();
+
+            ((Region) analysisFXML).prefWidthProperty().bind(container.widthProperty());
+            ((Region) analysisFXML).prefHeightProperty().bind(container.heightProperty());
+
             analysisController = analysisLoader.getController();
             analysisController.setUp(this, stage);
             analysisController.setImage(img);
@@ -50,6 +56,10 @@ public class MainController implements Initializable {
         try {
             FXMLLoader uploadLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/upload.fxml"));
             Parent uploadFXML = uploadLoader.load();
+
+            ((Region) uploadFXML).prefWidthProperty().bind(container.widthProperty());
+            ((Region) uploadFXML).prefHeightProperty().bind(container.heightProperty());
+
             uploadController = uploadLoader.getController();
             uploadController.setUp(this, stage);
             container.getChildren().add(0, uploadFXML);
