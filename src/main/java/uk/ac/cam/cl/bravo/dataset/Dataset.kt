@@ -42,7 +42,7 @@ class Dataset @Throws(IOException::class) constructor() {
     private fun loadImageSamples(csvFilename: String): List<ImageSample> {
         return loadPaths(csvFilename).mapNotNull { path ->
             try {
-                ImageSample(path, getPatient(path), getBodypart(path), getNormality(path))
+                ImageSample(path, getPatient(path), getBodypart(path), getBoneCondition(path))
             } catch (e: IllegalArgumentException) {
                 System.err.println(e.message)
                 null
@@ -62,8 +62,8 @@ class Dataset @Throws(IOException::class) constructor() {
         bodypartRegex.find(path)?.groupValues?.getOrNull(1)?.let { Bodypart.valueOf(it) }
             ?: throw IllegalArgumentException("Cannot determine body part of $path")
 
-    private fun getNormality(path: String): Normality =
-        normalityRegex.find(path)?.groupValues?.getOrNull(1)?.let { Normality.valueOf(it) }
+    private fun getBoneCondition(path: String): BoneCondition =
+        normalityRegex.find(path)?.groupValues?.getOrNull(1)?.let { BoneCondition.valueOf(it) }
             ?: throw IllegalArgumentException("Cannot determine normality of $path")
 
     init {
