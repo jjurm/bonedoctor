@@ -37,9 +37,7 @@ public class ImageExplorerController implements Initializable {
 
     }
 
-    public void setImage(File imgFile) {
-        // Load image in
-        Image userInImg = new Image(imgFile.toURI().toString());
+    public void setImage(Image userInImg) {
         width = userInImg.getWidth();
         height = userInImg.getHeight();
 

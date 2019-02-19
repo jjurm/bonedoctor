@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
 
 
-<VBox fx:id="topBottom" prefHeight="512.0" prefWidth="512.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+<VBox fx:id="topBottom" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="uk.ac.cam.cl.bravo.gui.AnalysisController">
     <children>
-        <ListView fx:id="matches" orientation="HORIZONTAL" prefHeight="200.0" prefWidth="200.0" />
+        <ListView fx:id="matches" orientation="HORIZONTAL" />
     </children>
 </VBox>

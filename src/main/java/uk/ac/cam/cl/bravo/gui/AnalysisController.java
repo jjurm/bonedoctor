@@ -29,16 +29,13 @@ import java.util.ResourceBundle;
 public class AnalysisController implements Initializable {
 
     private static final int MIN_PIXELS = 10;
-    public static final ObservableList images = FXCollections.observableArrayList();
 
+    public MainController mainController;
+    private ImageExplorerController imageExplorerController;
     private Stage stage;
-    private Scene scene;
-    private Parent parent;
 
     private ScrollPane scrollPane = new ScrollPane();
     final DoubleProperty zoomProperty = new SimpleDoubleProperty(200);
-
-    private ImageExplorerController imageExplorerController;
 
     @FXML
     private ListView matches;
@@ -47,32 +44,8 @@ public class AnalysisController implements Initializable {
     private VBox topBottom;
 
 
-    public AnalysisController(File imgFile)  {
-
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/analysis.fxml"));
-        fxmlLoader.setController(this);
-        try {
-            parent = (Parent) fxmlLoader.load();
-            // set height and width here for this login scene
-            scene = new Scene(parent, 1000, 800);
-        } catch (IOException ex) {
-            System.out.println("Error displaying analysis window");
-            throw new RuntimeException(ex);
-        }
-
-
-
-        // ------- CREATE SCROLLABLE IMAGE PANE USER INPUT --------
-
-        try {
-            FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
-            Parent imageExplorerFXML = imageExplorerLoader.load();
-            imageExplorerController = imageExplorerLoader.getController();
-            imageExplorerController.setImage(imgFile);
-            topBottom.getChildren().add(0, imageExplorerFXML);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
 
         // ------ CREATE SCROLLABLE LIST VIEW --------
 
@@ -119,18 +92,22 @@ public class AnalysisController implements Initializable {
         return;
     }
 
+    //  CREATE SCROLLABLE IMAGE PANE USER INPUT
+    public void setImage(Image imgFile) {
+        try {
+            FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
+            Parent imageExplorerFXML = imageExplorerLoader.load();
+            imageExplorerController = imageExplorerLoader.getController();
+            imageExplorerController.setImage(imgFile);
+            topBottom.getChildren().add(0, imageExplorerFXML);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-
-
-    public void launchAnalysisScene(Stage stage) {
-        this.stage = stage;
-
-        topBottom.setFillWidth(true);
-
-        stage.setScene(scene);
-
-        stage.hide();
-        stage.show();
+    public void setUp(MainController main, Stage newStage) {
+        mainController = main;
+        stage = newStage;
     }
 
     private HBox createButtons(double width, double height, ImageView imageView) {
@@ -185,8 +162,4 @@ public class AnalysisController implements Initializable {
                 viewport.getMinY() + yProportion * viewport.getHeight());
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-
-    }
 }
