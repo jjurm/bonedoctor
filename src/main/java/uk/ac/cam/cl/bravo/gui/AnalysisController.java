@@ -1,39 +1,35 @@
 package uk.ac.cam.cl.bravo.gui;
 
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class AnalysisController {
+public class AnalysisController implements Initializable {
 
     private static final int MIN_PIXELS = 10;
     public static final ObservableList images = FXCollections.observableArrayList();
-
 
     private Stage stage;
     private Scene scene;
@@ -42,17 +38,14 @@ public class AnalysisController {
     private ScrollPane scrollPane = new ScrollPane();
     final DoubleProperty zoomProperty = new SimpleDoubleProperty(200);
 
+    private ImageExplorerController imageExplorerController;
+
     @FXML
     private ListView matches;
 
     @FXML
     private VBox topBottom;
 
-    @FXML
-    private ImageView imageView;
-
-    @FXML
-    private GridPane container;
 
     public AnalysisController(File imgFile)  {
 
@@ -68,80 +61,18 @@ public class AnalysisController {
         }
 
 
-        // ------- CREATE SCROLLABLE IMAGE PANE --------
 
-        Image image = new Image(imgFile.toURI().toString());
-        double width = image.getWidth();
-        double height = image.getHeight();
+        // ------- CREATE SCROLLABLE IMAGE PANE USER INPUT --------
 
-        imageView.setImage(image);
-        imageView.setPreserveRatio(true);
-        reset(imageView, width, height);
-
-        ObjectProperty<Point2D> mouseDown = new SimpleObjectProperty<>();
-
-        imageView.setOnMousePressed(e -> {
-            Point2D mousePress = imageViewToImage(imageView, new Point2D(e.getX(), e.getY()));
-            mouseDown.set(mousePress);
-        });
-
-        imageView.setOnMouseDragged(e -> {
-            Point2D dragPoint = imageViewToImage(imageView, new Point2D(e.getX(), e.getY()));
-            shift(imageView, dragPoint.subtract(mouseDown.get()));
-            mouseDown.set(imageViewToImage(imageView, new Point2D(e.getX(), e.getY())));
-        });
-
-        imageView.setOnScroll(e -> {
-            double delta = e.getDeltaY();
-            Rectangle2D viewport = imageView.getViewport();
-
-            double scale = clamp(Math.pow(1.01, delta),
-
-                    // don't scale so we're zoomed in to fewer than MIN_PIXELS in any direction:
-                    Math.min(MIN_PIXELS / viewport.getWidth(), MIN_PIXELS / viewport.getHeight()),
-
-                    // don't scale so that we're bigger than image dimensions:
-                    Math.max(width / viewport.getWidth(), height / viewport.getHeight())
-
-            );
-
-            Point2D mouse = imageViewToImage(imageView, new Point2D(e.getX(), e.getY()));
-
-            double newWidth = viewport.getWidth() * scale;
-            double newHeight = viewport.getHeight() * scale;
-
-            // To keep the visual point under the mouse from moving, we need
-            // (x - newViewportMinX) / (x - currentViewportMinX) = scale
-            // where x is the mouse X coordinate in the image
-
-            // solving this for newViewportMinX gives
-
-            // newViewportMinX = x - (x - currentViewportMinX) * scale
-
-            // we then clamp this value so the image never scrolls out
-            // of the imageview:
-
-            double newMinX = clamp(mouse.getX() - (mouse.getX() - viewport.getMinX()) * scale,
-                    0, width - newWidth);
-            double newMinY = clamp(mouse.getY() - (mouse.getY() - viewport.getMinY()) * scale,
-                    0, height - newHeight);
-
-            imageView.setViewport(new Rectangle2D(newMinX, newMinY, newWidth, newHeight));
-        });
-
-        imageView.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) {
-                reset(imageView, width, height);
-            }
-        });
-
-        container.setPrefSize(800, 600);
-        imageView.fitWidthProperty().bind(container.widthProperty());
-        imageView.fitHeightProperty().bind(container.heightProperty());
-        topBottom.setFillWidth(true);
-        VBox.setVgrow(container, Priority.ALWAYS);
-
-
+        try {
+            FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
+            Parent imageExplorerFXML = imageExplorerLoader.load();
+            imageExplorerController = imageExplorerLoader.getController();
+            imageExplorerController.setImage(imgFile);
+            topBottom.getChildren().add(0, imageExplorerFXML);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // ------ CREATE SCROLLABLE LIST VIEW --------
 
@@ -152,9 +83,10 @@ public class AnalysisController {
         ObservableList<String> items =FXCollections.observableArrayList (
                 "RUBY", "APPLE", "VISTA");
         matches.setItems(items);
-
         matches.setCellFactory(param -> new ListCell<String>() {
             private ImageView matchView = new ImageView();
+
+
             @Override
             public void updateItem(String name, boolean empty) {
                 super.updateItem(name, empty);
@@ -162,23 +94,39 @@ public class AnalysisController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    if(name.equals("RUBY"))
+                    if (name.equals("RUBY"))
                         matchView.setImage(img1);
-                    else if(name.equals("APPLE"))
+                    else if (name.equals("APPLE"))
                         matchView.setImage(img2);
-                    else if(name.equals("VISTA"))
+                    else if (name.equals("VISTA"))
                         matchView.setImage(img3);
                     setText(name);
                     setGraphic(matchView);
                 }
+            }
+
+        });
+
+
+        // ----- ENABLE SELECT NEW MATCH -----
+
+        matches.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                System.out.println("Clicked on " + matches.getSelectionModel().getSelectedItem());
             }
         });
 
         return;
     }
 
+
+
+
     public void launchAnalysisScene(Stage stage) {
         this.stage = stage;
+
+        topBottom.setFillWidth(true);
+
         stage.setScene(scene);
 
         stage.hide();
@@ -237,4 +185,8 @@ public class AnalysisController {
                 viewport.getMinY() + yProportion * viewport.getHeight());
     }
 
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+
+    }
 }
