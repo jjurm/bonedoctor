@@ -1,5 +1,7 @@
 package uk.ac.cam.cl.bravo.gui;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 
 import javax.imageio.ImageIO;
@@ -20,7 +22,11 @@ public class DisplayImage {
      */
     private static AtomicInteger xLocation = new AtomicInteger(5);
 
-    public DisplayImage(BufferedImage img) {
+    public DisplayImage(@NotNull BufferedImage img) {
+        this(img, null);
+    }
+
+    public DisplayImage(BufferedImage img, @Nullable String title) {
         ImageIcon icon = new ImageIcon(img);
         JFrame frame = new JFrame();
         frame.setLayout(new FlowLayout());
@@ -37,11 +43,16 @@ public class DisplayImage {
             }
         });
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setTitle(title != null ? title : "Bone doctor");
         frame.setVisible(true);
     }
 
+    public DisplayImage(String filename, String title) throws IOException {
+        this(ImageIO.read(new File(filename)), title);
+    }
+
     public DisplayImage(String filename) throws IOException {
-        this(ImageIO.read(new File(filename)));
+        this(filename, null);
     }
 
     public DisplayImage(ImageSample sample) throws IOException {

@@ -40,25 +40,33 @@ compileJava.dependsOn(enforceVersion);
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
+
+    // For java-numpy interface
+//    jcenter()
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-math3
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 
     implementation 'com.github.andto:jhlabs:bd6e516fc9'
 
-    /*compile group: 'org.tensorflow', name: 'tensorflow', version: '1.12.0'
+    compile group: 'org.tensorflow', name: 'tensorflow', version: '1.12.0'
     compile group: 'org.tensorflow', name: 'libtensorflow', version: '1.12.0'
     compile group: 'org.tensorflow', name: 'libtensorflow_jni', version: '1.12.0'
-    compile group: 'org.tensorflow', name: 'libtensorflow_jni_gpu', version: '1.12.0'*/
+    compile group: 'org.tensorflow', name: 'libtensorflow_jni_gpu', version: '1.12.0'
+
+    // For java numpy interface
+//    compile 'org.jetbrains.bio:npy:0.3.3'
 }
 
 javafx {
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    modules = [ 'javafx.fxml', 'javafx.controls', 'javafx.graphics']
     version = "11.0.2"
 }
 
@@ -69,4 +77,12 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/resources"]
+        }
+    }
 }

@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.List;
 import javax.imageio.ImageIO;
 
-class ImagePreprocessorI implements ImagePreprocessor
+public class ImagePreprocessorI implements ImagePreprocessor
 {
 
     @NotNull
@@ -20,20 +20,20 @@ class ImagePreprocessorI implements ImagePreprocessor
         BufferedImage srcFile = srcImg(imageName);
         BufferedImage buffFile = buffImg(imageName);
 
-        BufferedImage outputFile;
+        BufferedImage outputFile = srcFile;
 
         if (shouldFlip(srcFile, buffFile)){
-            outputFile = invertImage(srcImg("invert-"+imageName), buffImg("invert-"+imageName));
-            writeImage("invert-"+imageName, outputFile);
+            outputFile = invertImage(srcFile, new BufferedImage(srcFile.getWidth(),
+                    srcFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
         }
 
         if (fleshy)
-            outputFile = contrast(srcImg("invert-"+imageName), buffImg("invert-"+imageName));
+            outputFile = contrast(outputFile, new BufferedImage(outputFile.getWidth(),
+                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
         else
-            outputFile = contrast(srcImg("invert-"+imageName));
-        writeImage("invert-"+imageName, outputFile);
+            outputFile = contrast(outputFile);
 
-        outputFile = resize(srcImg("invert-"+imageName), buffImg("invert-"+imageName));
+        //writeImage("invert-"+imageName, outputFile);
 
         return outputFile;
 
@@ -250,7 +250,7 @@ class ImagePreprocessorI implements ImagePreprocessor
 
         TreeMap<Integer, Integer> histo = new TreeMap<>();
         for (Pair p: img.keySet()) {
-            int c = img.get(p);
+            int c = (img.get(p)/5)*5;
             if (histo.containsKey(c))
                 histo.put(c, histo.get(c) + 1);
             else

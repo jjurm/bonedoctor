@@ -4,22 +4,22 @@ import com.jhlabs.image.WarpFilter
 import com.jhlabs.image.WarpGrid
 import uk.ac.cam.cl.bravo.util.ImageTools
 import java.awt.Color
+import java.awt.Point
 import java.awt.image.BufferedImage
 
 class InnerWarpTransformer(
     parameterScale: Double,
     parameterPenaltyScale: Double,
     /** number of flexible points in one dimension */
-    private val RESOLUTION: Int
+    private val resolution: Int
 ) : AbstractTransformer(parameterScale, parameterPenaltyScale) {
 
     // number of flexible+fixed points in one dimension (points at the edges are fixed)
-    private val SIZE = RESOLUTION + 2
-    // flexible points (in principle RESOLUTION in two dimensions)
-    private val FLEXIBLE = RESOLUTION * RESOLUTION
+    private val SIZE = resolution + 2
+    // flexible points (in principle resolution in two dimensions)
+    private val FLEXIBLE = resolution * resolution
     // total number of points in the grid
     private val GRID_POINTS = SIZE * SIZE
-    private val SOURCE_GRID = WarpGrid(SIZE, SIZE, ImageTools.PLANE_WIDTH, ImageTools.PLANE_HEIGHT)
 
     override val parameterCount get() = FLEXIBLE * 2 // X, Y coordinates for each grid point
 
@@ -28,28 +28,27 @@ class InnerWarpTransformer(
     override val minBounds0 get() = List(FLEXIBLE * 2) { -1.0 }
     override val maxBounds0 get() = List(FLEXIBLE * 2) { 1.0 }
 
-    private fun paramsToGrid(parameters: DoubleArray): WarpGrid {
-        val dstGrid = WarpGrid(SIZE, SIZE, ImageTools.PLANE_WIDTH, ImageTools.PLANE_HEIGHT)
+    private fun paramsToGrid(parameters: DoubleArray, planeSize: Point): WarpGrid {
+        val dstGrid = WarpGrid(SIZE, SIZE, planeSize.x, planeSize.y)
         (0 until FLEXIBLE).forEach { i ->
-            val x = i % RESOLUTION
-            val y = i / RESOLUTION
-            dstGrid.xGrid[(y + 1) * SIZE + (x + 1)] += (parameters[i] * ImageTools.PLANE_WIDTH).toFloat()
-            dstGrid.yGrid[(y + 1) * SIZE + (x + 1)] += (parameters[FLEXIBLE + i] * ImageTools.PLANE_HEIGHT).toFloat()
+            val x = i % resolution
+            val y = i / resolution
+            dstGrid.xGrid[(y + 1) * SIZE + (x + 1)] += (parameters[i] * planeSize.x).toFloat()
+            dstGrid.yGrid[(y + 1) * SIZE + (x + 1)] += (parameters[FLEXIBLE + i] * planeSize.y).toFloat()
         }
         return dstGrid
     }
 
-    override fun transform0(image: BufferedImage, parameters: DoubleArray): BufferedImage {
-        val filter = WarpFilter(SOURCE_GRID, paramsToGrid(parameters))
+    override fun transform0(image: BufferedImage, parameters: DoubleArray, planeSize: Point): BufferedImage {
+        val srcGrid = WarpGrid(SIZE, SIZE, planeSize.x, planeSize.y)
+        val dstGrid = paramsToGrid(parameters, planeSize)
+        val filter = WarpFilter(srcGrid, dstGrid)
 
-        return filter.filter(
-            image,
-            BufferedImage(ImageTools.PLANE_WIDTH, ImageTools.PLANE_HEIGHT, BufferedImage.TYPE_BYTE_GRAY)
-        )
+        return filter.filter(image, ImageTools.getPlaneImage(planeSize))
     }
 
-    fun drawMarks(image: BufferedImage, params: DoubleArray) {
-        val grid = paramsToGrid(rescaleIn(params))
+    fun drawMarks(image: BufferedImage, params: DoubleArray, planeSize: Point) {
+        val grid = paramsToGrid(rescaleIn(params), planeSize)
         val size = 5
         fun pointX(x: Int, y: Int) = grid.xGrid[y * SIZE + x].toInt()
         fun pointY(x: Int, y: Int) = grid.yGrid[y * SIZE + x].toInt()
