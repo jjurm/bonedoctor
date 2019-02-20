@@ -18,6 +18,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -30,8 +31,9 @@ public class AnalysisController implements Initializable {
 
     private static final int MIN_PIXELS = 10;
 
-    public MainController mainController;
+    private MainController mainController;
     private ImageExplorerController imageExplorerController;
+    private MatchListController matchListController;
     private Stage stage;
 
     private ScrollPane scrollPane = new ScrollPane();
@@ -46,50 +48,18 @@ public class AnalysisController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        try {
+            FXMLLoader matchListLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/matchList.fxml"));
+            Parent matchListFXML = matchListLoader.load();
+            matchListFXML.maxHeight(topBottom.getMaxHeight()*0.75);
+            matchListController = matchListLoader.getController();
 
-        // ------ CREATE SCROLLABLE LIST VIEW --------
+            topBottom.getChildren().add(1, matchListFXML);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        Image img1 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
-        Image img2 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/bowtie.jpg"));
-        Image img3 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
-
-        ObservableList<String> items =FXCollections.observableArrayList (
-                "RUBY", "APPLE", "VISTA");
-        matches.setItems(items);
-        matches.setCellFactory(param -> new ListCell<String>() {
-            private ImageView matchView = new ImageView();
-
-
-            @Override
-            public void updateItem(String name, boolean empty) {
-                super.updateItem(name, empty);
-                if (empty) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    if (name.equals("RUBY"))
-                        matchView.setImage(img1);
-                    else if (name.equals("APPLE"))
-                        matchView.setImage(img2);
-                    else if (name.equals("VISTA"))
-                        matchView.setImage(img3);
-                    setText(name);
-                    setGraphic(matchView);
-                }
-            }
-
-        });
-
-
-        // ----- ENABLE SELECT NEW MATCH -----
-
-        matches.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) {
-                System.out.println("Clicked on " + matches.getSelectionModel().getSelectedItem());
-            }
-        });
-
-        return;
+        System.out.println("Box " + topBottom.heightProperty());
     }
 
     //  CREATE SCROLLABLE IMAGE PANE USER INPUT
@@ -97,6 +67,8 @@ public class AnalysisController implements Initializable {
         try {
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
             Parent imageExplorerFXML = imageExplorerLoader.load();
+            imageExplorerFXML.maxHeight(topBottom.getMaxHeight()*0.25);
+
             imageExplorerController = imageExplorerLoader.getController();
             imageExplorerController.setImage(imgFile);
             topBottom.getChildren().add(0, imageExplorerFXML);

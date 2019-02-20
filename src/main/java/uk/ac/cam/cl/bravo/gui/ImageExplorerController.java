@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import java.io.File;
 import java.net.URL;
@@ -105,6 +106,7 @@ public class ImageExplorerController implements Initializable {
 
         container.setPrefSize(800, 600);
         imageView.fitWidthProperty().bind(container.widthProperty());
+        System.out.println("Explorer: " + container.heightProperty());
         imageView.fitHeightProperty().bind(container.heightProperty());
         VBox.setVgrow(container, Priority.ALWAYS);
     }
