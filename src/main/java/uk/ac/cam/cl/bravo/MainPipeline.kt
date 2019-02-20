@@ -19,7 +19,7 @@ class MainPipeline(private val observer: MainPipelineObserver) {
     val preprocessor: ImagePreprocessor = ImagePreprocessorI()
     val boneConditionClassifier: BoneConditionClassifier = BoneConditionClassifierImpl()
     val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl()
-    val imageMatcher: ImageMatcher = TODO()
+    lateinit var imageMatcher: ImageMatcher // TODO
     val imageOverlay: ImageOverlay = ImageOverlayImpl(
         arrayOf(
             InnerWarpTransformer(

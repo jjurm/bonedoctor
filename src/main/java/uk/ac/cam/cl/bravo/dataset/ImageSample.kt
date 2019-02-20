@@ -29,7 +29,7 @@ class ImageSample(val path: String) {
                 ?: throw IllegalArgumentException("Cannot determine body part of $path")
 
         private fun getBoneCondition(path: String): BoneCondition =
-            normalityRegex.find(path)?.groupValues?.getOrNull(1)?.let { BoneCondition.valueOf(it) }
+            normalityRegex.find(path)?.groupValues?.getOrNull(1)?.let { BoneCondition.fromLabel(it) }
                 ?: throw IllegalArgumentException("Cannot determine normality of $path")
     }
 

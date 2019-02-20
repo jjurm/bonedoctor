@@ -4,6 +4,8 @@ import com.jhlabs.image.GaussianFilter
 import org.apache.commons.lang3.time.StopWatch
 import uk.ac.cam.cl.bravo.classify.BodypartViewClassifier
 import uk.ac.cam.cl.bravo.classify.BodypartViewClassifierImpl
+import uk.ac.cam.cl.bravo.dataset.Bodypart
+import uk.ac.cam.cl.bravo.dataset.BoneCondition
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
 import uk.ac.cam.cl.bravo.overlay.*
@@ -11,6 +13,7 @@ import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI
 import uk.ac.cam.cl.bravo.util.ImageTools
 import java.awt.Point
+import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
@@ -23,7 +26,12 @@ fun main(args: Array<String>) {
         "images/in/train_XR_HAND_patient09734_study1_positive_image1_edit.png" to "images/in/train_XR_HAND_patient09734_study1_positive_image3_edit.png"
     //    "images/in/train_XR_FOREARM_patient02116_study1_negative_image1.png" to "images/in/train_XR_FOREARM_patient02132_study1_negative_image1.png"
     //    "images/in/train_XR_SHOULDER_patient00037_study1_positive_image1_edit.png" to "images/in/train_XR_SHOULDER_patient01449_study1_negative_image2_edit.png"
-    tryOverlay(file1, file2)
+    //tryOverlay(file1, file2)
+
+    val dataset = Dataset()
+    val imageSample = dataset.training.values
+        .filter { it.bodypart == Bodypart.HAND && it.patient == 9734 }.first()
+    mainPipeline(imageSample.path, imageSample.bodypart)
 }
 
 fun preprocessPipeline() {
@@ -44,6 +52,27 @@ fun preprocessPipeline() {
         val newPath = sample.path.removeSuffix(".png") + "_edit.png"
         ImageIO.write(image, "png", File(newPath))
     }
+}
+
+fun mainPipeline(inputFile: String, bodypart: Bodypart) {
+    DisplayImage(inputFile, "Input")
+    val pipeline = MainPipeline(object : MainPipelineObserver {
+        override fun overallProgress(progress: Double) = println("Progress: $progress")
+        override fun statusUpdate(message: String) = println("Status: $message")
+        override fun reportBoneCondition(boneCondition: BoneCondition) = println("BoneCondition = $boneCondition")
+        override fun preprocessedUserImage(image: BufferedImage) {
+            DisplayImage(image, "Preprocessed user image")
+        }
+
+        override fun partialOverlay(matchedNormal: BufferedImage?, matchedAbnormal: BufferedImage?) =
+            println("Got partial overlay")
+
+        override fun success(matchedNormal: BufferedImage?, matchedAbnormal: BufferedImage?) {
+            matchedNormal?.let { DisplayImage(it, "Matched NORMAL") }
+            matchedAbnormal?.let { DisplayImage(it, "Matched ABNORMAL") }
+        }
+    })
+    pipeline.submit(inputFile, bodypart)
 }
 
 /*fun loadDataset() {
@@ -90,7 +119,7 @@ fun tryOverlay(file1: String, file2: String) {
     sw.start()
     val result = overlay.findBestOverlay(base, sample)
     sw.stop()
-    val time = "${"%.1f".format(sw.time.toDouble()/1000)}s"
+    val time = "${"%.1f".format(sw.time.toDouble() / 1000)}s"
     println("  $time")
 
     println("Generating overlay...")
