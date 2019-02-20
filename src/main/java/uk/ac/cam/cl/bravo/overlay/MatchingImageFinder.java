@@ -3,7 +3,7 @@ package uk.ac.cam.cl.bravo.overlay;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.BodypartView;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
-import uk.ac.cam.cl.bravo.dataset.Normality;
+import uk.ac.cam.cl.bravo.dataset.BoneCondition;
 
 import java.awt.image.BufferedImage;
 
@@ -12,5 +12,5 @@ import java.awt.image.BufferedImage;
  */
 public interface MatchingImageFinder {
     @NotNull
-    ImageSample match(@NotNull BufferedImage image, @NotNull BodypartView bodypartView, @NotNull Normality normality);
+    ImageSample match(@NotNull BufferedImage image, @NotNull BodypartView bodypartView, @NotNull BoneCondition boneCondition);
 }

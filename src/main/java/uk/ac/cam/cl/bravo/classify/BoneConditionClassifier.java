@@ -1,14 +1,14 @@
 package uk.ac.cam.cl.bravo.classify;
 
 import org.jetbrains.annotations.NotNull;
-import uk.ac.cam.cl.bravo.dataset.Normality;
+import uk.ac.cam.cl.bravo.dataset.BoneCondition;
 
 import java.awt.image.BufferedImage;
 
 /**
  * Responsible: Leon Mlodzian (lam206)
  */
-public interface NormalityClassifier {
+public interface BoneConditionClassifier {
     @NotNull
-    Normality classify(@NotNull BufferedImage image);
+    BoneCondition classify(@NotNull BufferedImage image);
 }
