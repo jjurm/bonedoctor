@@ -3,16 +3,18 @@ package uk.ac.cam.cl.bravo
 import com.jhlabs.image.GaussianFilter
 import org.apache.commons.lang3.time.StopWatch
 import uk.ac.cam.cl.bravo.classify.BodypartViewClassifier
+import uk.ac.cam.cl.bravo.classify.BodypartViewClassifierImpl
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
+import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI
 import uk.ac.cam.cl.bravo.util.ImageTools
 import java.awt.Point
 import java.io.File
 import javax.imageio.ImageIO
 
-const val PLANE_WIDTH = 550
+const val PLANE_WIDTH = 520
 const val PLANE_HEIGHT = PLANE_WIDTH
 val PLANE_SIZE = Point(PLANE_WIDTH, PLANE_HEIGHT)
 
@@ -27,14 +29,14 @@ fun main(args: Array<String>) {
 fun preprocessPipeline() {
     val dataset = Dataset()
 
-    val imagePreprocessor: ImagePreprocessor = TODO()
-    val bodypartViewClassifierImpl: BodypartViewClassifier = TODO()
+    val imagePreprocessor: ImagePreprocessor = ImagePreprocessorI()
+    val bodypartViewClassifierImpl: BodypartViewClassifier = BodypartViewClassifierImpl()
 
-    dataset.training.forEach { sample ->
+    listOf(dataset.training, dataset.validation).map { it.values }.flatten().forEach { sample ->
         //var image = sample.loadImage()
 
         // preprocessing
-        var image = imagePreprocessor.preprocess(sample.path)
+        val image = imagePreprocessor.preprocess(sample.path)
 
         // classify view
         val view = bodypartViewClassifierImpl.classify(image, sample.bodypart)

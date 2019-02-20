@@ -4,7 +4,33 @@ import java.io.File
 import javax.imageio.ImageIO
 
 /** A classified sample loaded from the MURA dataset. */
-class ImageSample(val path: String, val patient: Int, val bodypart: Bodypart, val boneCondition: BoneCondition) {
-    val file get() = File(path)
-    fun loadImage() = ImageIO.read(file)
+class ImageSample(val path: String) {
+
+    val patient = getPatient(path)
+    val bodypart = getBodypart(path)
+    val boneCondition = getBoneCondition(path)
+
+    val preprocessedPath: String get() = Dataset.DIR_PREPROCESSED + path.removePrefix(Dataset.DIR)
+
+    fun loadImage() = ImageIO.read(File(path))
+    fun loadPreprocessedImage() = ImageIO.read(File(path))
+
+    companion object {
+        private val patientRegex = Regex("""patient(\d+)""")
+        private val bodypartRegex = Regex("""XR_(\w+)""")
+        private val normalityRegex = Regex("""study\d+_(\w+)""")
+
+        private fun getPatient(path: String): Int =
+            patientRegex.find(path)?.groupValues?.getOrNull(1)?.toIntOrNull()
+                ?: throw IllegalArgumentException("Cannot determine patient number of $path")
+
+        private fun getBodypart(path: String): Bodypart =
+            bodypartRegex.find(path)?.groupValues?.getOrNull(1)?.let { Bodypart.valueOf(it) }
+                ?: throw IllegalArgumentException("Cannot determine body part of $path")
+
+        private fun getBoneCondition(path: String): BoneCondition =
+            normalityRegex.find(path)?.groupValues?.getOrNull(1)?.let { BoneCondition.valueOf(it) }
+                ?: throw IllegalArgumentException("Cannot determine normality of $path")
+    }
+
 }

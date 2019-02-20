@@ -28,7 +28,11 @@ class ImageOverlayImpl(
         transformers.map { it.maxBounds }.flatten().toDoubleArray()
     )
 
-    fun Array<Transformer>.transformAll(image: BufferedImage, parameters: DoubleArray, planeSize: Point): BufferedImage {
+    fun Array<Transformer>.transformAll(
+        image: BufferedImage,
+        parameters: DoubleArray,
+        planeSize: Point
+    ): BufferedImage {
         // for each transformer, extract the appropriate parameters and transform the image
         val (_, transformed) = this.fold(Pair(0, image)) { (paramOffset, image), transformer ->
             val sliced = parameters.slice(paramOffset until (transformer.parameterCount + paramOffset))
@@ -50,7 +54,7 @@ class ImageOverlayImpl(
         return accParams
     }
 
-    override fun findBestOverlay(base: BufferedImage, sample: BufferedImage): PointValuePair {
+    fun findBestOverlay(base: BufferedImage, sample: BufferedImage): PointValuePair {
         val optimizer = BOBYQAOptimizer(
             parameterCount * 2 + 1,
             0.3,
@@ -83,4 +87,12 @@ class ImageOverlayImpl(
         return transformers.transformAll(inPlane, parameters, bigPlaneSize)
     }
 
+    override fun fitImage(base: BufferedImage, sample: BufferedImage): BufferedImage {
+        val bestOverlay = findBestOverlay(base, sample)
+        return applyTransformations(sample, bestOverlay.point)
+    }
+
+    override fun normalise(image: BufferedImage): BufferedImage {
+        return ImageTools.copyToPlane(image, bigPlaneSize)
+    }
 }
