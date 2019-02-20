@@ -52,11 +52,12 @@ class EdgeDetection
             }
         }
 
+        double scale = 255.0 / maxGradient;
+
         for (int i = 1; i < x - 1; i++) {
             for (int j = 1; j < y - 1; j++) {
-                int edgeColor = edgeColors[i][j];
+                int edgeColor = (int) (edgeColors[i][j]/scale);
                 edgeColor = 0xff000000 | (edgeColor << 16) | (edgeColor << 8) | edgeColor;
-
                 srcFile.setRGB(i, j, edgeColor);
             }
         }
