@@ -17,15 +17,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class AnalysisController {
 
@@ -46,6 +41,9 @@ public class AnalysisController {
     @FXML
     private VBox topBottom;
 
+    @FXML
+    private HBox imgExplorers;
+
     public AnalysisController(Stage stage, PipelineObserver pipelineObserver) {
         this.stage = stage;
         this.pipelineObserver = pipelineObserver;
@@ -60,7 +58,7 @@ public class AnalysisController {
             Parent matchListFXML = matchListLoader.load();
 
             matchListFXML.maxHeight(topBottom.getMaxHeight()*0.75);
-            topBottom.getChildren().add(1, matchListFXML);
+            topBottom.getChildren().add(2, matchListFXML);
 
             // Child controller actions
             matchListController.launch();
@@ -72,23 +70,8 @@ public class AnalysisController {
         System.out.println("Box " + topBottom.heightProperty());
     }
 
-//    @Override
-//    public void initialize(URL location, ResourceBundle resources) {
-//        try {
-//            FXMLLoader matchListLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/matchList.fxml"));
-//            Parent matchListFXML = matchListLoader.load();
-//            matchListFXML.maxHeight(topBottom.getMaxHeight()*0.75);
-//            matchListController = matchListLoader.getController();
-//            topBottom.getChildren().add(1, matchListFXML);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        System.out.println("Box " + topBottom.heightProperty());
-//    }
-
     //  CREATE SCROLLABLE IMAGE PANE USER INPUT
-    public void setImage(Image imgFile) {
+    public void setUserImage(Image imgFile) {
         try {
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
@@ -97,11 +80,35 @@ public class AnalysisController {
             Parent imageExplorerFXML = imageExplorerLoader.load();
 
             imageExplorerFXML.maxHeight(topBottom.getMaxHeight()*0.25);
-            topBottom.getChildren().add(0, imageExplorerFXML);
+            imgExplorers.getChildren().add(0, imageExplorerFXML);
 
             // Child controller actions
             imageExplorerController.setImage(imgFile);
             pipelineObserver.addImageExplorerController(imageExplorerController);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //  CREATE SCROLLABLE IMAGE PANE CLOSEST MATCH
+    public void setMatchImage(Image imgFile) {
+        try {
+            // Initialize controller
+            FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
+            imageExplorerController = new ImageExplorerController(stage, pipelineObserver);
+            imageExplorerLoader.setController(imageExplorerController);
+            Parent imageExplorerFXML = imageExplorerLoader.load();
+
+            imageExplorerFXML.maxHeight(topBottom.getMaxHeight()*0.25);
+            imgExplorers.getChildren().add(1, imageExplorerFXML);
+
+            // Child controller actions
+            imageExplorerController.setImage(imgFile);
+            pipelineObserver.addImageExplorerController(imageExplorerController);
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }

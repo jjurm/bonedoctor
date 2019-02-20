@@ -46,7 +46,11 @@ public class MainController {
             container.getChildren().add(0, analysisFXML);
 
             // Child controller actions
-            analysisController.setImage(img);
+            analysisController.setUserImage(img);
+
+            Image match = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
+            analysisController.setMatchImage(match);
+
             analysisController.launch();
             pipelineObserver.addAnalysisController(analysisController);
         } catch (IOException e) {
