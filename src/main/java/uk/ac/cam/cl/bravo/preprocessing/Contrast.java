@@ -103,7 +103,7 @@ public class Contrast {
             diff.put(Math.max(a,b), d);
         }
         HashMap<Integer, Integer> sortDiff = Statistics.sortByValue(diff);
-        return ((Integer)sortDiff.keySet().toArray()[0]);
+        return ((Integer)sortDiff.keySet().toArray()[0])+5;
     }
 
     private static int whiteThreshold(TreeMap<Integer, Integer> histo, int size, int bT){
