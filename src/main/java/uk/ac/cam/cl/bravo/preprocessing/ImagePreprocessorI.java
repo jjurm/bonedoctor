@@ -47,6 +47,9 @@ public class ImagePreprocessorI implements ImagePreprocessor
         outputFile = EdgeRemoval.colourBand(outputFile, new BufferedImage(outputFile.getWidth(),
                 outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR), band);
 
+        outputFile = Crop.crop(outputFile, new BufferedImage(outputFile.getWidth(),
+                outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
+
         return outputFile;
 
     }
