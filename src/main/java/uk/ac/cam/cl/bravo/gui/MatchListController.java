@@ -14,18 +14,24 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class MatchListController implements Initializable {
-
+public class MatchListController {
 
     @FXML
     private ListView matches;
+    private Stage stage;
+    private PipelineObserver pipelineObserver;
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public MatchListController(Stage stage, PipelineObserver pipelineObserver) {
+        this.stage = stage;
+        this.pipelineObserver = pipelineObserver;
+    }
+
+    public void launch() {
         // ------ CREATE SCROLLABLE LIST VIEW --------
 
         Image img1 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
@@ -71,7 +77,5 @@ public class MatchListController implements Initializable {
 
         return;
     }
-
-
-
+    
 }

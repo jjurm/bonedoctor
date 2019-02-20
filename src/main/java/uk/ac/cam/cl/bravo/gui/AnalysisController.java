@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class AnalysisController implements Initializable {
+public class AnalysisController {
 
     private static final int MIN_PIXELS = 10;
 
@@ -35,6 +35,7 @@ public class AnalysisController implements Initializable {
     private ImageExplorerController imageExplorerController;
     private MatchListController matchListController;
     private Stage stage;
+    private PipelineObserver pipelineObserver;
 
     private ScrollPane scrollPane = new ScrollPane();
     final DoubleProperty zoomProperty = new SimpleDoubleProperty(200);
@@ -45,16 +46,25 @@ public class AnalysisController implements Initializable {
     @FXML
     private VBox topBottom;
 
+    public AnalysisController(Stage stage, PipelineObserver pipelineObserver) {
+        this.stage = stage;
+        this.pipelineObserver = pipelineObserver;
+    }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void launch() {
         try {
+            // Initialize controller
             FXMLLoader matchListLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/matchList.fxml"));
+            matchListController = new MatchListController(stage, pipelineObserver);
+            matchListLoader.setController(matchListController);
             Parent matchListFXML = matchListLoader.load();
-            matchListFXML.maxHeight(topBottom.getMaxHeight()*0.75);
-            matchListController = matchListLoader.getController();
 
+            matchListFXML.maxHeight(topBottom.getMaxHeight()*0.75);
             topBottom.getChildren().add(1, matchListFXML);
+
+            // Child controller actions
+            matchListController.launch();
+            pipelineObserver.addMatchListController(matchListController);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -62,24 +72,39 @@ public class AnalysisController implements Initializable {
         System.out.println("Box " + topBottom.heightProperty());
     }
 
+//    @Override
+//    public void initialize(URL location, ResourceBundle resources) {
+//        try {
+//            FXMLLoader matchListLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/matchList.fxml"));
+//            Parent matchListFXML = matchListLoader.load();
+//            matchListFXML.maxHeight(topBottom.getMaxHeight()*0.75);
+//            matchListController = matchListLoader.getController();
+//            topBottom.getChildren().add(1, matchListFXML);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        System.out.println("Box " + topBottom.heightProperty());
+//    }
+
     //  CREATE SCROLLABLE IMAGE PANE USER INPUT
     public void setImage(Image imgFile) {
         try {
+            // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
+            imageExplorerController = new ImageExplorerController(stage, pipelineObserver);
+            imageExplorerLoader.setController(imageExplorerController);
             Parent imageExplorerFXML = imageExplorerLoader.load();
-            imageExplorerFXML.maxHeight(topBottom.getMaxHeight()*0.25);
 
-            imageExplorerController = imageExplorerLoader.getController();
-            imageExplorerController.setImage(imgFile);
+            imageExplorerFXML.maxHeight(topBottom.getMaxHeight()*0.25);
             topBottom.getChildren().add(0, imageExplorerFXML);
+
+            // Child controller actions
+            imageExplorerController.setImage(imgFile);
+            pipelineObserver.addImageExplorerController(imageExplorerController);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void setUp(MainController main, Stage newStage) {
-        mainController = main;
-        stage = newStage;
     }
 
     private HBox createButtons(double width, double height, ImageView imageView) {
@@ -116,7 +141,6 @@ public class AnalysisController implements Initializable {
     }
 
     private double clamp(double value, double min, double max) {
-
         if (value < min)
             return min;
         if (value > max)

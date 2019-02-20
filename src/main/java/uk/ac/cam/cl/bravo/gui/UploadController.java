@@ -19,11 +19,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
 
-public class UploadController implements Initializable {
+public class UploadController {
 
     private File imgFile;
     private MainController mainController;
     private Stage stage;
+    private PipelineObserver pipelineObserver;
 
     @FXML
     private Button selectButton;
@@ -35,14 +36,14 @@ public class UploadController implements Initializable {
     private Button analyzeButton;
 
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-
+    public UploadController(Stage stage, PipelineObserver pipelineObserver) {
+        this.stage = stage;
+        this.pipelineObserver = pipelineObserver;
     }
 
-    public void setUp(MainController main, Stage newStage) {
+
+    public void setMainController(MainController main) {
         mainController = main;
-        stage = newStage;
     }
 
     @FXML

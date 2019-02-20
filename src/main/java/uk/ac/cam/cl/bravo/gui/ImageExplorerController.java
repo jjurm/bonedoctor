@@ -13,15 +13,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import java.io.File;
-import java.net.URL;
-import java.util.ResourceBundle;
+import javafx.stage.Stage;
 
-public class ImageExplorerController implements Initializable {
+public class ImageExplorerController {
 
     private static final int MIN_PIXELS = 10;
+    private final Stage stage;
+    private PipelineObserver pipelineObserver;
 
     double width;
     double height;
@@ -33,9 +32,9 @@ public class ImageExplorerController implements Initializable {
     private ImageView imageView;
 
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-
+    public ImageExplorerController(Stage stage, PipelineObserver pipelineObserver) {
+        this.stage = stage;
+        this.pipelineObserver = pipelineObserver;
     }
 
     public void setImage(Image userInImg) {
