@@ -1,6 +1,7 @@
 from keras.applications.densenet import DenseNet169
 from keras.layers import Dense, Flatten
 from keras.models import Sequential
+from keras.callbacks import ModelCheckpoint
 import numpy
 
 # load data
@@ -31,4 +32,4 @@ callbacks_list = [checkpoint]
 
 # fit model and evaluate on validation dataset
 print('fitting model')
-model.fit(x=training_images, y=training_labels, validation_data=(validation_images, validation_labels), callbacks=callbacks_list, epochs=2, batch_size=8)
+model.fit(x=training_images, y=training_labels, validation_data=(validation_images, validation_labels), callbacks=callbacks_list, epochs=3, batch_size=8)
