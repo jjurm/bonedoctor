@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.List;
 import javax.imageio.ImageIO;
 
-class ImagePreprocessorI implements ImagePreprocessor
+public class ImagePreprocessorI implements ImagePreprocessor
 {
 
     @NotNull

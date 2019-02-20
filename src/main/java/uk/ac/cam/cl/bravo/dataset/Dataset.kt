@@ -14,16 +14,15 @@ import kotlin.streams.toList
 class Dataset @Throws(IOException::class) constructor() {
 
     companion object {
-        private const val DIR = "MURA-v1.1/"
+        const val DIR = "MURA-v1.1/"
+        const val DIR_PREPROCESSED = "MURA-preprocessed/"
         private const val CSV_TRAIN_IMAGE_PATHS = DIR + "train_image_paths.csv"
-        private const val CSV_TRAIN_LABELED_STUDIES = DIR + "train_labeled_studies.csv"
         private const val CSV_VALID_IMAGE_PATHS = DIR + "valid_image_paths.csv"
-        private const val CSV_VALID_LABELED_STUDIES = DIR + "valid_labeled_studies.csv"
 
     }
-
-    val training: List<ImageSample>
-    val validation: List<ImageSample>
+    
+    val training: Map<String, ImageSample>
+    val validation: Map<String, ImageSample>
 
     private fun checkDatasetFolderExists() {
         if (!Files.isDirectory(Paths.get(DIR))) {
@@ -39,32 +38,16 @@ class Dataset @Throws(IOException::class) constructor() {
         return BufferedReader(FileReader(filename)).use { it.lines().toList() }
     }
 
-    private fun loadImageSamples(csvFilename: String): List<ImageSample> {
+    private fun loadImageSamples(csvFilename: String): Map<String, ImageSample> {
         return loadPaths(csvFilename).mapNotNull { path ->
             try {
-                ImageSample(path, getPatient(path), getBodypart(path), getBoneCondition(path))
+                path to ImageSample(path)
             } catch (e: IllegalArgumentException) {
                 System.err.println(e.message)
                 null
             }
-        }
+        }.toMap()
     }
-
-    private val patientRegex = Regex("""patient(\d+)""")
-    private val bodypartRegex = Regex("""XR_(\w+)""")
-    private val normalityRegex = Regex("""study\d+_(\w+)""")
-
-    private fun getPatient(path: String): Int =
-        patientRegex.find(path)?.groupValues?.getOrNull(1)?.toIntOrNull()
-            ?: throw IllegalArgumentException("Cannot determine patient number of $path")
-
-    private fun getBodypart(path: String): Bodypart =
-        bodypartRegex.find(path)?.groupValues?.getOrNull(1)?.let { Bodypart.valueOf(it) }
-            ?: throw IllegalArgumentException("Cannot determine body part of $path")
-
-    private fun getBoneCondition(path: String): BoneCondition =
-        normalityRegex.find(path)?.groupValues?.getOrNull(1)?.let { BoneCondition.valueOf(it) }
-            ?: throw IllegalArgumentException("Cannot determine normality of $path")
 
     init {
         checkDatasetFolderExists()
