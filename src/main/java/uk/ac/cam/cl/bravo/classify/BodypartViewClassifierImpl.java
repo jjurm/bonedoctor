@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.tensorflow.*;
 import uk.ac.cam.cl.bravo.dataset.Bodypart;
 import uk.ac.cam.cl.bravo.dataset.BodypartView;
+import uk.ac.cam.cl.bravo.dataset.ImageSample;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -18,7 +19,7 @@ import java.util.stream.Stream;
 public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     @NotNull
     @Override
-    public BodypartView classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart) {
+    public BodypartView classify(@NotNull ImageSample imageSample) {
         return null;
     }
 
@@ -149,6 +150,11 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         return ret;
     }
+
+    // TODO: return view label and list of image samples, but add the information to the Image Sample class
+    // Hashing takes in a list of image samples
+
+    // Lesson: storing image sample as a new class and successively build up the image sample info
 
     public static void main(String[] args){
 //        // Test with one image
