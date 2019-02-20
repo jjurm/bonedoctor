@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Text?>
 
-<GridPane alignment="center" prefHeight="512" prefWidth="512" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" >
+<GridPane alignment="CENTER" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" >
     <padding> <Insets bottom="25" left="25" right="25" top="25" /> </padding>
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -25,20 +25,12 @@
     <Label alignment="CENTER" contentDisplay="CENTER" text="Upload new X-Ray" />
 
     <!-- Add Select File Button -->
-    <Button fx:id="selectButton" mnemonicParsing="false"
-            onAction="#handleSelectButtonAction" text="Select file " GridPane.rowIndex="1" />
+    <Button fx:id="selectButton" mnemonicParsing="false" onAction="#handleSelectButtonAction" text="Select file " GridPane.rowIndex="1" />
 
     <Text fx:id="fileText" wrappingWidth="182.0" GridPane.rowIndex="2" />
 
     <ImageView fx:id="imageView" fitHeight="158.0" fitWidth="169.0" pickOnBounds="true" preserveRatio="true" GridPane.rowIndex="3" />
 
-    <Button
-            fx:id="analyzeButton"
-            onAction="#handleAnalyzeButtonAction"
-            mnemonicParsing="false"
-            text="Analyze"
-            GridPane.columnIndex="1"
-            GridPane.rowIndex="3"
-    />
+    <Button fx:id="analyzeButton" mnemonicParsing="false" onAction="#handleAnalyzeButtonAction" text="Analyze" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
 </GridPane>
