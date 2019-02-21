@@ -24,6 +24,9 @@ import java.util.stream.Stream;
 
 
 public class BodypartViewClassifierImpl implements BodypartViewClassifier {
+    private Map<Bodypart, Map<Integer, List<String>>> bodyPartToLabelToFilenamesMap = new HashMap<>();
+    private Map<Bodypart, Map<Integer, float[]>> bodyPartToLabelToMeanFeaturesMap = new HashMap<>();
+
     @NotNull
     @Override
     public BodypartView classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart) {
@@ -201,6 +204,32 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     private void decodeBodyPartFolder(Bodypart bodypart, String outputDir){
         // Obtain array of files in the bodypart folder
         File[] filesArray = new File((outputDir + "/" + bodypart)).listFiles();
+
+        for (File file : filesArray){
+            // Decode mean features, process only label files containing mean features
+            String filename = file.toString();
+            if (filename.startsWith("mean_features_label")){
+                // Get the label id
+                int label = Integer.valueOf(filename.split("_")[filename.length()-4]);
+
+                // Decode mean features
+                float[] meanFeatures = decodeMeanFeaturesFile(filename);
+
+                // Add it to required hashmap
+                Map<Integer, float[]> toPut = new HashMap<>();
+                toPut.put(label, meanFeatures);
+                bodyPartToLabelToMeanFeaturesMap.put(bodypart, toPut);
+            }
+
+            // Decode features filenames
+            else if (filename.startsWith("labels_to_image_filenames")){
+                Map<Integer, List<String>> labelToImageFilenamesMap = decodeFeaturesNamesFile(filename);
+
+                // Add it to required hashmap
+                bodyPartToLabelToFilenamesMap.put(bodypart, labelToImageFilenamesMap);
+
+            }
+        }
     }
 
     public static void main(String[] args) throws IOException {
