@@ -22,8 +22,8 @@ public class ImagePreprocessorI implements ImagePreprocessor
 
     PreProcessObserver observer;
 
-    ImagePreprocessorI(PreProcessObserver obs){
-        observer = obs; 
+    public ImagePreprocessorI(PreProcessObserver obs){
+        observer = obs;
     }
 
 
