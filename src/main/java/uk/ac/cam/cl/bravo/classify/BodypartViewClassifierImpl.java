@@ -34,7 +34,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     @Override
     public BodypartView classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart) {
         // First load the results into the hashmaps if haven't already
-        if (bodyPartToLabelToMeanFeaturesMap.get(bodypart) == null && bodyPartToLabelToFilenamesMap.get(bodypart) ==null){
+        if (bodyPartToLabelToMeanFeaturesMap.get(bodypart) == null && bodyPartToLabelToFilenamesMap.get(bodypart) == null){
             decodeBodyPartFolder(bodypart, outputDir);
         }
 
@@ -49,17 +49,9 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         // Obtained flattened array as output
         float[] outputArray = executeInferenceGraph(graphDef, preprocessedImage, inputNodeName, outputNodeName);
 
-        // Obtain the right hashmap for this bodypart for comparison
-
+        // Obtain the right hashmaps for this bodypart for comparison
         Map<Integer, List<String>> labelToFilenamesMap = bodyPartToLabelToFilenamesMap.get(bodypart);
-
-        System.out.println("filenames Map");
-        System.out.println(labelToFilenamesMap);
-
         Map<Integer, float[]> labelToMeanFeaturesMap = bodyPartToLabelToMeanFeaturesMap.get(bodypart);
-
-        System.out.println("label mean map:");
-        System.out.println(labelToMeanFeaturesMap);
 
         // Compute L2 distance with benchmark
         int topLabel = 0;
@@ -76,6 +68,10 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         }
 
         return new BodypartView(bodypart, topLabel);
+    }
+
+    public List<String> getClusterFiles(BodypartView bodypartview){
+        return bodyPartToLabelToFilenamesMap.get(bodypartview.getBodypart()).get(bodypartview.getValue());
     }
 
     private static byte[] bufferedImageToByteArray(BufferedImage image){
@@ -262,6 +258,8 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
             for (int i=0; i<contentValues.length; i++){
                 contentFloatArray[i] = Float.valueOf(contentValues[i]);
             }
+
+            return contentFloatArray;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -281,13 +279,10 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
             String filename = file.getName();
             if (filename.startsWith("mean_features_label")){
                 // Get the label ids
-//                System.out.println(Integer.valueOf(filename.split("_"));
-                int label = Integer.valueOf(filename.split("_")[filename.length()-2]);
-
-                System.out.println(label);
+                int label = Integer.valueOf(filename.substring(filename.length()-5, filename.length()-4));
 
                 // Decode mean features
-                float[] meanFeatures = decodeMeanFeaturesFile(filename);
+                float[] meanFeatures = decodeMeanFeaturesFile(file.toString());
 
                 // Add it to required hashmap
                 Map<Integer, float[]> toPut = new HashMap<>();
@@ -297,7 +292,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
             // Decode features filenames
             else if (filename.startsWith("labels_to_image_filenames")){
-                Map<Integer, List<String>> labelToImageFilenamesMap = decodeFeaturesNamesFile(filename);
+                Map<Integer, List<String>> labelToImageFilenamesMap = decodeFeaturesNamesFile(file.toString());
 
                 // Add it to required hashmap
                 bodyPartToLabelToFilenamesMap.put(bodypart, labelToImageFilenamesMap);
@@ -307,48 +302,13 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     }
 
     public static void main(String[] args) throws IOException {
-        // Read classifier
-//        String graphDefFilename = "python/view_clustering/InceptionV3.pb";
-//        String outputDirName = "python/view_clustering/output/";
+        // Test
         BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
-
         String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HUMERUS/patient03225/study1_negative/image1.png";
-
         BufferedImage image = ImageIO.read(new File(testImage));
-
-        System.out.println(classifier.classify(image, Bodypart.HUMERUS));
-
-
-//        // Read features file from txt
-//        String meanFeaturesFilename = "/home/kwotsin/Desktop/group_project/python/output/XR_HUMERUS/label_to_image_filenames/mean_features_label_0.txt";
-//        String content = new String(Files.readAllBytes(Paths.get(meanFeaturesFilename)));
-//        String[] contentFloat = content.split("\n");
-//
-//        float[] contentFloatArray = new float[contentFloat.length];
-//
-//        for (int i=0; i<contentFloat.length; i++){
-//            contentFloatArray[i] = Float.valueOf(contentFloat[i]);
-//        }
-//        System.out.println(Arrays.toString(contentFloatArray));
-
-//        // Read features name file from json
-//        String featuresNameFilename = "/home/kwotsin/Desktop/group_project/python/output/XR_HUMERUS/label_to_image_filenames/labels_to_image_filenames.json";
-//
-//        try {
-//            JsonReader reader = new JsonReader(new FileReader(featuresNameFilename));
-//            Map<String, List<String>> data = new Gson().fromJson(reader, Map.class);
-//
-//            // Convert key to integers instead
-//            Map<Integer, List<String>> ret = new HashMap<>();
-//
-//            for (String key : data.keySet()){
-//                ret.put(Integer.valueOf(key), data.get(key));
-//            }
-//
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-
+        BodypartView result = classifier.classify(image, Bodypart.HUMERUS);
+        System.out.println(result.getValue());
+        System.out.println(result.getBodypart());
     }
 
 }
