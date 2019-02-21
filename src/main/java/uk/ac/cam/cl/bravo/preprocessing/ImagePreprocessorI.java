@@ -14,6 +14,19 @@ import javax.imageio.ImageIO;
 public class ImagePreprocessorI implements ImagePreprocessor
 {
 
+    public interface PreProcessObserver{
+
+        public void progressUpdate(double d);
+
+    }
+
+    PreProcessObserver observer;
+
+    ImagePreprocessorI(PreProcessObserver obs){
+        observer = obs; 
+    }
+
+
     @NotNull
     @Override
     public BufferedImage preprocess(@NotNull  String imageName){
