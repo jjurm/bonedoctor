@@ -48,10 +48,8 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         // Preprocess image first to get float tensor of shape [1, 299, 299, 3]
         Tensor<Float> preprocessedImage = executePreprocessingGraph(imageBytes);
 
-        // Inference with PB file
-
+        // Build the graph definition for use
         byte[] graphDef = readBytesFromFile(graphDefFilename);
-
 
         // Obtained flattened array as output
         float[] outputArray = executeInferenceGraph(graphDef, preprocessedImage, inputNodeName, outputNodeName);
