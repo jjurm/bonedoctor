@@ -17,6 +17,8 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class MatchListController {
@@ -25,6 +27,8 @@ public class MatchListController {
     private ListView matches;
     private Stage stage;
     private PipelineObserver pipelineObserver;
+    private AnalysisController analysisController;
+
 
     public MatchListController(Stage stage, PipelineObserver pipelineObserver) {
         this.stage = stage;
@@ -37,6 +41,10 @@ public class MatchListController {
         Image img1 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
         Image img2 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/bowtie.jpg"));
         Image img3 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
+        List<Image> imgList = new ArrayList<>();
+        imgList.add(img1);
+        imgList.add(img2);
+        imgList.add(img3);
 
         ObservableList<String> items = FXCollections.observableArrayList (
                 "RUBY", "APPLE", "VISTA");
@@ -53,12 +61,7 @@ public class MatchListController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    if (name.equals("RUBY"))
-                        matchView.setImage(img1);
-                    else if (name.equals("APPLE"))
-                        matchView.setImage(img2);
-                    else if (name.equals("VISTA"))
-                        matchView.setImage(img3);
+                    matchView.setImage(imgList.get(getIndex()));
                     setText(name);
                     setGraphic(matchView);
                 }
@@ -71,11 +74,19 @@ public class MatchListController {
 
         matches.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
-                System.out.println("Clicked on " + matches.getSelectionModel().getSelectedItem());
+                System.out.println("Clicked on " + matches.getSelectionModel().getSelectedIndex());
             }
+
+            int index = matches.getSelectionModel().getSelectedIndex();
+            analysisController.setMatchImage(imgList.get(index));
+
         });
 
         return;
+    }
+
+    public void setAnalysisController(AnalysisController analysisController) {
+        this.analysisController = analysisController;
     }
     
 }

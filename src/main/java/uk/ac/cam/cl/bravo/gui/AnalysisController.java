@@ -62,6 +62,7 @@ public class AnalysisController {
 
             // Child controller actions
             matchListController.launch();
+            matchListController.setAnalysisController(this);
             pipelineObserver.addMatchListController(matchListController);
         } catch (IOException e) {
             e.printStackTrace();
