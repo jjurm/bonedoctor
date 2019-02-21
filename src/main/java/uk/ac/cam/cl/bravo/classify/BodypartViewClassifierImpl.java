@@ -23,17 +23,12 @@ import java.util.stream.Stream;
 public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     private Map<Bodypart, Map<Integer, List<String>>> bodyPartToLabelToFilenamesMap = new HashMap<>();
     private Map<Bodypart, Map<Integer, float[]>> bodyPartToLabelToMeanFeaturesMap = new HashMap<>();
-    private String outputDir; // Location where the python mean features are stored
-    private String graphDefFilename; // Graph def file for inference
+    private String outputDir = "python/view_clustering/output/"; // Location where the python mean features are stored
+    private String graphDefFilename = "python/view_clustering/InceptionV3.pb";; // Graph def file for inference
 
     // Input and output node names based on python nodes inspection.
     private final String inputNodeName = "input_1";
     private final String outputNodeName = "mixed10/concat";
-
-    public BodypartViewClassifierImpl(String pathToOutputFeaturesFile, String pathToGraphDefFile){
-        outputDir = pathToOutputFeaturesFile;
-        graphDefFilename = pathToGraphDefFile;
-    }
 
     @NotNull
     @Override
@@ -55,8 +50,16 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         float[] outputArray = executeInferenceGraph(graphDef, preprocessedImage, inputNodeName, outputNodeName);
 
         // Obtain the right hashmap for this bodypart for comparison
+
         Map<Integer, List<String>> labelToFilenamesMap = bodyPartToLabelToFilenamesMap.get(bodypart);
+
+        System.out.println("filenames Map");
+        System.out.println(labelToFilenamesMap);
+
         Map<Integer, float[]> labelToMeanFeaturesMap = bodyPartToLabelToMeanFeaturesMap.get(bodypart);
+
+        System.out.println("label mean map:");
+        System.out.println(labelToMeanFeaturesMap);
 
         // Compute L2 distance with benchmark
         int topLabel = 0;
@@ -271,16 +274,17 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         String bodyPartString = "XR_" + bodypart;
 
         // Obtain array of files in the bodypart folder
-        File[] filesArray = new File((outputDir + "/" + bodyPartString)).listFiles();
-
-        System.out.println(outputDir + "/" + bodyPartString);
+        File[] filesArray = new File((outputDir + bodyPartString + "/label_to_image_filenames")).listFiles();
 
         for (File file : filesArray){
             // Decode mean features, process only label files containing mean features
-            String filename = file.toString();
+            String filename = file.getName();
             if (filename.startsWith("mean_features_label")){
-                // Get the label id
-                int label = Integer.valueOf(filename.split("_")[filename.length()-4]);
+                // Get the label ids
+//                System.out.println(Integer.valueOf(filename.split("_"));
+                int label = Integer.valueOf(filename.split("_")[filename.length()-2]);
+
+                System.out.println(label);
 
                 // Decode mean features
                 float[] meanFeatures = decodeMeanFeaturesFile(filename);
@@ -304,11 +308,11 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
     public static void main(String[] args) throws IOException {
         // Read classifier
-        String graphDefFilename = "/home/kwotsin/Desktop/group_project/java_github/bonedoctor/python/view_clustering/InceptionV3.pb";
-        String outputDirName = "/home/kwotsin/Desktop/group_project/java_github/bonedoctor/python/view_clustering/output/";
-        BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl(outputDirName, graphDefFilename);
+//        String graphDefFilename = "python/view_clustering/InceptionV3.pb";
+//        String outputDirName = "python/view_clustering/output/";
+        BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
 
-        String testImage = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1/image_by_class/XR_HUMERUS/train_XR_HUMERUS_patient03226_study1_negative_image2.png";
+        String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HUMERUS/patient03225/study1_negative/image1.png";
 
         BufferedImage image = ImageIO.read(new File(testImage));
 
