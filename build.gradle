@@ -40,9 +40,6 @@ compileJava.dependsOn(enforceVersion);
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
-
-    // For java-numpy interface
-//    jcenter()
 }
 
 dependencies {
@@ -61,8 +58,8 @@ dependencies {
     compile group: 'org.tensorflow', name: 'libtensorflow_jni', version: '1.12.0'
     compile group: 'org.tensorflow', name: 'libtensorflow_jni_gpu', version: '1.12.0'
 
-    // For java numpy interface
-//    compile 'org.jetbrains.bio:npy:0.3.3'
+    // GSON
+    implementation 'com.google.code.gson:gson:2.8.5'
 }
 
 javafx {

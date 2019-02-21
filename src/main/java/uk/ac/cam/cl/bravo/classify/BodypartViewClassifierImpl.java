@@ -1,25 +1,32 @@
 package uk.ac.cam.cl.bravo.classify;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import org.jetbrains.annotations.NotNull;
 import org.tensorflow.*;
 import uk.ac.cam.cl.bravo.dataset.Bodypart;
 import uk.ac.cam.cl.bravo.dataset.BodypartView;
-import uk.ac.cam.cl.bravo.dataset.ImageSample;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 
 public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     @NotNull
     @Override
-    public BodypartView classify(@NotNull ImageSample imageSample) {
+    public BodypartView classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart) {
         return null;
     }
 
@@ -151,12 +158,84 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         return ret;
     }
 
-    // TODO: return view label and list of image samples, but add the information to the Image Sample class
-    // Hashing takes in a list of image samples
+    private Map<Integer, List<String>> decodeFeaturesNamesFile(String featuresNamesFilename){
+        try {
+            JsonReader reader = new JsonReader(new FileReader(featuresNamesFilename));
+            Map<String, List<String>> data = new Gson().fromJson(reader, Map.class);
 
-    // Lesson: storing image sample as a new class and successively build up the image sample info
+            // Convert key to integers instead
+            Map<Integer, List<String>> ret = new HashMap<>();
 
-    public static void main(String[] args){
+            for (String key : data.keySet()){
+                ret.put(Integer.valueOf(key), data.get(key));
+            }
+
+            return ret;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private float[] decodeMeanFeaturesFile(String meanFeaturesFilename){
+        try {
+            // Obtain the txt file contents and read all lines.
+            String content = new String(Files.readAllBytes(Paths.get(meanFeaturesFilename)));
+            String[] contentValues = content.split("\n");
+
+            // Convert content values to float to return
+            float[] contentFloatArray = new float[contentValues.length];
+
+            for (int i=0; i<contentValues.length; i++){
+                contentFloatArray[i] = Float.valueOf(contentValues[i]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private void decodeBodyPartFolder(Bodypart bodypart, String outputDir){
+        // Obtain array of files in the bodypart folder
+        File[] filesArray = new File((outputDir + "/" + bodypart)).listFiles();
+    }
+
+    public static void main(String[] args) throws IOException {
+//        // Read features file from txt
+//        String meanFeaturesFilename = "/home/kwotsin/Desktop/group_project/python/output/XR_HUMERUS/label_to_image_filenames/mean_features_label_0.txt";
+//        String content = new String(Files.readAllBytes(Paths.get(meanFeaturesFilename)));
+//        String[] contentFloat = content.split("\n");
+//
+//        float[] contentFloatArray = new float[contentFloat.length];
+//
+//        for (int i=0; i<contentFloat.length; i++){
+//            contentFloatArray[i] = Float.valueOf(contentFloat[i]);
+//        }
+//        System.out.println(Arrays.toString(contentFloatArray));
+
+//        // Read features name file from json
+//        String featuresNameFilename = "/home/kwotsin/Desktop/group_project/python/output/XR_HUMERUS/label_to_image_filenames/labels_to_image_filenames.json";
+//
+//        try {
+//            JsonReader reader = new JsonReader(new FileReader(featuresNameFilename));
+//            Map<String, List<String>> data = new Gson().fromJson(reader, Map.class);
+//
+//            // Convert key to integers instead
+//            Map<Integer, List<String>> ret = new HashMap<>();
+//
+//            for (String key : data.keySet()){
+//                ret.put(Integer.valueOf(key), data.get(key));
+//            }
+//
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+
+
+
 //        // Test with one image
 //        String imageFilename = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1/image_by_class/XR_HUMERUS/train_XR_HUMERUS_patient03225_study1_negative_image2.png";
 //        byte[] imageBytes = readBytesFromFile(imageFilename);

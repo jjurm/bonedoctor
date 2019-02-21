@@ -12,5 +12,5 @@ import java.awt.image.BufferedImage;
  */
 public interface BodypartViewClassifier {
     @NotNull
-    BodypartView classify(@NotNull ImageSample imageSample);
+    BodypartView classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart);
 }
