@@ -2,13 +2,10 @@ package uk.ac.cam.cl.bravo.preprocessing;
 
 import javafx.util.Pair;
 import org.jetbrains.annotations.NotNull;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 import javax.imageio.ImageIO;
 
 public class ImagePreprocessorI implements ImagePreprocessor
@@ -16,7 +13,7 @@ public class ImagePreprocessorI implements ImagePreprocessor
 
     public interface PreProcessObserver{
 
-        public void progressUpdate(double d);
+        void progressUpdate(double d);
 
     }
 
@@ -31,6 +28,8 @@ public class ImagePreprocessorI implements ImagePreprocessor
     @Override
     public BufferedImage preprocess(@NotNull  String imageName){
 
+        observer.progressUpdate(0.0);
+
         BufferedImage srcFile = srcImg(imageName);
         BufferedImage buffFile = buffImg(imageName);
 
@@ -41,27 +40,37 @@ public class ImagePreprocessorI implements ImagePreprocessor
                     srcFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
         }
 
+        observer.progressUpdate(0.10);
+
         Pair edgeRemoval= EdgeRemoval.edgeRemoval(outputFile, new BufferedImage(outputFile.getWidth(),
                 outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
 
         outputFile = (BufferedImage) edgeRemoval.getKey();
         HashSet<Point2D> band = (HashSet) edgeRemoval.getValue();
 
+        observer.progressUpdate(0.75);
+
         if (fleshy)
             outputFile = Contrast.contrast(outputFile, new BufferedImage(outputFile.getWidth(),
                     outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR), EdgeRemoval.insideOutside(outputFile,
                     new BufferedImage(outputFile.getWidth(),
-                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR)));
+                            outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR)));
         else
             outputFile = Contrast.contrast(outputFile, EdgeRemoval.insideOutside(outputFile,
                     new BufferedImage(outputFile.getWidth(),
-                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR)));
+                            outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR)));
+
+        observer.progressUpdate(0.95);
 
         outputFile = EdgeRemoval.colourBand(outputFile, new BufferedImage(outputFile.getWidth(),
                 outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR), band);
 
+        observer.progressUpdate(0.98);
+
         outputFile = Crop.crop(outputFile, new BufferedImage(outputFile.getWidth(),
                 outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
+
+        observer.progressUpdate(1.0);
 
         return outputFile;
 
