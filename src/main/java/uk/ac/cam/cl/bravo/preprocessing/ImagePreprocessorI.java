@@ -50,13 +50,7 @@ public class ImagePreprocessorI implements ImagePreprocessor
 
         observer.progressUpdate(0.75);
 
-        if (fleshy)
-            outputFile = Contrast.contrast(outputFile, new BufferedImage(outputFile.getWidth(),
-                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR), EdgeRemoval.insideOutside(outputFile,
-                    new BufferedImage(outputFile.getWidth(),
-                            outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR)));
-        else
-            outputFile = Contrast.contrast(outputFile, EdgeRemoval.insideOutside(outputFile,
+        outputFile = Contrast.contrast(outputFile, EdgeRemoval.insideOutside(outputFile,
                     new BufferedImage(outputFile.getWidth(),
                             outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR)));
 
@@ -96,10 +90,5 @@ public class ImagePreprocessorI implements ImagePreprocessor
             return null;
         }
     }
-
-    static boolean fleshy = false;
-
-
-
 
 }

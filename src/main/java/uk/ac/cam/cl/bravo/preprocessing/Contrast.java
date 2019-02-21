@@ -9,45 +9,6 @@ import java.util.TreeMap;
 
 public class Contrast {
 
-    public static BufferedImage contrast(BufferedImage srcFile, BufferedImage inputFile,
-                                         Pair<HashSet<Point2D>, HashSet<Point2D>> insideOutside) {
-
-        inputFile.getGraphics().drawImage(srcFile, 0, 0, null);
-
-        HashMap<Point2D, Integer> img = Statistics.imgMap(inputFile, EdgeRemoval.inside(insideOutside));
-
-        TreeMap<Integer, Integer> histo = Statistics.histogram(img);
-
-        int bT = blackThreshold(histo);
-        int wT = whiteThreshold(histo, img.size(), bT);
-
-        BufferedImage outputFile = new BufferedImage(inputFile.getWidth(), inputFile.getHeight(), inputFile.getType());
-
-        for (int x = 0; x < inputFile.getWidth(); x++) {
-            for (int y = 0; y < inputFile.getHeight(); y++) {
-                if (EdgeRemoval.outside(insideOutside).contains(new Point2D(x,y))){
-                    outputFile.setRGB(x, y, new Color(0,0,0).getRGB());
-                }
-                else {
-                    int rgba = inputFile.getRGB(x, y);
-                    Color col = new Color(rgba, true);
-                    int gs = (int) (0.3 * col.getRed() + 0.59 * col.getGreen() + 0.11 * col.getBlue());
-                    if (gs <= bT)
-                        col = new Color(0, 0, 0);
-                    else if (gs >= wT)
-                        col = new Color(255, 255, 255);
-                    else {
-                        int c = (int) Math.floor(255.0 / (wT - bT) * (gs - bT));
-                        col = new Color(c, c, c);
-                    }
-                    outputFile.setRGB(x, y, col.getRGB());
-                }
-            }
-        }
-
-        return outputFile;
-    }
-
     public static BufferedImage contrast(BufferedImage srcFile,
                                          Pair<HashSet<Point2D>, HashSet<Point2D>> insideOutside) {
 
