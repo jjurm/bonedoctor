@@ -81,9 +81,15 @@ class MainPipeline {
 
     private val nSimilarImages = Observable.just(5)
 
+    companion object {
+        const val PROGRESS_PREPROCESSING = 0
+    }
+
     // ===== COMPONENTS =====
 
-    private val preprocessor: ImagePreprocessor = ImagePreprocessorI()
+    private val preprocessor: ImagePreprocessor = ImagePreprocessorI({
+        // TODO Juraj: handle progress updates
+    })
     private val boneConditionClassifier: BoneConditionClassifier = BoneConditionClassifierImpl()
     private val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl()
     lateinit private var imageMatcher: ImageMatcher // TODO Shehab: instantiate ImageMatcher
