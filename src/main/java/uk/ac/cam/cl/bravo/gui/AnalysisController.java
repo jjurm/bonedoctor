@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
@@ -135,6 +136,12 @@ public class AnalysisController {
     }
 
     public void showThirdExplorer(boolean bool) {
+        if (bool) {
+            grid.getColumnConstraints().get(0).setPercentWidth(30);
+            grid.getColumnConstraints().get(2).setPercentWidth(30);
+            grid.getColumnConstraints().get(4).setPercentWidth(30);
+        }
+
         addBox.setVisible(!bool);
         addBox.setManaged(!bool);
         linkBox2.setVisible(bool);
