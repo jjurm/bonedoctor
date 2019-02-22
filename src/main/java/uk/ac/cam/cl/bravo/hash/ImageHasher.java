@@ -5,9 +5,7 @@ import javafx.util.Pair;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -32,7 +30,7 @@ public class ImageHasher implements java.io.Serializable {
         int hamming;
         for (Pair<File, Long> p : simpleHash){
             if (p.getKey().getAbsolutePath().equals(f.getAbsolutePath())){
-                System.out.println("Self Awareness");
+                //System.out.println("Self Awareness");
                 continue;
             }
             imgHash = p.getValue();
@@ -235,8 +233,8 @@ public class ImageHasher implements java.io.Serializable {
                 }
                 thissquaredistance = Math.min(squaredistance, thissquaredistance);
 
-                System.out.println(match.getAbsolutePath());
-                System.out.println(thissquaredistance);
+                //System.out.println(match.getAbsolutePath());
+                //System.out.println(thissquaredistance);
 
                 if (thissquaredistance < minsquaredistance){
                     minsquaredistance = squaredistance;

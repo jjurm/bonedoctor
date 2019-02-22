@@ -9,6 +9,7 @@ import uk.ac.cam.cl.bravo.dataset.BoneCondition
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
 import uk.ac.cam.cl.bravo.overlay.*
+import uk.ac.cam.cl.bravo.pipeline.MainPipeline
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI
 import uk.ac.cam.cl.bravo.util.ImageTools
@@ -56,23 +57,13 @@ fun preprocessPipeline() {
 
 fun mainPipeline(inputFile: String, bodypart: Bodypart) {
     DisplayImage(inputFile, "Input")
-    val pipeline = MainPipeline(object : MainPipelineObserver {
-        override fun overallProgress(progress: Double) = println("Progress: $progress")
-        override fun statusUpdate(message: String) = println("Status: $message")
-        override fun reportBoneCondition(boneCondition: BoneCondition) = println("BoneCondition = $boneCondition")
-        override fun preprocessedUserImage(image: BufferedImage) {
-            DisplayImage(image, "Preprocessed user image")
-        }
 
-        override fun partialOverlay(matchedNormal: BufferedImage?, matchedAbnormal: BufferedImage?) =
-            println("Got partial overlay")
+    val pipeline = MainPipeline()
+    pipeline.status.subscribe(::println)
+    pipeline.preprocessed.subscribe { DisplayImage(it) }
+    pipeline.overlayed.subscribe { DisplayImage(it) }
 
-        override fun success(matchedNormal: BufferedImage?, matchedAbnormal: BufferedImage?) {
-            matchedNormal?.let { DisplayImage(it, "Matched NORMAL") }
-            matchedAbnormal?.let { DisplayImage(it, "Matched ABNORMAL") }
-        }
-    })
-    pipeline.submit(inputFile, bodypart)
+    pipeline.userInput.onNext(Pair(inputFile, bodypart))
 }
 
 /*fun loadDataset() {

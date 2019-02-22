@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from scipy.misc import imread
 from sklearn import cluster
 from sklearn.metrics import silhouette_score
+from sklearn.neighbors import kneighbors_graph
 
 import tensorflow as tf
 import keras as K
@@ -187,7 +188,6 @@ def predict_and_eval(image_features,
     cluster_model = cluster.KMeans(n_clusters=num_clusters)
     pred = cluster_model.fit_predict(image_features)
 
-
     print("INFO: Silhouette Score ({} clusters): {}".format(
         num_clusters, silhouette_score(image_features, pred)))
 
@@ -233,7 +233,7 @@ def vis_images(label_to_image_filenames_dict, num_images_to_show=64):
     # Decide number of imgs to be multiples of 8
     # otherwise, truncate to nearest multiple.
     if (num_images_to_show % 8 != 0):
-        num_images_to_show = (num_images_to_show / 8) * 8
+        num_images_to_show = int((num_images_to_show / 8) * 8)
 
     # Visualise output of each label
     for label in label_to_image_filenames_dict:
@@ -246,15 +246,29 @@ def vis_images(label_to_image_filenames_dict, num_images_to_show=64):
         # Visualise them in a plot
         fig = plt.figure(figsize=(8,8))
         num_cols = 8
-        num_rows = num_images_to_show / 8
+        num_rows = int(num_images_to_show / 8)
 
-        for i in range(1, min(int(num_cols*num_rows)+1, len(images))):
-            fig.add_subplot(num_rows, num_cols, i)
-            plt.imshow(images[i-1])
+        for i in range(num_cols*num_rows):
+            fig.add_subplot(num_rows, num_cols, i+1)
+            plt.imshow(images[i], cmap='gray')
             plt.axis('off')
 
         plt.axis('off')
         plt.show()
+
+
+
+def convert_to_java_readable_format(feat_file, output_dir):
+    # Load pickle object
+    with open(feat_file, 'rb') as file:
+        features = pkl.load(file)
+
+    # Write by label major
+    for label in features:
+        file_to_write = os.path.join(output_dir, "mean_features_label_{}.txt".format(label))
+        with open(file_to_write, 'w') as file:
+            for k in features[label]:
+                file.write(str(k) + "\n")
 
 
 if __name__ == "__main__":
@@ -316,6 +330,9 @@ if __name__ == "__main__":
                                                             output_names_file=LABELS_TO_IMAGE_FILENAMES_FILE,
                                                             output_feats_file=LABELS_TO_IMAGE_MEAN_FEAT_FILE)
 
+    # Convert required data into java readable format
+    convert_to_java_readable_format(feat_file=LABELS_TO_IMAGE_MEAN_FEAT_FILE, output_dir=OUTPUT_JSON_DIR)
+
     # Perform visualisation
     if FLAGS.visualise:
-        vis_images(labels_to_image_filenames_dict)
+        vis_images(labels_to_image_filenames_dict, num_images_to_show=64)

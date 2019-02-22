@@ -1,11 +1,9 @@
 import tensorflow as tf
 from tensorflow.python.framework import graph_util
-from keras.applications.inception_v3 import InceptionV3
 from keras import backend as K
 from keras.applications.densenet import DenseNet169
 from keras.layers import Dense, Flatten
 from keras.models import Sequential
-import numpy
 
 
 def freeze_model(sess, model, output_dir, output_filename):
@@ -18,8 +16,11 @@ def freeze_model(sess, model, output_dir, output_filename):
     # Extract graph from the session
     graph = sess.graph
 
-    # Obtain the output nodes from the model
+    # Obtain the input and output nodes from the model
     output_node_names = [out.op.name for out in model.outputs]
+    input_node_names = [input.op.name for input in model.inputs]
+    print(output_node_names) # ['dense_1/Sigmoid']
+    print(input_node_names) # ['densenet169_input']
 
     # Obtain all variables to be frozen into constants.
     with graph.as_default():
@@ -43,7 +44,6 @@ def freeze_model(sess, model, output_dir, output_filename):
                              name=output_filename,
                              as_text=False)
 
-        print(output_node_names)
 
 densenet = DenseNet169(include_top=False, weights=None, input_tensor=None, input_shape=(320,320,3), pooling=None, classes=False)
 model = Sequential()

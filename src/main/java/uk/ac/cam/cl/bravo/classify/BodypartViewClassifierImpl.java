@@ -1,5 +1,7 @@
 package uk.ac.cam.cl.bravo.classify;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import org.jetbrains.annotations.NotNull;
 import org.tensorflow.*;
 import uk.ac.cam.cl.bravo.dataset.Bodypart;
@@ -7,20 +9,92 @@ import uk.ac.cam.cl.bravo.dataset.BodypartView;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.stream.Stream;
-
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BodypartViewClassifierImpl implements BodypartViewClassifier {
+    private Map<Bodypart, Map<Integer, List<String>>> bodyPartToLabelToFilenamesMap = new HashMap<>();
+    private Map<Bodypart, Map<Integer, float[]>> bodyPartToLabelToMeanFeaturesMap = new HashMap<>();
+    private String outputDir = "python/view_clustering/output/"; // Location where the python mean features are stored
+    private String graphDefFilename = "python/view_clustering/InceptionV3.pb"; // Graph def file for inference
+
+    // Input and output node names based on python nodes inspection.
+    private final String inputNodeName = "input_1";
+    private final String outputNodeName = "mixed10/concat";
+
     @NotNull
     @Override
     public BodypartView classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart) {
-        return null;
+        // First load the results into the hashmaps if haven't already
+        if (bodyPartToLabelToMeanFeaturesMap.get(bodypart) == null && bodyPartToLabelToFilenamesMap.get(bodypart) == null){
+            decodeBodyPartFolder(bodypart, outputDir);
+        }
+
+        // Convert image to byte array for inference
+        byte[] imageBytes = bufferedImageToByteArray(image);
+        // Preprocess image first to get float tensor of shape [1, 299, 299, 3]
+        Tensor<Float> preprocessedImage = executePreprocessingGraph(imageBytes);
+
+        // Build the graph definition for use
+        byte[] graphDef = readBytesFromFile(graphDefFilename);
+
+        // Obtained flattened array as output
+        float[] outputArray = executeInferenceGraph(graphDef, preprocessedImage, inputNodeName, outputNodeName);
+
+        // Obtain the right hashmaps for this bodypart for comparison
+        Map<Integer, List<String>> labelToFilenamesMap = bodyPartToLabelToFilenamesMap.get(bodypart);
+        Map<Integer, float[]> labelToMeanFeaturesMap = bodyPartToLabelToMeanFeaturesMap.get(bodypart);
+
+        // Compute L2 distance with benchmark
+        int topLabel = 0;
+        double minL2Distance = Float.MAX_VALUE;
+        for (Integer label : labelToMeanFeaturesMap.keySet()){
+            float[] meanFeatures = labelToMeanFeaturesMap.get(label);
+            double currDistance = computeL2Distance(outputArray, meanFeatures);
+
+            // Update the top label
+            if (currDistance < minL2Distance){
+                topLabel = label;
+                minL2Distance = currDistance;
+            }
+        }
+
+        return new BodypartView(bodypart, topLabel);
     }
+
+    /**
+     * Given the body part view,
+      * @param bodypartview
+     * @return ret A list of string representing the image filenames from the same cluster of the
+     */
+    public List<String> getClusterFiles(BodypartView bodypartview){
+        List<String> ret = bodyPartToLabelToFilenamesMap.get(bodypartview.getBodypart()).get(bodypartview.getValue());
+
+        return ret;
+    }
+
+
+    /**
+     * Function to compute the euclidean distance between two float arrays, for finding to which centroid the current
+     * image belongs to
+     * @param inputFeatures features from the extracted image that was given by user
+     * @param meanFeatures the mean features of the images in the cluster
+     * @return ret L2 distance between the two features
+     */
+    private double computeL2Distance(float[] inputFeatures, float[] meanFeatures){
+        double ret = 0.0;
+
+        for (int i=0; i<inputFeatures.length; i++){
+            ret += Math.pow((inputFeatures[i] - meanFeatures[i]), 2.0);
+        }
+
+        return ret;
+    }
+
 
     /**
      *
@@ -32,7 +106,6 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
      * @param b     Graph builder to add on more nodes to the graph
      * @return preprocessedInput    output from image preprocessing graph ready for inference.
      */
-
     private Output<Float> preprocessImage(Output<String> input, int H, int W, float mean, float scale, GraphBuilder b){
         // Decode input as jpeg and cast as float
         Output<Float> preprocessedInput = b.cast(b.decodeJpeg(input, 3), Float.class);
@@ -50,6 +123,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         return preprocessedInput;
 
     }
+
 
     /**
      * Build graph to preprocess and normalize image before feeding
@@ -71,9 +145,6 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
             final float mean = 117f;
             final float scale = 1f;
 
-            // TODO: Check if need to use placeholder for input or could build graph consecutively.
-//            final Output<Float> input = b.placeholder("input", DataType.STRING);
-
             // Setup input and output nodes
             final Output<String> input = b.constant("input", imageBytes);
             final Output<Float> output = preprocessImage(input, H, W, mean, scale, b);
@@ -87,16 +158,14 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     }
 
 
-    private static byte[] readBytesFromFile(String filename){
-        try{
-            return Files.readAllBytes(new File(filename).toPath());
-        }catch (IOException e){
-            System.err.println("Cannot find [" + filename + "]: " + e.getMessage());
-            System.exit(1);
-        }
-        return null;
-    }
-
+    /**
+     * Performs the inference on one image and obtain a flattened array output for L2 distance comparison
+     * @param graphDef protobuf file converted to byte array
+     * @param image image tensor to be fed into the network
+     * @param inputNodeName the input node name for the graph, must be known beforehand via node inspection
+     * @param outputNodeName the output node name for the graph, must be known beforehand via node inspection
+     * @return flattenedArray the array that was reshaped from output feature of shape [1, 8, 8, 2048].
+     */
     private float[] executeInferenceGraph(byte[] graphDef,
                                           Tensor<Float> image,
                                           String inputNodeName,
@@ -122,6 +191,12 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         }
     }
 
+
+    /**
+     * Method to flattened the multidimensional array output from graph inference, for computing L2 distance later.
+     * @param retArray
+     * @return ret The flattened output array of 1 dimension.
+     */
     private float[] flattenArray(float[][][][] retArray){
         // Build output array
         float[] ret = new float[(int) (retArray.length
@@ -130,7 +205,6 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
                                         * retArray[0][0][0].length)];
 
         // Start flattening it
-        // TODO: check mathematics.
         for (int i=0; i<retArray.length; i++){
             for (int j=0; j<retArray[0].length; j++){
                 for (int k=0; k<retArray[0][0].length; k++){
@@ -150,22 +224,135 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         return ret;
     }
 
-    public static void main(String[] args){
-//        // Test with one image
-//        String imageFilename = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1/image_by_class/XR_HUMERUS/train_XR_HUMERUS_patient03225_study1_negative_image2.png";
-//        byte[] imageBytes = readBytesFromFile(imageFilename);
+
+    /**
+     * Method to help decode the features name file from the python ETL process, based on a certain body part.
+     * @param featuresNamesFilename
+     * @return ret The decoded JSON data that goes to a Map.
+     */
+    private Map<Integer, List<String>> decodeFeaturesNamesFile(String featuresNamesFilename){
+        try {
+            JsonReader reader = new JsonReader(new FileReader(featuresNamesFilename));
+            Map<String, List<String>> data = new Gson().fromJson(reader, Map.class);
+
+            // Convert key to integers instead
+            Map<Integer, List<String>> ret = new HashMap<>();
+
+            for (String key : data.keySet()){
+                ret.put(Integer.valueOf(key), data.get(key));
+            }
+
+            return ret;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Method to decode the mean features for one cluster from the python ETL process, based on a certain body part.
+     * @param meanFeaturesFilename
+     * @return contentFloatArray A float array representing the mean features for one cluster.
+     */
+    private float[] decodeMeanFeaturesFile(String meanFeaturesFilename){
+        try {
+            // Obtain the txt file contents and read all lines.
+            String content = new String(Files.readAllBytes(Paths.get(meanFeaturesFilename)));
+            String[] contentValues = content.split("\n");
+
+            // Convert content values to float to return
+            float[] contentFloatArray = new float[contentValues.length];
+
+            for (int i=0; i<contentValues.length; i++){
+                contentFloatArray[i] = Float.valueOf(contentValues[i]);
+            }
+
+            return contentFloatArray;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Method to decode one entire body part folder for filling up the stored hash maps.
+     * @param bodypart The specific body part to be queried
+     * @param outputDir The specific output directory we need to refer to
+     */
+    private void decodeBodyPartFolder(Bodypart bodypart, String outputDir){
+        // Append XR_ to bodypart to account for dataset and impl differences
+        String bodyPartString = "XR_" + bodypart;
+
+        // Obtain array of files in the bodypart folder
+        File[] filesArray = new File((outputDir + bodyPartString + "/label_to_image_filenames")).listFiles();
+
+        for (File file : filesArray){
+            // Decode mean features, process only label files containing mean features
+            String filename = file.getName();
+            if (filename.startsWith("mean_features_label")){
+                // Get the label ids
+                int label = Integer.valueOf(filename.substring(filename.length()-5, filename.length()-4));
+
+                // Decode mean features
+                float[] meanFeatures = decodeMeanFeaturesFile(file.toString());
+
+                // Add it to required hashmap
+                Map<Integer, float[]> toPut = new HashMap<>();
+                toPut.put(label, meanFeatures);
+                bodyPartToLabelToMeanFeaturesMap.put(bodypart, toPut);
+            }
+
+            // Decode features filenames
+            else if (filename.startsWith("labels_to_image_filenames")){
+                Map<Integer, List<String>> labelToImageFilenamesMap = decodeFeaturesNamesFile(file.toString());
+
+                // Add it to required hashmap
+                bodyPartToLabelToFilenamesMap.put(bodypart, labelToImageFilenamesMap);
+
+            }
+        }
+    }
+
+
+    private static byte[] bufferedImageToByteArray(BufferedImage image){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "jpg", baos);
+
+            byte[] bytes = baos.toByteArray();
+
+            return bytes;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    private static byte[] readBytesFromFile(String filename){
+        try{
+            return Files.readAllBytes(new File(filename).toPath());
+        }catch (IOException e){
+            System.err.println("Cannot find [" + filename + "]: " + e.getMessage());
+            System.exit(1);
+        }
+        return null;
+    }
+
+
+    public static void main(String[] args) throws IOException {
+//        // Test
 //        BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
-//
-//        Tensor<Float> preprocessedImage = classifier.executePreprocessingGraph(imageBytes);
-//        System.out.println(preprocessedImage); // gives float tensor of shape [1, 299, 299, 3]
-//
-//        // Inference with PB file
-//        String graphDefFilename = "/home/kwotsin/Desktop/group_project/java/bonedoctor/python/view_clustering/InceptionV3.pb";
-//        byte[] graphDef = readBytesFromFile(graphDefFilename);
-//        String inputNodeName = "input_1"; // based on python nodes inspection
-//        String outputNodeName = "mixed10/concat"; // based on python nodes inspection.
-//
-//        classifier.executeInferenceGraph(graphDef, preprocessedImage, inputNodeName, outputNodeName);
+//        String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HUMERUS/patient03225/study1_negative/image1.png";
+//        BufferedImage image = ImageIO.read(new File(testImage));
+//        BodypartView result = classifier.classify(image, Bodypart.HUMERUS);
+//        System.out.println(result.getValue());
+//        System.out.println(result.getBodypart());
     }
 
 }
