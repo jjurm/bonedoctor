@@ -93,7 +93,8 @@ public class AnalysisController {
 
             // Child controller actions
             imageExplorerController.setImage(imgFile);
-            pipelineObserver.addImageExplorerController(imageExplorerController);
+            imageExplorerController.setAnalysisController(this);
+        pipelineObserver.addImageExplorerController(imageExplorerController);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -116,6 +117,7 @@ public class AnalysisController {
 
             // Child controller actions
             imageExplorerController.setImage(imgFile);
+            imageExplorerController.setAnalysisController(this);
             pipelineObserver.addImageExplorerController(imageExplorerController);
         } catch (IOException e) {
             e.printStackTrace();
@@ -139,6 +141,7 @@ public class AnalysisController {
 
             // Child controller actions
             imageExplorerController.setImage(imgFile);
+            imageExplorerController.setAnalysisController(this);
             pipelineObserver.addImageExplorerController(imageExplorerController);
         } catch (IOException e) {
             e.printStackTrace();

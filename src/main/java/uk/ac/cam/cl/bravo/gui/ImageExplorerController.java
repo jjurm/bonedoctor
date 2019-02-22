@@ -1,9 +1,6 @@
 package uk.ac.cam.cl.bravo.gui;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
@@ -20,6 +17,7 @@ public class ImageExplorerController {
     private static final int MIN_PIXELS = 10;
     private final Stage stage;
     private PipelineObserver pipelineObserver;
+    private AnalysisController analysisController;
 
     double width;
     double height;
@@ -104,8 +102,10 @@ public class ImageExplorerController {
 
         GridPane.setVgrow(container, Priority.ALWAYS);
         GridPane.setHgrow(container, Priority.ALWAYS);
-        imageView.fitWidthProperty().bind(container.widthProperty());
-        imageView.fitHeightProperty().bind(container.heightProperty());
+        ReadOnlyDoubleProperty gridWidth = ((GridPane) container.getParent()).widthProperty();
+        ReadOnlyDoubleProperty gridHeight = ((GridPane) container.getParent()).heightProperty();
+        imageView.fitWidthProperty().bind(gridWidth);
+        imageView.fitHeightProperty().bind(gridHeight);
 
         System.out.println("Height:" + container.heightProperty());
         System.out.println("Width:" + container.widthProperty());
@@ -152,6 +152,10 @@ public class ImageExplorerController {
         return new Point2D(
                 viewport.getMinX() + xProportion * viewport.getWidth(),
                 viewport.getMinY() + yProportion * viewport.getHeight());
+    }
+
+    public void setAnalysisController(AnalysisController analysisController){
+        this.analysisController = analysisController;
     }
 
 }
