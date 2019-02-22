@@ -2,11 +2,8 @@ package uk.ac.cam.cl.bravo.gui;
 
 import javafx.beans.property.*;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.geometry.HPos;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
-import javafx.geometry.VPos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
