@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.BodypartView;
 import uk.ac.cam.cl.bravo.dataset.BoneCondition;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
+import uk.ac.cam.cl.bravo.pipeline.Rated;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -16,7 +17,7 @@ public interface ImageMatcher {
      * This method can make use of the Dataset class.
      */
     @NotNull
-    List<ImageSample> findMatchingImage(
+    List<Rated<ImageSample>> findMatchingImage(
             @NotNull BufferedImage image,
             @NotNull BoneCondition boneCondition,
             @NotNull BodypartView bodypartView,

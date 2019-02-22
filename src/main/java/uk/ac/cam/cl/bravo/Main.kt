@@ -60,8 +60,8 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
 
     val pipeline = MainPipeline()
     pipeline.status.subscribe(::println)
-    pipeline.preprocessed.subscribe { DisplayImage(it) }
-    pipeline.overlayed.subscribe { DisplayImage(it) }
+    pipeline.preprocessed.subscribe { DisplayImage(it.value, "Confidence: ${it.confidence}") }
+    pipeline.overlayed.subscribe { DisplayImage(it.value, "Score: ${it.score}") }
 
     pipeline.userInput.onNext(Pair(inputFile, bodypart))
 }

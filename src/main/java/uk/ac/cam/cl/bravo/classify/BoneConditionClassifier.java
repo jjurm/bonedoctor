@@ -2,6 +2,7 @@ package uk.ac.cam.cl.bravo.classify;
 
 import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.BoneCondition;
+import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
 import java.awt.image.BufferedImage;
 
@@ -10,5 +11,5 @@ import java.awt.image.BufferedImage;
  */
 public interface BoneConditionClassifier {
     @NotNull
-    BoneCondition classify(@NotNull BufferedImage image);
+    Uncertain<BoneCondition> classify(@NotNull BufferedImage image);
 }

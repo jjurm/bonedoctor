@@ -3,6 +3,7 @@ package uk.ac.cam.cl.bravo.classify;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.Bodypart;
 import uk.ac.cam.cl.bravo.dataset.BodypartView;
+import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
 import java.awt.image.BufferedImage;
 
@@ -11,5 +12,5 @@ import java.awt.image.BufferedImage;
  */
 public interface BodypartViewClassifier {
     @NotNull
-    BodypartView classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart);
+    Uncertain<BodypartView> classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart);
 }

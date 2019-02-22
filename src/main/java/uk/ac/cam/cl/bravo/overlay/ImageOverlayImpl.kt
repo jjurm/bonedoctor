@@ -7,6 +7,7 @@ import org.apache.commons.math3.optim.SimpleBounds
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer
+import uk.ac.cam.cl.bravo.pipeline.Rated
 import uk.ac.cam.cl.bravo.util.ImageTools
 import uk.ac.cam.cl.bravo.util.div
 import java.awt.Point
@@ -16,11 +17,11 @@ class ImageOverlayImpl(
     private val transformers: Array<Transformer>,
     private val f: OverlayFunction,
     private val bigPlaneSize: Point,
-    private val downsample: Double = 1.0,
-    private val precision: Double = 1e-4
+    var downsample: Double = 1.0,
+    var precision: Double = 1e-4
 ) : ImageOverlay {
 
-    private val smallPlaneSize = bigPlaneSize / downsample
+    private val smallPlaneSize get() = bigPlaneSize / downsample
     private val parameterCount = transformers.map { it.parameterCount }.sum()
     private val initialGuess = InitialGuess(transformers.map { it.initialGuess }.flatten().toDoubleArray())
     private val bounds = SimpleBounds(
@@ -87,9 +88,11 @@ class ImageOverlayImpl(
         return transformers.transformAll(inPlane, parameters, bigPlaneSize)
     }
 
-    override fun fitImage(base: BufferedImage, sample: BufferedImage): BufferedImage {
+    override fun fitImage(base: BufferedImage, sample: BufferedImage): Rated<BufferedImage> {
         val bestOverlay = findBestOverlay(base, sample)
-        return applyTransformations(sample, bestOverlay.point)
+        val transformed = applyTransformations(sample, bestOverlay.point)
+        val score = bestOverlay.value
+        return Rated(transformed, score)
     }
 
     override fun normalise(image: BufferedImage): BufferedImage {
