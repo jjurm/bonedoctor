@@ -35,7 +35,7 @@ fun main(args: Array<String>) {
     mainPipeline(imageSample.path, imageSample.bodypart)
 }
 
-fun preprocessPipeline() {
+/*fun preprocessPipeline() {
     val dataset = Dataset()
 
 //    val imagePreprocessor: ImagePreprocessor = ImagePreprocessorI()
@@ -53,7 +53,7 @@ fun preprocessPipeline() {
         val newPath = sample.path.removeSuffix(".png") + "_edit.png"
 //        ImageIO.write(image, "png", File(newPath))
     }
-}
+}*/
 
 fun mainPipeline(inputFile: String, bodypart: Bodypart) {
     DisplayImage(inputFile, "Input")

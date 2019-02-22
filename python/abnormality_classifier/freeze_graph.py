@@ -50,7 +50,7 @@ model = Sequential()
 model.add(densenet)
 model.add(Flatten())
 model.add(Dense(1, activation='sigmoid'))
-model.load_weights('weights-01-1.00.hdf5')
+model.load_weights('weights-02-0.52.hdf5')
 
 frozen_graph = freeze_model(
     sess=K.get_session(),
