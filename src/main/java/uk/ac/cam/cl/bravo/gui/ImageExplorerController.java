@@ -6,14 +6,13 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.HPos;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.control.ScrollPane;
+import javafx.geometry.VPos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class ImageExplorerController {
@@ -103,11 +102,14 @@ public class ImageExplorerController {
             }
         });
 
-        container.setPrefSize(800, 600);
+        GridPane.setVgrow(container, Priority.ALWAYS);
+        GridPane.setHgrow(container, Priority.ALWAYS);
         imageView.fitWidthProperty().bind(container.widthProperty());
-        System.out.println("Explorer: " + container.heightProperty());
         imageView.fitHeightProperty().bind(container.heightProperty());
-        VBox.setVgrow(container, Priority.ALWAYS);
+
+        System.out.println("Height:" + container.heightProperty());
+        System.out.println("Width:" + container.widthProperty());
+
     }
 
 

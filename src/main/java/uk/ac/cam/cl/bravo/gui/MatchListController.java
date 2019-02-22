@@ -55,8 +55,11 @@ public class MatchListController {
             @Override
             public void updateItem(String name, boolean empty) {
                 super.updateItem(name, empty);
-                matchView.fitHeightProperty().bind(matches.heightProperty());
-                System.out.println("Matches: " + matches.heightProperty());
+
+                matchView.setFitHeight(180);
+                matchView.setFitWidth(180);
+                matchView.setPreserveRatio(true);
+
                 if (empty) {
                     setText(null);
                     setGraphic(null);
@@ -78,7 +81,7 @@ public class MatchListController {
             }
 
             int index = matches.getSelectionModel().getSelectedIndex();
-            analysisController.setMatchImage(imgList.get(index));
+            analysisController.setPane2Image(imgList.get(index));
 
         });
 
@@ -87,6 +90,10 @@ public class MatchListController {
 
     public void setAnalysisController(AnalysisController analysisController) {
         this.analysisController = analysisController;
+    }
+
+    public ListView getMatches() {
+        return this.matches;
     }
     
 }

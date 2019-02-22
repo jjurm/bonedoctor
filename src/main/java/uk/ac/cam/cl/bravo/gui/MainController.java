@@ -20,6 +20,8 @@ public class MainController {
     private AnalysisController analysisController;
     private PipelineObserver pipelineObserver;
     private Stage stage;
+    private Image bestMatchNormal;
+    private Image bestMatchAbnormal;
 
     @FXML
     AnchorPane container;
@@ -46,10 +48,13 @@ public class MainController {
             container.getChildren().add(0, analysisFXML);
 
             // Child controller actions
-            analysisController.setUserImage(img);
+            analysisController.setPane1Image(img);
 
-            Image match = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
-            analysisController.setMatchImage(match);
+            bestMatchAbnormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
+            bestMatchNormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
+            analysisController.setPane2Image(bestMatchAbnormal);
+            analysisController.setPane3Image(bestMatchNormal);
+            analysisController.showThirdExplorer(false);
 
             analysisController.launch();
             pipelineObserver.addAnalysisController(analysisController);
@@ -81,12 +86,12 @@ public class MainController {
         }
     }
 
-    public void setStage(Stage newStage) {
-        stage = newStage;
+    public Image getBestMatchNormal() {
+        return bestMatchNormal;
     }
 
-    public void setPipelineObserver(PipelineObserver obs) {
-        pipelineObserver = obs;
+    public Image getBestMatchAbnormal() {
+        return bestMatchAbnormal;
     }
 
     public void launch() {

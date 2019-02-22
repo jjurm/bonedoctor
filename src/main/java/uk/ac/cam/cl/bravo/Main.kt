@@ -38,20 +38,20 @@ fun main(args: Array<String>) {
 fun preprocessPipeline() {
     val dataset = Dataset()
 
-    val imagePreprocessor: ImagePreprocessor = ImagePreprocessorI()
+//    val imagePreprocessor: ImagePreprocessor = ImagePreprocessorI()
     val bodypartViewClassifierImpl: BodypartViewClassifier = BodypartViewClassifierImpl()
 
     listOf(dataset.training, dataset.validation).map { it.values }.flatten().forEach { sample ->
         //var image = sample.loadImage()
 
         // preprocessing
-        val image = imagePreprocessor.preprocess(sample.path)
+//        val image = imagePreprocessor.preprocess(sample.path)
 
         // classify view
-        val view = bodypartViewClassifierImpl.classify(image, sample.bodypart)
+//        val view = bodypartViewClassifierImpl.classify(image, sample.bodypart)
 
         val newPath = sample.path.removeSuffix(".png") + "_edit.png"
-        ImageIO.write(image, "png", File(newPath))
+//        ImageIO.write(image, "png", File(newPath))
     }
 }
 

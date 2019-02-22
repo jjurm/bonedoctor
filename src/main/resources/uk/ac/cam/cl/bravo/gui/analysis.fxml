@@ -1,12 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 
-<VBox fx:id="topBottom" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
-    <children>
-      <HBox fx:id="imgExplorers" prefHeight="622.0" prefWidth="248.0" />
-        <ListView fx:id="matches" orientation="HORIZONTAL" prefHeight="403.0" prefWidth="248.0" />
-    </children>
-</VBox>
+<GridPane fx:id="grid" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" percentWidth="45" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="40.0" percentWidth="5" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" percentWidth="45" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="40.0" percentWidth="5" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
+    <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
+      <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
+  </rowConstraints>
+   <children>
+      <GridPane fx:id="pane1" prefHeight="279.0" prefWidth="270.0" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.vgrow="ALWAYS">
+         <children>
+            <ComboBox promptText="- Select View -" />
+         </children>
+         <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+         </rowConstraints>
+      </GridPane>
+      <GridPane fx:id="linkBox1" prefWidth="30.0" GridPane.columnIndex="1" GridPane.rowSpan="2">
+         <children>
+            <Button alignment="CENTER" ellipsisString="Link" mnemonicParsing="false" prefHeight="27.0" prefWidth="30.0" text="Button" textAlignment="CENTER" />
+         </children>
+         <columnConstraints>
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+         </rowConstraints>
+      </GridPane>
+      <GridPane fx:id="pane2" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.vgrow="ALWAYS">
+         <children>
+            <ComboBox promptText="- Select View -" />
+         </children>
+         <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+         </rowConstraints>
+      </GridPane>
+      <GridPane fx:id="addBox" prefWidth="30.0" GridPane.columnIndex="3" GridPane.rowSpan="2">
+         <children>
+            <Button mnemonicParsing="false" onAction="#handleAddExplorerButtonAction" text="Add explorer" />
+         </children>
+         <columnConstraints>
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+         </rowConstraints>
+      </GridPane>
+      <GridPane fx:id="linkBox2" prefWidth="30.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2">
+         <children>
+            <Button alignment="CENTER" ellipsisString="Link" mnemonicParsing="false" prefWidth="30.0" text="Button" textAlignment="CENTER" />
+         </children>
+         <columnConstraints>
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+         </rowConstraints>
+      </GridPane>
+      <GridPane fx:id="pane3" GridPane.columnIndex="4" GridPane.rowSpan="2">
+         <children>
+            <ComboBox promptText="- Select View -" />
+         </children>
+         <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+         </rowConstraints>
+      </GridPane>
+   </children>
+</GridPane>
