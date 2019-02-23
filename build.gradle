@@ -70,7 +70,7 @@ javafx {
     version = "11.0.2"
 }
 
-mainClassName = "uk.ac.cam.cl.bravo.MainKt"
+mainClassName = "uk.ac.cam.cl.bravo.gui.Main"
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
