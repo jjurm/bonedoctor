@@ -16,12 +16,9 @@ import java.awt.image.BufferedImage
 class ImageOverlayImpl(
     private val transformers: Array<Transformer>,
     private val f: OverlayFunction,
-    private val bigPlaneSize: Point,
-    var downsample: Double = 1.0,
-    var precision: Double = 1e-4
+    private val bigPlaneSize: Point
 ) : ImageOverlay {
 
-    private val smallPlaneSize get() = bigPlaneSize / downsample
     private val parameterCount = transformers.map { it.parameterCount }.sum()
     private val initialGuess = InitialGuess(transformers.map { it.initialGuess }.flatten().toDoubleArray())
     private val bounds = SimpleBounds(
@@ -55,7 +52,9 @@ class ImageOverlayImpl(
         return accParams
     }
 
-    fun findBestOverlay(base: BufferedImage, sample: BufferedImage): PointValuePair {
+    fun findBestOverlay(base: BufferedImage, sample: BufferedImage, downsample: Double, precision: Double): PointValuePair {
+        val smallPlaneSize = bigPlaneSize / downsample
+
         val optimizer = BOBYQAOptimizer(
             parameterCount * 2 + 1,
             0.3,
@@ -88,8 +87,8 @@ class ImageOverlayImpl(
         return transformers.transformAll(inPlane, parameters, bigPlaneSize)
     }
 
-    override fun fitImage(base: BufferedImage, sample: BufferedImage): Rated<BufferedImage> {
-        val bestOverlay = findBestOverlay(base, sample)
+    override fun fitImage(base: BufferedImage, sample: BufferedImage, downsample: Double, precision: Double): Rated<BufferedImage> {
+        val bestOverlay = findBestOverlay(base, sample, downsample, precision)
         val transformed = applyTransformations(sample, bestOverlay.point)
         val score = bestOverlay.value
         return Rated(transformed, score)

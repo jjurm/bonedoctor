@@ -31,8 +31,8 @@ fun main(args: Array<String>) {
 
     val dataset = Dataset()
     val imageSample = dataset.training.values
-        .filter { it.bodypart == Bodypart.HAND && it.patient == 9734 }.first()
-    mainPipeline(imageSample.path, imageSample.bodypart)
+        .filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 9734 }.first()
+    mainPipeline(imageSample.path, imageSample.bodypartView.bodypart)
 }
 
 /*fun preprocessPipeline() {
@@ -100,15 +100,13 @@ fun tryOverlay(file1: String, file2: String) {
         PixelSimilarity(
             ignoreBorderWidth = 0.25
         ) + ParameterPenaltyFunction() * 0.05,
-        bigPlaneSize = PLANE_SIZE,
-        downsample = downsample,
-        precision = 1e-5
+        bigPlaneSize = PLANE_SIZE
     )
 
     println("Fitting images...")
     val sw = StopWatch()
     sw.start()
-    val result = overlay.findBestOverlay(base, sample)
+    val result = overlay.findBestOverlay(base, sample, downsample, 1e-5)
     sw.stop()
     val time = "${"%.1f".format(sw.time.toDouble() / 1000)}s"
     println("  $time")

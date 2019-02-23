@@ -14,6 +14,7 @@ import uk.ac.cam.cl.bravo.dataset.Bodypart
 import uk.ac.cam.cl.bravo.dataset.BodypartView
 import uk.ac.cam.cl.bravo.dataset.BoneCondition
 import uk.ac.cam.cl.bravo.dataset.ImageSample
+import uk.ac.cam.cl.bravo.hash.ImageHasher
 import uk.ac.cam.cl.bravo.hash.ImageMatcher
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
@@ -38,7 +39,7 @@ class MainPipeline {
     val precision: Subject<Double> = BehaviorSubject.createDefault(0.5)
 
     /** A pair of (input image, bodypart of the input image) */
-    val userInput: Subject<Pair<String, Bodypart>>
+    val userInput: Subject<Pair<String, Bodypart>> = BehaviorSubject.create()
 
     /**
      * An image to overlay the user image with.
@@ -107,18 +108,20 @@ class MainPipeline {
         PixelSimilarity(
             ignoreBorderWidth = 0.25
         ) + ParameterPenaltyFunction() * 0.05,
-        bigPlaneSize = PLANE_SIZE,
-        downsample = 1.0,
-        precision = 1e-5
+        bigPlaneSize = PLANE_SIZE
     )
 
     init {
+        // === Subjects ===
+
         // progress0 has type BehaviorSubject<Double> (so that we can call .onNext(...))
         // but the exposed 'progress' variable is just Observable
         val progress0 = BehaviorSubject.createDefault(0.0)
         progress = progress0
         val status0 = BehaviorSubject.createDefault("Program started")
         status = status0
+
+        // === Pipeline ===
 
         /** When 'this' observable emits a value, the given progress and status are reported to the UI. */
         fun <T> Observable<T>.doneMeans(progress: Double, status: String? = null) {
@@ -128,7 +131,13 @@ class MainPipeline {
             }
         }
 
-        userInput = BehaviorSubject.create()
+        // map [0.0, 1.0] to [3.0, 1.0]
+        val downsample = precision.map { x -> Math.pow(x - 1, 2.0) * 2 + 1 }
+        // map [0.0, 1.0] to [1e-3, 1e-5]
+        val overlayPrecision = precision.map { x ->
+            (Math.pow(10.0, -3 - 2 * x) + 1e-3 - x * (1e-3 - 1e-5)) / 2
+        }
+
         userInput.doneMeans(0.0, "Pre-processing the input x-ray")
 
         val path = userInput.map(Pair<String, *>::first)
@@ -163,7 +172,9 @@ class MainPipeline {
         overlayed = Observable.combineLatest(
             preprocessedVal,
             imageToOverlay.map(ImageSample::loadPreprocessedImage),
-            BiFunction(imageOverlay::fitImage)
+            downsample,
+            overlayPrecision,
+            Function4(imageOverlay::fitImage)
         )
         overlayed.doneMeans(0.8, "Highlighting differences")
 
