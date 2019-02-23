@@ -17,6 +17,7 @@ public interface ImageMatcher {
      * This method can make use of the Dataset class.
      */
     @NotNull
+    // TODO Juraj: consider changing bodypartView to Uncertain<BodypartView>, then allow searching other clusters too
     List<Rated<ImageSample>> findMatchingImage(
             @NotNull BufferedImage image,
             @NotNull BoneCondition boneCondition,
