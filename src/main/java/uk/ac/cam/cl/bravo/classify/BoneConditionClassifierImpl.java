@@ -6,6 +6,7 @@ import org.tensorflow.Output;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import uk.ac.cam.cl.bravo.dataset.BoneCondition;
+import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor;
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI;
 
@@ -21,8 +22,10 @@ import java.util.stream.Stream;
 public class BoneConditionClassifierImpl implements BoneConditionClassifier {
     @Override
     @NotNull
-    public BoneCondition classify(@NotNull BufferedImage image) {
-        return BoneCondition.NORMAL;
+    public Uncertain<BoneCondition> classify(@NotNull BufferedImage image) {
+        // TODO Leon: return classified BoneCondition
+        // TODO Leon: add confidence argument to the constructor below
+        return new Uncertain<>(BoneCondition.NORMAL);
     }
 
     private static BoneCondition classify(Path imagePath) {

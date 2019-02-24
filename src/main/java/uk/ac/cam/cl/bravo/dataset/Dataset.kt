@@ -49,6 +49,10 @@ class Dataset @Throws(IOException::class) constructor() {
         }.toMap()
     }
 
+    private fun getBodypartViewOf(path: String): BodypartView {
+        TODO()
+    }
+
     init {
         checkDatasetFolderExists()
         training = loadImageSamples(CSV_TRAIN_IMAGE_PATHS)

@@ -7,7 +7,7 @@ import javax.imageio.ImageIO
 class ImageSample(val path: String) {
 
     val patient = getPatient(path)
-    val bodypart = getBodypart(path)
+    val bodypartView = BodypartView(getBodypart(path), getBodypartViewIndex(path))
     val boneCondition = getBoneCondition(path)
 
     val preprocessedPath: String get() = Dataset.DIR_PREPROCESSED + path.removePrefix(Dataset.DIR)
@@ -31,6 +31,8 @@ class ImageSample(val path: String) {
         private fun getBoneCondition(path: String): BoneCondition =
             normalityRegex.find(path)?.groupValues?.getOrNull(1)?.let { BoneCondition.fromLabel(it) }
                 ?: throw IllegalArgumentException("Cannot determine normality of $path")
+
+        private fun getBodypartViewIndex(path: String): Int = TODO()
     }
 
 }

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.tensorflow.*;
 import uk.ac.cam.cl.bravo.dataset.Bodypart;
 import uk.ac.cam.cl.bravo.dataset.BodypartView;
+import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -28,7 +29,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
     @NotNull
     @Override
-    public BodypartView classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart) {
+    public Uncertain<BodypartView> classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart) {
         // First load the results into the hashmaps if haven't already
         if (bodyPartToLabelToMeanFeaturesMap.get(bodypart) == null && bodyPartToLabelToFilenamesMap.get(bodypart) == null){
             decodeBodyPartFolder(bodypart, outputDir);
@@ -63,7 +64,8 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
             }
         }
 
-        return new BodypartView(bodypart, topLabel);
+        // TODO Kwotsin: add confidence argument to the constructor below
+        return new Uncertain<>(new BodypartView(bodypart, topLabel));
     }
 
     /**
@@ -343,6 +345,23 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         }
         return null;
     }
+
+    /**
+     * Given a file mapping image filenames to each label, imbue the label information into every image filename
+     * @param imageFilenameToLabelFile
+     */
+    public static void buildBodyPartViews(String imageFilenameToLabelFile){
+
+    }
+
+    /**
+     * Get the specific body part view of an image filename, to be called in the Dataset API.
+     * @param imageFilename
+     * @return
+     */
+    public static BodypartView getBodypartViewOf(String imageFilename){
+            return null;
+        }
 
 
     public static void main(String[] args) throws IOException {

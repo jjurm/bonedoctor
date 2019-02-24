@@ -2,6 +2,8 @@ package uk.ac.cam.cl.bravo.preprocessing;
 
 import javafx.util.Pair;
 import org.jetbrains.annotations.NotNull;
+import uk.ac.cam.cl.bravo.pipeline.Uncertain;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +28,7 @@ public class ImagePreprocessorI implements ImagePreprocessor
 
     @NotNull
     @Override
-    public BufferedImage preprocess(@NotNull  String imageName){
+    public Uncertain<BufferedImage> preprocess(@NotNull  String imageName){
 
         observer.progressUpdate(0.0);
 
@@ -66,7 +68,8 @@ public class ImagePreprocessorI implements ImagePreprocessor
 
         observer.progressUpdate(1.0);
 
-        return outputFile;
+        // TODO Nicole: add confidence argument to the constructor below
+        return new Uncertain<>(outputFile);
 
     }
 
