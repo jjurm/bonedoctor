@@ -2,8 +2,6 @@ package uk.ac.cam.cl.bravo.gui;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
@@ -11,8 +9,6 @@ import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class MainController {
 
@@ -20,6 +16,7 @@ public class MainController {
     private AnalysisController analysisController;
     private PipelineObserver pipelineObserver;
     private Stage stage;
+    private Image inputImage;
     private Image bestMatchNormal;
     private Image bestMatchAbnormal;
 
@@ -49,10 +46,11 @@ public class MainController {
 
             // Child controller actions
             analysisController.setPane1Image(img);
-
+            analysisController.setMainController(this);
+            inputImage = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/bowtie.jpg"));
             bestMatchAbnormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
             bestMatchNormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
-            analysisController.setPane2Image(bestMatchAbnormal);
+            analysisController.setPane2Image(analysisController.pane2, bestMatchAbnormal);
             analysisController.setPane3Image(bestMatchNormal);
             analysisController.showThirdExplorer(false);
 
@@ -93,6 +91,9 @@ public class MainController {
     public Image getBestMatchAbnormal() {
         return bestMatchAbnormal;
     }
+
+    public Image getInputImage() {
+        return inputImage; }
 
     public void launch() {
 
