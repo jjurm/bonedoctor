@@ -72,7 +72,7 @@ public class MatchListController {
             }
 
             int index = matches.getSelectionModel().getSelectedIndex();
-            analysisController.setPane2Image(imgList.get(index));
+            analysisController.setPane2Image(analysisController.pane2, imgList.get(index));
 
         });
 

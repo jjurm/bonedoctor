@@ -1,12 +1,20 @@
 package uk.ac.cam.cl.bravo.gui;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -21,20 +29,33 @@ public class AnalysisController {
     private Stage stage;
     private PipelineObserver pipelineObserver;
 
+    private static String INPUT = "Input Image";
+    private static String NORMAL = "Best Match, Normal";
+    private static String ABNORMAL = "Best Match, Abormal";
+    private static String ABNORMAL_OVER = "Overlay, Abormal";
+    private static String NORMAL_OVER = "Overlay, Normal";
+
+
     @FXML
     private GridPane grid;
     @FXML
-    private GridPane pane1;
+    public GridPane pane1;
     @FXML
     private GridPane linkBox1;
     @FXML
-    private GridPane pane2;
+    public GridPane pane2;
     @FXML
     private GridPane linkBox2;
     @FXML
-    private GridPane pane3;
+    public GridPane pane3;
     @FXML
     private GridPane addBox;
+    @FXML
+    private ComboBox pane1choice;
+    @FXML
+    private ComboBox pane2choice;
+    @FXML
+    private ComboBox pane3choice;
 
     public AnalysisController(Stage stage, PipelineObserver pipelineObserver) {
         this.stage = stage;
@@ -51,7 +72,12 @@ public class AnalysisController {
 
             matchListController.getMatches().setPrefHeight(200);
 
+            ObservableList<String> items = FXCollections.observableArrayList(INPUT, NORMAL, ABNORMAL, NORMAL_OVER, ABNORMAL_OVER);
+
             grid.add(matchListFXML, 0, 2);
+            pane1choice.setItems(items);
+            pane2choice.setItems(items);
+            pane3choice.setItems(items);
 
             // Child controller actions
             matchListController.launch();
@@ -63,56 +89,8 @@ public class AnalysisController {
 
     }
 
-    //  CREATE SCROLLABLE IMAGE PANE USER INPUT
-    public void setPane1Image(Image imgFile) {
-        try {
-            // Initialize controller
-            FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
-            imageExplorerController = new ImageExplorerController(stage, pipelineObserver);
-            imageExplorerLoader.setController(imageExplorerController);
-            Parent imageExplorerFXML = imageExplorerLoader.load();
-
-            if (pane1.getChildren().size() > 1) {
-                pane1.getChildren().set(1, imageExplorerFXML);
-            } else {
-                pane1.add(imageExplorerFXML,0, 1 );
-            }
-
-            // Child controller actions
-            imageExplorerController.setImage(imgFile);
-            imageExplorerController.setAnalysisController(this);
-        pipelineObserver.addImageExplorerController(imageExplorerController);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    //  CREATE SCROLLABLE IMAGE PANE CLOSEST MATCH
-    public void setPane2Image(Image imgFile) {
-        try {
-            // Initialize controller
-            FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
-            imageExplorerController = new ImageExplorerController(stage, pipelineObserver);
-            imageExplorerLoader.setController(imageExplorerController);
-
-            Parent imageExplorerFXML = imageExplorerLoader.load();
-
-            if (pane2.getChildren().size() > 1) {
-                pane2.getChildren().set(1, imageExplorerFXML);
-            } else {
-                pane2.add(imageExplorerFXML,0, 1 );            }
-
-            // Child controller actions
-            imageExplorerController.setImage(imgFile);
-            imageExplorerController.setAnalysisController(this);
-            pipelineObserver.addImageExplorerController(imageExplorerController);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     //  CREATE SCROLLABLE IMAGE PANE
-    public void setPane3Image(Image imgFile) {
+    public void setPaneImage(GridPane pane, Image imgFile) {
         try {
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
@@ -120,10 +98,18 @@ public class AnalysisController {
             imageExplorerLoader.setController(imageExplorerController);
             Parent imageExplorerFXML = imageExplorerLoader.load();
 
-            if (pane3.getChildren().size() > 1) {
-                pane3.getChildren().set(1, imageExplorerFXML);
+            if (pane.getChildren().size() > 1) {
+                pane.getChildren().clear();
+                if (pane.getId().equals("pane1")) {
+                    pane.add(pane1choice, 0, 0);
+                } else if (pane.getId().equals("pane2")) {
+                    pane.add(pane2choice, 0, 0);
+                } else if (pane.getId().equals("pane3")) {
+                    pane.add(pane3choice, 0, 0);
+                }
+                pane.add(imageExplorerFXML, 0, 1);
             } else {
-                pane3.add(imageExplorerFXML,0, 1 );
+                pane.add(imageExplorerFXML, 0, 1);
             }
 
             // Child controller actions
@@ -156,4 +142,51 @@ public class AnalysisController {
         System.out.println("removing!!");
     }
 
+    @FXML
+    protected void handleSelectViewPane1(ActionEvent e) {
+        String choiceText = pane1choice.getSelectionModel().getSelectedItem().toString();
+        System.out.println(choiceText);
+        System.out.println(choiceText == INPUT);
+        if (choiceText == INPUT) {
+            setPaneImage(pane1, mainController.getInputImage());
+        } else if (choiceText == NORMAL) {
+            setPaneImage(pane1, mainController.getBestMatchNormal());
+        } else if (choiceText == ABNORMAL) {
+            setPaneImage(pane1, mainController.getBestMatchAbnormal());
+        } else {
+            return;
+        }
+    }
+
+    @FXML
+    protected void handleSelectViewPane2(ActionEvent e) {
+        String choiceText = pane2choice.getSelectionModel().getSelectedItem().toString();
+        if (choiceText == INPUT) {
+            setPaneImage(pane2, mainController.getInputImage());
+        } else if (choiceText == NORMAL) {
+            setPaneImage(pane2, mainController.getBestMatchNormal());
+        } else if (choiceText == ABNORMAL) {
+            setPaneImage(pane2, mainController.getBestMatchAbnormal());
+        } else {
+            return;
+        }
+    }
+
+    @FXML
+    protected void handleSelectViewPane3(ActionEvent e) {
+        String choiceText = pane3choice.getSelectionModel().getSelectedItem().toString();
+        if (choiceText == INPUT) {
+            setPaneImage(pane3, mainController.getInputImage());
+        } else if (choiceText == NORMAL) {
+            setPaneImage(pane3, mainController.getBestMatchNormal());
+        } else if (choiceText == ABNORMAL) {
+            setPaneImage(pane3, mainController.getBestMatchAbnormal());
+        } else {
+            return;
+        }
+    }
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 }

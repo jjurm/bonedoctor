@@ -155,4 +155,8 @@ public class ImageExplorerController {
         this.analysisController = analysisController;
     }
 
+    public Pane getContainer() {
+        return this.container;
+    }
+
 }

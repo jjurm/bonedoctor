@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
+<?import javafx.scene.text.TextFlow?>
 <GridPane fx:id="grid" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" percentWidth="45" />
@@ -22,7 +23,7 @@
    <children>
       <GridPane fx:id="pane1" prefHeight="279.0" prefWidth="270.0" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.vgrow="ALWAYS">
          <children>
-            <ComboBox promptText="- Select View -" />
+            <ComboBox fx:id="pane1choice" onAction="#handleSelectViewPane1" promptText="- Select View -" />
          </children>
          <columnConstraints>
             <ColumnConstraints hgrow="ALWAYS" />
@@ -45,7 +46,8 @@
       </GridPane>
       <GridPane fx:id="pane2" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.vgrow="ALWAYS">
          <children>
-            <ComboBox promptText="- Select View -" />
+            <ComboBox fx:id="pane2choice" onAction="#handleSelectViewPane2" promptText="- Select View -">
+            </ComboBox>
          </children>
          <columnConstraints>
             <ColumnConstraints hgrow="ALWAYS" />
@@ -68,7 +70,7 @@
       </GridPane>
       <GridPane fx:id="linkBox2" prefWidth="30.0" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2">
          <children>
-            <Button alignment="CENTER" ellipsisString="Link" mnemonicParsing="false" prefWidth="30.0" text="Button" textAlignment="CENTER" />
+            <Button alignment="CENTER" ellipsisString="Link" mnemonicParsing="false"  prefWidth="30.0" text="Button" textAlignment="CENTER" />
          </children>
          <columnConstraints>
             <ColumnConstraints />
@@ -79,7 +81,7 @@
       </GridPane>
       <GridPane fx:id="pane3" GridPane.columnIndex="4" GridPane.rowSpan="2">
          <children>
-            <ComboBox promptText="- Select View -" />
+            <ComboBox fx:id="pane3choice"  onAction="#handleSelectViewPane3"  promptText="- Select View -" />
          </children>
          <columnConstraints>
             <ColumnConstraints hgrow="ALWAYS" />

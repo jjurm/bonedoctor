@@ -16,6 +16,7 @@ public class MainController {
     private AnalysisController analysisController;
     private PipelineObserver pipelineObserver;
     private Stage stage;
+    private Image inputImage;
     private Image bestMatchNormal;
     private Image bestMatchAbnormal;
 
@@ -45,10 +46,11 @@ public class MainController {
 
             // Child controller actions
             analysisController.setPane1Image(img);
-
+            analysisController.setMainController(this);
+            inputImage = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/bowtie.jpg"));
             bestMatchAbnormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
             bestMatchNormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
-            analysisController.setPane2Image(bestMatchAbnormal);
+            analysisController.setPane2Image(analysisController.pane2, bestMatchAbnormal);
             analysisController.setPane3Image(bestMatchNormal);
             analysisController.showThirdExplorer(false);
 
@@ -89,6 +91,9 @@ public class MainController {
     public Image getBestMatchAbnormal() {
         return bestMatchAbnormal;
     }
+
+    public Image getInputImage() {
+        return inputImage; }
 
     public void launch() {
 
