@@ -32,10 +32,6 @@ def swap_keys(json_file):
 	with open(json_file, 'r') as file:
 		labels_to_image_filenames_dict = json.load(file)
 
-
-	print(len(labels_to_image_filenames_dict["0"]) + len(labels_to_image_filenames_dict["1"]))
-	print(json_file)
-
 	# Convert into relative paths and swap key and values
 	image_filename_to_label_dict = {}
 
