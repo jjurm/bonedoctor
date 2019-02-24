@@ -33,7 +33,18 @@ def swap_keys(json_file):
 		labels_to_image_filenames_dict = json.load(file)
 
 	# Convert into relative paths and swap key and values
-	image_filename_to_label_dict = dict([(filename.replace("_", "/"), k) for k, v in labels_to_image_filenames_dict.items() for filename in v])
+	image_filename_to_label_dict = {}
+
+	for label, image_filenames in labels_to_image_filenames_dict.items():
+		for filename in image_filenames:
+			filename = filename.replace("_", "/")
+
+			# Restore XR_ prefix to directory
+			filename_list = filename.split("XR")
+			filename_list[-1] = filename_list[-1][1:] # Remove extra slash
+			filename = "XR_".join(filename_list) # join back XR_prefix
+
+			image_filename_to_label_dict[filename] = label
 
 	# Output the file
 	output_file = os.path.join(OUTPUT_DIR, BODY_PART, "label_to_image_filenames/image_filename_to_label_dict.json")
@@ -46,7 +57,7 @@ if __name__ == "__main__":
 
 	for BODY_PART in os.listdir(OUTPUT_DIR):
 		print("Processing {} folder...".format(BODY_PART))
-		
+
 		# Perform the swapping of keys
 		json_file = os.path.join(OUTPUT_DIR, BODY_PART, "label_to_image_filenames/labels_to_image_filenames.json")
 		swap_keys(json_file)
