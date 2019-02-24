@@ -45,13 +45,13 @@ public class MainController {
             container.getChildren().add(0, analysisFXML);
 
             // Child controller actions
-            analysisController.setPane1Image(img);
+            analysisController.setPaneImage(analysisController.pane1, img);
             analysisController.setMainController(this);
             inputImage = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/bowtie.jpg"));
             bestMatchAbnormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
             bestMatchNormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
-            analysisController.setPane2Image(analysisController.pane2, bestMatchAbnormal);
-            analysisController.setPane3Image(bestMatchNormal);
+            analysisController.setPaneImage(analysisController.pane2, bestMatchAbnormal);
+            analysisController.setPaneImage(analysisController.pane3, bestMatchNormal);
             analysisController.showThirdExplorer(false);
 
             analysisController.launch();

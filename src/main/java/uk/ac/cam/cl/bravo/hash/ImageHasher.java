@@ -8,8 +8,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class ImageHasher implements java.io.Serializable {
+    private static final int MATCH_THRESHOLD = 10;
     private ArrayList<Pair<File, Long>> simpleHash;
 
     public ImageHasher(){
@@ -22,17 +25,24 @@ public class ImageHasher implements java.io.Serializable {
     }
 
     public ArrayList<File> getSimpleMatches(File f){
-        long[] rotations = rotatedAverageHashes(f);
+        try {
+            BufferedImage inputImage = ImageIO.read(f);
+
+            return getSimpleMatches(inputImage);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    public ArrayList<File> getSimpleMatches(BufferedImage img){
+        long[] rotations = rotatedAverageHashes(img);
 
         ArrayList<File> matches = new ArrayList<>();
         int minHamming = Integer.MAX_VALUE;
         long imgHash;
         int hamming;
         for (Pair<File, Long> p : simpleHash){
-            if (p.getKey().getAbsolutePath().equals(f.getAbsolutePath())){
-                //System.out.println("Self Awareness");
-                continue;
-            }
             imgHash = p.getValue();
             for(int i = 0; i < rotations.length; i++) {
                 hamming = Long.bitCount(rotations[i] ^ imgHash);
@@ -52,6 +62,69 @@ public class ImageHasher implements java.io.Serializable {
         return matches;
     }
 
+    public ArrayList<File> getNMatches(BufferedImage img, int n){
+        long[] rotations = rotatedAverageHashes(img);
+
+        ArrayList<File> matches = new ArrayList<>();
+        int minHamming = Integer.MAX_VALUE, hamming;
+        long imgHash;
+        for (Pair<File, Long> p : simpleHash){
+            imgHash = p.getValue();
+            for(int i = 0; i < rotations.length; i++) {
+                hamming = Long.bitCount(rotations[i] ^ imgHash);
+
+                if (hamming < minHamming){
+                    minHamming = hamming;
+                    matches = new ArrayList<>();
+                    matches.add(p.getKey());
+                    break; //prevent matching twice to same image
+                } else if (hamming == minHamming){
+                    matches.add(p.getKey());
+                    break; //prevent matching twice to same image
+                }
+            }
+        }
+
+        // hamming and minhamming have different meanings in the context below
+        hamming = minHamming + 1;
+        while (matches.size() < n && hamming < MATCH_THRESHOLD){
+            for (Pair<File, Long> p : simpleHash){
+                if (matches.contains(p.getKey())){
+                    continue;
+                } else {
+                    imgHash = p.getValue();
+                    minHamming = Integer.MAX_VALUE;
+                    for (int i = 0; i < rotations.length; i++) {
+                            minHamming = Math.min(Long.bitCount(rotations[i] ^ imgHash), minHamming);
+                    }
+                    if (hamming == minHamming){
+                        matches.add(p.getKey());
+                    }
+                }
+            }
+        }
+
+        return matches;
+    }
+
+    public List<Pair<File, Integer>> getNPairs(BufferedImage img, int n){
+        List<File> files = getNMatches(img, n);
+        List<Pair<File, Integer>> pairList = new ArrayList<>();
+
+        for (File f: files) {
+            pairList.add(new Pair<>(f, getDiff(img, f, 32)));
+        }
+
+        pairList.sort(new Comparator<Pair<File, Integer>>() {
+            @Override
+            public int compare(Pair<File, Integer> o1, Pair<File, Integer> o2) {
+                return o1.getValue() - o2.getValue();
+            }
+        });
+
+        return pairList;
+    }
+
     public File getBestMatch(File f){
         ArrayList<File> matches = getSimpleMatches(f);
         return getMatchFromList(f, matches, 32);
@@ -59,10 +132,20 @@ public class ImageHasher implements java.io.Serializable {
 
     private static long averageHash (File f) {
         try {
+            BufferedImage inputImage = ImageIO.read(f);
+
+            return averageHash(inputImage);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+        return 0L;
+    }
+
+    protected static long averageHash (BufferedImage inputImage) {
+        try {
             int scaledWidth = 8;
             int scaledHeight = 8;
 
-            BufferedImage inputImage = ImageIO.read(f);
             BufferedImage scaledImage = new BufferedImage(scaledWidth, scaledHeight, inputImage.getType());
 
             Graphics2D g2d = scaledImage.createGraphics();
@@ -99,13 +182,23 @@ public class ImageHasher implements java.io.Serializable {
     }
 
     private static long[] rotatedAverageHashes (File f){
+        try {
+            BufferedImage inputImage = ImageIO.read(f);
+
+            return rotatedAverageHashes(inputImage);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+    }
+
+    private static long[] rotatedAverageHashes (BufferedImage inputImage){
         long[] ans = new long[4];
 
         try {
             int scaledWidth = 8;
             int scaledHeight = 8;
 
-            BufferedImage inputImage = ImageIO.read(f);
             BufferedImage scaledImage = new BufferedImage(scaledWidth, scaledHeight, inputImage.getType());
 
             Graphics2D g2d = scaledImage.createGraphics();
@@ -174,70 +267,15 @@ public class ImageHasher implements java.io.Serializable {
             Graphics2D matchGraphics = scaledMatchImage.createGraphics();
             matchGraphics.drawImage(inputImage, 0, 0, fidelity, fidelity, null);
 
-            Color imagePixel;
-            Color matchPixel;
-
             File returnFile = null;
 
-            long squaredistance, thissquaredistance, minsquaredistance = Integer.MAX_VALUE;
+            int thissquaredistance, minsquaredistance = Integer.MAX_VALUE;
 
             for (File match : matches){
-
-                matchImage = ImageIO.read(match);
-                matchGraphics.drawImage(matchImage, 0, 0, fidelity, fidelity, null);
-
-                thissquaredistance = 0;
-                for (int j = 0; j < fidelity; j++){
-                    for (int i = 0; i < fidelity; i++){
-                        imagePixel = new Color(scaledImage.getRGB(i,j));
-                        matchPixel = new Color(scaledMatchImage.getRGB(i,j));
-
-                        thissquaredistance += (imagePixel.getRed() - matchPixel.getRed())
-                                * (imagePixel.getRed() - matchPixel.getRed());
-                    }
-                }
-
-                squaredistance = 0;
-                for (int i = fidelity-1; i >= 0; i--){
-                    for (int j = 0; j < fidelity; j++) {
-                        imagePixel = new Color(scaledImage.getRGB(i,j));
-                        matchPixel = new Color(scaledMatchImage.getRGB(i,j));
-
-                        squaredistance += (imagePixel.getRed() - matchPixel.getRed())
-                                * (imagePixel.getRed() - matchPixel.getRed());
-                    }
-                }
-                thissquaredistance = Math.min(squaredistance, thissquaredistance);
-
-                squaredistance = 0;
-                for (int j = fidelity-1; j >= 0; j--){
-                    for (int i = fidelity-1; i >= 0; i--) {
-                        imagePixel = new Color(scaledImage.getRGB(i,j));
-                        matchPixel = new Color(scaledMatchImage.getRGB(i,j));
-
-                        squaredistance += (imagePixel.getRed() - matchPixel.getRed())
-                                * (imagePixel.getRed() - matchPixel.getRed());
-                    }
-                }
-                thissquaredistance = Math.min(squaredistance, thissquaredistance);
-
-                squaredistance = 0;
-                for (int i = 0; i < fidelity; i++){
-                    for (int j = fidelity-1; j >= 0; j--) {
-                        imagePixel = new Color(scaledImage.getRGB(i,j));
-                        matchPixel = new Color(scaledMatchImage.getRGB(i,j));
-
-                        squaredistance += (imagePixel.getRed() - matchPixel.getRed())
-                                * (imagePixel.getRed() - matchPixel.getRed());
-                    }
-                }
-                thissquaredistance = Math.min(squaredistance, thissquaredistance);
-
-                //System.out.println(match.getAbsolutePath());
-                //System.out.println(thissquaredistance);
+                thissquaredistance = getDiff(inputImage, match, fidelity);
 
                 if (thissquaredistance < minsquaredistance){
-                    minsquaredistance = squaredistance;
+                    minsquaredistance = thissquaredistance;
                     returnFile = match;
                 }
             }
@@ -248,5 +286,80 @@ public class ImageHasher implements java.io.Serializable {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    private int getDiff(BufferedImage inputImage, File f, int fidelity){
+        try {
+            BufferedImage scaledImage = new BufferedImage(fidelity, fidelity, inputImage.getType());
+
+            Graphics2D g2d = scaledImage.createGraphics();
+            g2d.drawImage(inputImage, 0, 0, fidelity, fidelity, null);
+
+            BufferedImage matchImage = ImageIO.read(f);
+            BufferedImage scaledMatchImage = new BufferedImage(fidelity, fidelity, inputImage.getType());
+
+            Graphics2D matchGraphics = scaledMatchImage.createGraphics();
+            matchGraphics.drawImage(inputImage, 0, 0, fidelity, fidelity, null);
+
+            Color imagePixel;
+            Color matchPixel;
+
+            int squaredistance, thissquaredistance, minsquaredistance = Integer.MAX_VALUE;
+
+            matchGraphics.drawImage(matchImage, 0, 0, fidelity, fidelity, null);
+
+            thissquaredistance = 0;
+            for (int j = 0; j < fidelity; j++) {
+                for (int i = 0; i < fidelity; i++) {
+                    imagePixel = new Color(scaledImage.getRGB(i, j));
+                    matchPixel = new Color(scaledMatchImage.getRGB(i, j));
+
+                    thissquaredistance += (imagePixel.getRed() - matchPixel.getRed())
+                            * (imagePixel.getRed() - matchPixel.getRed());
+                }
+            }
+
+            squaredistance = 0;
+            for (int i = fidelity - 1; i >= 0; i--) {
+                for (int j = 0; j < fidelity; j++) {
+                    imagePixel = new Color(scaledImage.getRGB(i, j));
+                    matchPixel = new Color(scaledMatchImage.getRGB(i, j));
+
+                    squaredistance += (imagePixel.getRed() - matchPixel.getRed())
+                            * (imagePixel.getRed() - matchPixel.getRed());
+                }
+            }
+            thissquaredistance = Math.min(squaredistance, thissquaredistance);
+
+            squaredistance = 0;
+            for (int j = fidelity - 1; j >= 0; j--) {
+                for (int i = fidelity - 1; i >= 0; i--) {
+                    imagePixel = new Color(scaledImage.getRGB(i, j));
+                    matchPixel = new Color(scaledMatchImage.getRGB(i, j));
+
+                    squaredistance += (imagePixel.getRed() - matchPixel.getRed())
+                            * (imagePixel.getRed() - matchPixel.getRed());
+                }
+            }
+            thissquaredistance = Math.min(squaredistance, thissquaredistance);
+
+            squaredistance = 0;
+            for (int i = 0; i < fidelity; i++) {
+                for (int j = fidelity - 1; j >= 0; j--) {
+                    imagePixel = new Color(scaledImage.getRGB(i, j));
+                    matchPixel = new Color(scaledMatchImage.getRGB(i, j));
+
+                    squaredistance += (imagePixel.getRed() - matchPixel.getRed())
+                            * (imagePixel.getRed() - matchPixel.getRed());
+                }
+            }
+            thissquaredistance = Math.min(squaredistance, thissquaredistance);
+
+            return thissquaredistance;
+
+        } catch (IOException e){
+            System.out.println(e.getMessage());
+        }
+        return Integer.MAX_VALUE;
     }
 }
