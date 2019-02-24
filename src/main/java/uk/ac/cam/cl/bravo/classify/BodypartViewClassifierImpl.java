@@ -71,6 +71,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         // Obtain the confidence for the prediction
         Confidence confidenceLevel = getConfidenceLevel(minL2Distance, outputArray, labelToMeanFeaturesMap);
+        System.out.println(confidenceLevel);
 
         return new Uncertain<>(new BodypartView(bodypart, topLabel), confidenceLevel);
     }
@@ -93,7 +94,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         double dist1 = computeL2Distance(outputArray, labelToMeanFeaturesMap.get(1));
 
         double ratio = Math.min(dist0, dist1) / Math.max(dist0, dist1);
-//        System.out.println("ratio: " + ratio);
+        System.out.println("ratio: " + ratio);
 
         // Perform the bucketing here
         if (ratio < 0.333){
@@ -105,7 +106,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         }
 
         else{
-            return Confidence.HIGH;
+            return Confidence.LOW;
         }
     }
 
