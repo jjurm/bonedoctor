@@ -360,8 +360,8 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
      * @return
      */
     public static BodypartView getBodypartViewOf(String imageFilename){
-
-    }
+            return null;
+        }
 
 
     public static void main(String[] args) throws IOException {
