@@ -346,6 +346,23 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         return null;
     }
 
+    /**
+     * Given a file mapping image filenames to each label, imbue the label information into every image filename
+     * @param imageFilenameToLabelFile
+     */
+    public static void buildBodyPartViews(String imageFilenameToLabelFile){
+
+    }
+
+    /**
+     * Get the specific body part view of an image filename, to be called in the Dataset API.
+     * @param imageFilename
+     * @return
+     */
+    public static BodypartView getBodypartViewOf(String imageFilename){
+
+    }
+
 
     public static void main(String[] args) throws IOException {
 //        // Test
