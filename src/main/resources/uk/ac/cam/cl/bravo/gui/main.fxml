@@ -4,5 +4,5 @@
 
 <AnchorPane fx:id="container"
             xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml/1">
+            xmlns:fx="http://javafx.com/fxml/1" VBox.vgrow="ALWAYS">
 </AnchorPane>

@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.bravo.overlay;
 
 import org.jetbrains.annotations.NotNull;
+import uk.ac.cam.cl.bravo.pipeline.Rated;
 
 import java.awt.image.BufferedImage;
 
@@ -19,7 +20,11 @@ public interface ImageOverlay {
      * (e.g. make it the same resolution as the sample image)
      */
     @NotNull
-    BufferedImage fitImage(@NotNull BufferedImage base, @NotNull BufferedImage sample);
+    Rated<BufferedImage> fitImage(
+            @NotNull BufferedImage base,
+            @NotNull BufferedImage sample,
+            double downsample,
+            double precision);
 
     /**
      * Normalises the given image to have the same size as the output of {@link #fitImage(BufferedImage, BufferedImage)}

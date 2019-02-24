@@ -1,19 +1,12 @@
 package uk.ac.cam.cl.bravo.gui;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class ImageExplorerController {
@@ -21,6 +14,7 @@ public class ImageExplorerController {
     private static final int MIN_PIXELS = 10;
     private final Stage stage;
     private PipelineObserver pipelineObserver;
+    private AnalysisController analysisController;
 
     double width;
     double height;
@@ -103,11 +97,16 @@ public class ImageExplorerController {
             }
         });
 
-        container.setPrefSize(800, 600);
-        imageView.fitWidthProperty().bind(container.widthProperty());
-        System.out.println("Explorer: " + container.heightProperty());
-        imageView.fitHeightProperty().bind(container.heightProperty());
-        VBox.setVgrow(container, Priority.ALWAYS);
+        GridPane.setVgrow(container, Priority.ALWAYS);
+        GridPane.setHgrow(container, Priority.ALWAYS);
+        ReadOnlyDoubleProperty gridWidth = ((GridPane) container.getParent()).widthProperty();
+        ReadOnlyDoubleProperty gridHeight = ((GridPane) container.getParent()).heightProperty();
+        imageView.fitWidthProperty().bind(gridWidth);
+        imageView.fitHeightProperty().bind(gridHeight);
+
+        System.out.println("Height:" + container.heightProperty());
+        System.out.println("Width:" + container.widthProperty());
+
     }
 
 
@@ -150,6 +149,14 @@ public class ImageExplorerController {
         return new Point2D(
                 viewport.getMinX() + xProportion * viewport.getWidth(),
                 viewport.getMinY() + yProportion * viewport.getHeight());
+    }
+
+    public void setAnalysisController(AnalysisController analysisController){
+        this.analysisController = analysisController;
+    }
+
+    public Pane getContainer() {
+        return this.container;
     }
 
 }

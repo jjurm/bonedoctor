@@ -1,0 +1,14 @@
+#container {
+    -fx-border-color: red;
+    -fx-border-width: 2px;
+}
+
+#imageView {
+    -fx-border-color: red;
+    -fx-border-width: 2px;
+}
+
+#pane1, #pane2 {
+    -fx-border-color: black;
+    -fx-border-width: 2px;
+}

@@ -31,37 +31,37 @@ fun main(args: Array<String>) {
 
     val dataset = Dataset()
     val imageSample = dataset.training.values
-        .filter { it.bodypart == Bodypart.HAND && it.patient == 9734 }.first()
-    mainPipeline(imageSample.path, imageSample.bodypart)
+        .filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 9734 }.first()
+    mainPipeline(imageSample.path, imageSample.bodypartView.bodypart)
 }
 
-fun preprocessPipeline() {
+/*fun preprocessPipeline() {
     val dataset = Dataset()
 
-    val imagePreprocessor: ImagePreprocessor = ImagePreprocessorI()
+//    val imagePreprocessor: ImagePreprocessor = ImagePreprocessorI()
     val bodypartViewClassifierImpl: BodypartViewClassifier = BodypartViewClassifierImpl()
 
     listOf(dataset.training, dataset.validation).map { it.values }.flatten().forEach { sample ->
         //var image = sample.loadImage()
 
         // preprocessing
-        val image = imagePreprocessor.preprocess(sample.path)
+//        val image = imagePreprocessor.preprocess(sample.path)
 
         // classify view
-        val view = bodypartViewClassifierImpl.classify(image, sample.bodypart)
+//        val view = bodypartViewClassifierImpl.classify(image, sample.bodypart)
 
         val newPath = sample.path.removeSuffix(".png") + "_edit.png"
-        ImageIO.write(image, "png", File(newPath))
+//        ImageIO.write(image, "png", File(newPath))
     }
-}
+}*/
 
 fun mainPipeline(inputFile: String, bodypart: Bodypart) {
     DisplayImage(inputFile, "Input")
 
     val pipeline = MainPipeline()
     pipeline.status.subscribe(::println)
-    pipeline.preprocessed.subscribe { DisplayImage(it) }
-    pipeline.overlayed.subscribe { DisplayImage(it) }
+    pipeline.preprocessed.subscribe { DisplayImage(it.value, "Confidence: ${it.confidence}") }
+    pipeline.overlayed.subscribe { DisplayImage(it.value, "Score: ${it.score}") }
 
     pipeline.userInput.onNext(Pair(inputFile, bodypart))
 }
@@ -100,15 +100,13 @@ fun tryOverlay(file1: String, file2: String) {
         PixelSimilarity(
             ignoreBorderWidth = 0.25
         ) + ParameterPenaltyFunction() * 0.05,
-        bigPlaneSize = PLANE_SIZE,
-        downsample = downsample,
-        precision = 1e-5
+        bigPlaneSize = PLANE_SIZE
     )
 
     println("Fitting images...")
     val sw = StopWatch()
     sw.start()
-    val result = overlay.findBestOverlay(base, sample)
+    val result = overlay.findBestOverlay(base, sample, downsample, 1e-5)
     sw.stop()
     val time = "${"%.1f".format(sw.time.toDouble() / 1000)}s"
     println("  $time")

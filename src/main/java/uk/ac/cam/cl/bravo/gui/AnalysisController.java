@@ -1,23 +1,20 @@
 package uk.ac.cam.cl.bravo.gui;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -32,17 +29,33 @@ public class AnalysisController {
     private Stage stage;
     private PipelineObserver pipelineObserver;
 
-    private ScrollPane scrollPane = new ScrollPane();
-    final DoubleProperty zoomProperty = new SimpleDoubleProperty(200);
+    private static String INPUT = "Input Image";
+    private static String NORMAL = "Best Match, Normal";
+    private static String ABNORMAL = "Best Match, Abormal";
+    private static String ABNORMAL_OVER = "Overlay, Abormal";
+    private static String NORMAL_OVER = "Overlay, Normal";
+
 
     @FXML
-    private ListView matches;
-
+    private GridPane grid;
     @FXML
-    private VBox topBottom;
-
+    public GridPane pane1;
     @FXML
-    private HBox imgExplorers;
+    private GridPane linkBox1;
+    @FXML
+    public GridPane pane2;
+    @FXML
+    private GridPane linkBox2;
+    @FXML
+    public GridPane pane3;
+    @FXML
+    private GridPane addBox;
+    @FXML
+    private ComboBox pane1choice;
+    @FXML
+    private ComboBox pane2choice;
+    @FXML
+    private ComboBox pane3choice;
 
     public AnalysisController(Stage stage, PipelineObserver pipelineObserver) {
         this.stage = stage;
@@ -57,21 +70,27 @@ public class AnalysisController {
             matchListLoader.setController(matchListController);
             Parent matchListFXML = matchListLoader.load();
 
-            matchListFXML.maxHeight(topBottom.getMaxHeight()*0.75);
-            topBottom.getChildren().add(2, matchListFXML);
+            matchListController.getMatches().setPrefHeight(200);
+
+            ObservableList<String> items = FXCollections.observableArrayList(INPUT, NORMAL, ABNORMAL, NORMAL_OVER, ABNORMAL_OVER);
+
+            grid.add(matchListFXML, 0, 2);
+            pane1choice.setItems(items);
+            pane2choice.setItems(items);
+            pane3choice.setItems(items);
 
             // Child controller actions
             matchListController.launch();
+            matchListController.setAnalysisController(this);
             pipelineObserver.addMatchListController(matchListController);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        System.out.println("Box " + topBottom.heightProperty());
     }
 
-    //  CREATE SCROLLABLE IMAGE PANE USER INPUT
-    public void setUserImage(Image imgFile) {
+    //  CREATE SCROLLABLE IMAGE PANE
+    public void setPaneImage(GridPane pane, Image imgFile) {
         try {
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
@@ -79,90 +98,95 @@ public class AnalysisController {
             imageExplorerLoader.setController(imageExplorerController);
             Parent imageExplorerFXML = imageExplorerLoader.load();
 
-            imageExplorerFXML.maxHeight(topBottom.getMaxHeight()*0.25);
-            imgExplorers.getChildren().add(0, imageExplorerFXML);
+            if (pane.getChildren().size() > 1) {
+                pane.getChildren().clear();
+                if (pane.getId().equals("pane1")) {
+                    pane.add(pane1choice, 0, 0);
+                } else if (pane.getId().equals("pane2")) {
+                    pane.add(pane2choice, 0, 0);
+                } else if (pane.getId().equals("pane3")) {
+                    pane.add(pane3choice, 0, 0);
+                }
+                pane.add(imageExplorerFXML, 0, 1);
+            } else {
+                pane.add(imageExplorerFXML, 0, 1);
+            }
 
             // Child controller actions
             imageExplorerController.setImage(imgFile);
+            imageExplorerController.setAnalysisController(this);
             pipelineObserver.addImageExplorerController(imageExplorerController);
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    //  CREATE SCROLLABLE IMAGE PANE CLOSEST MATCH
-    public void setMatchImage(Image imgFile) {
-        try {
-            // Initialize controller
-            FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
-            imageExplorerController = new ImageExplorerController(stage, pipelineObserver);
-            imageExplorerLoader.setController(imageExplorerController);
-            Parent imageExplorerFXML = imageExplorerLoader.load();
+    public void showThirdExplorer(boolean bool) {
+        if (bool) {
+            grid.getColumnConstraints().get(0).setPercentWidth(30);
+            grid.getColumnConstraints().get(2).setPercentWidth(30);
+            grid.getColumnConstraints().get(4).setPercentWidth(30);
+        }
 
-            imageExplorerFXML.maxHeight(topBottom.getMaxHeight()*0.25);
-            imgExplorers.getChildren().add(1, imageExplorerFXML);
+        addBox.setVisible(!bool);
+        addBox.setManaged(!bool);
+        linkBox2.setVisible(bool);
+        linkBox2.setManaged(bool);
+        pane3.setVisible(bool);
+        pane3.setManaged(bool);
+    }
 
-            // Child controller actions
-            imageExplorerController.setImage(imgFile);
-            pipelineObserver.addImageExplorerController(imageExplorerController);
+    @FXML
+    protected void handleAddExplorerButtonAction(ActionEvent event) throws IOException {
+        showThirdExplorer(true);
+        System.out.println("removing!!");
+    }
 
-
-        } catch (IOException e) {
-            e.printStackTrace();
+    @FXML
+    protected void handleSelectViewPane1(ActionEvent e) {
+        String choiceText = pane1choice.getSelectionModel().getSelectedItem().toString();
+        System.out.println(choiceText);
+        System.out.println(choiceText == INPUT);
+        if (choiceText == INPUT) {
+            setPaneImage(pane1, mainController.getInputImage());
+        } else if (choiceText == NORMAL) {
+            setPaneImage(pane1, mainController.getBestMatchNormal());
+        } else if (choiceText == ABNORMAL) {
+            setPaneImage(pane1, mainController.getBestMatchAbnormal());
+        } else {
+            return;
         }
     }
 
-    private HBox createButtons(double width, double height, ImageView imageView) {
-        Button reset = new Button("Reset");
-        reset.setOnAction(e -> reset(imageView, width / 2, height / 2));
-        Button full = new Button("Full view");
-        full.setOnAction(e -> reset(imageView, width, height));
-        HBox buttons = new HBox(10, reset, full);
-        buttons.setAlignment(Pos.CENTER);
-        buttons.setPadding(new Insets(10));
-        return buttons;
+    @FXML
+    protected void handleSelectViewPane2(ActionEvent e) {
+        String choiceText = pane2choice.getSelectionModel().getSelectedItem().toString();
+        if (choiceText == INPUT) {
+            setPaneImage(pane2, mainController.getInputImage());
+        } else if (choiceText == NORMAL) {
+            setPaneImage(pane2, mainController.getBestMatchNormal());
+        } else if (choiceText == ABNORMAL) {
+            setPaneImage(pane2, mainController.getBestMatchAbnormal());
+        } else {
+            return;
+        }
     }
 
-    // reset to the top left:
-    private void reset(ImageView imageView, double width, double height) {
-        imageView.setViewport(new Rectangle2D(0, 0, width, height));
+    @FXML
+    protected void handleSelectViewPane3(ActionEvent e) {
+        String choiceText = pane3choice.getSelectionModel().getSelectedItem().toString();
+        if (choiceText == INPUT) {
+            setPaneImage(pane3, mainController.getInputImage());
+        } else if (choiceText == NORMAL) {
+            setPaneImage(pane3, mainController.getBestMatchNormal());
+        } else if (choiceText == ABNORMAL) {
+            setPaneImage(pane3, mainController.getBestMatchAbnormal());
+        } else {
+            return;
+        }
     }
 
-    // shift the viewport of the imageView by the specified delta, clamping so
-    // the viewport does not move off the actual image:
-    private void shift(ImageView imageView, Point2D delta) {
-        Rectangle2D viewport = imageView.getViewport();
-
-        double width = imageView.getImage().getWidth() ;
-        double height = imageView.getImage().getHeight() ;
-
-        double maxX = width - viewport.getWidth();
-        double maxY = height - viewport.getHeight();
-
-        double minX = clamp(viewport.getMinX() - delta.getX(), 0, maxX);
-        double minY = clamp(viewport.getMinY() - delta.getY(), 0, maxY);
-
-        imageView.setViewport(new Rectangle2D(minX, minY, viewport.getWidth(), viewport.getHeight()));
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
     }
-
-    private double clamp(double value, double min, double max) {
-        if (value < min)
-            return min;
-        if (value > max)
-            return max;
-        return value;
-    }
-
-    private Point2D imageViewToImage(ImageView imageView, Point2D imageViewCoordinates) {
-        double xProportion = imageViewCoordinates.getX() / imageView.getBoundsInLocal().getWidth();
-        double yProportion = imageViewCoordinates.getY() / imageView.getBoundsInLocal().getHeight();
-
-        Rectangle2D viewport = imageView.getViewport();
-        return new Point2D(
-                viewport.getMinX() + xProportion * viewport.getWidth(),
-                viewport.getMinY() + yProportion * viewport.getHeight());
-    }
-
 }

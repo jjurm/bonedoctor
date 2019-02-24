@@ -14,6 +14,7 @@ import uk.ac.cam.cl.bravo.dataset.Bodypart
 import uk.ac.cam.cl.bravo.dataset.BodypartView
 import uk.ac.cam.cl.bravo.dataset.BoneCondition
 import uk.ac.cam.cl.bravo.dataset.ImageSample
+import uk.ac.cam.cl.bravo.hash.ImageHasher
 import uk.ac.cam.cl.bravo.hash.ImageMatcher
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
@@ -38,7 +39,7 @@ class MainPipeline {
     val precision: Subject<Double> = BehaviorSubject.createDefault(0.5)
 
     /** A pair of (input image, bodypart of the input image) */
-    val userInput: Subject<Pair<String, Bodypart>>
+    val userInput: Subject<Pair<String, Bodypart>> = BehaviorSubject.create()
 
     /**
      * An image to overlay the user image with.
@@ -59,31 +60,36 @@ class MainPipeline {
     val status: Observable<String>
 
     /** Input image from the user, preprocessed. */
-    val preprocessed: Observable<BufferedImage>
+    val preprocessed: Observable<Uncertain<BufferedImage>>
 
     /** Classified BoneCondition, taking the 'preprocessed' image as the input */
-    val boneCondition: Observable<BoneCondition>
+    val boneCondition: Observable<Uncertain<BoneCondition>>
 
     /** List of matched images (similar to 'preprocessed') that are NORMAL */
-    val similarNormal: Observable<List<ImageSample>>
+    val similarNormal: Observable<List<Rated<ImageSample>>>
     /** List of matched images (similar to 'preprocessed') that are ABNORMAL */
-    val similarAbnormal: Observable<List<ImageSample>>
+    val similarAbnormal: Observable<List<Rated<ImageSample>>>
 
     /** The result of the overlay algorithm, taking 'imageToOverlay' as the input. */
-    val overlayed: Observable<BufferedImage>
+    val overlayed: Observable<Rated<BufferedImage>>
 
     /** The 'overlayed' image modified to highlight differences from 'preprocessed' */
     val preprocessedHighlighted: Observable<BufferedImage>
-
 
 
     // ===== Constants =====
 
     private val nSimilarImages = Observable.just(5)
 
+    companion object {
+        const val PROGRESS_PREPROCESSING = 0
+    }
+
     // ===== COMPONENTS =====
 
-    private val preprocessor: ImagePreprocessor = ImagePreprocessorI()
+    private val preprocessor: ImagePreprocessor = ImagePreprocessorI({
+        // TODO Juraj: handle progress updates
+    })
     private val boneConditionClassifier: BoneConditionClassifier = BoneConditionClassifierImpl()
     private val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl()
     lateinit private var imageMatcher: ImageMatcher // TODO Shehab: instantiate ImageMatcher
@@ -102,18 +108,20 @@ class MainPipeline {
         PixelSimilarity(
             ignoreBorderWidth = 0.25
         ) + ParameterPenaltyFunction() * 0.05,
-        bigPlaneSize = PLANE_SIZE,
-        downsample = 1.0,
-        precision = 1e-5
+        bigPlaneSize = PLANE_SIZE
     )
 
     init {
+        // === Subjects ===
+
         // progress0 has type BehaviorSubject<Double> (so that we can call .onNext(...))
         // but the exposed 'progress' variable is just Observable
         val progress0 = BehaviorSubject.createDefault(0.0)
         progress = progress0
         val status0 = BehaviorSubject.createDefault("Program started")
         status = status0
+
+        // === Pipeline ===
 
         /** When 'this' observable emits a value, the given progress and status are reported to the UI. */
         fun <T> Observable<T>.doneMeans(progress: Double, status: String? = null) {
@@ -123,7 +131,13 @@ class MainPipeline {
             }
         }
 
-        userInput = BehaviorSubject.create()
+        // map [0.0, 1.0] to [3.0, 1.0]
+        val downsample = precision.map { x -> Math.pow(x - 1, 2.0) * 2 + 1 }
+        // map [0.0, 1.0] to [1e-3, 1e-5]
+        val overlayPrecision = precision.map { x ->
+            (Math.pow(10.0, -3 - 2 * x) + 1e-3 - x * (1e-3 - 1e-5)) / 2
+        }
+
         userInput.doneMeans(0.0, "Pre-processing the input x-ray")
 
         val path = userInput.map(Pair<String, *>::first)
@@ -131,37 +145,41 @@ class MainPipeline {
 
         preprocessed = path.map(preprocessor::preprocess)
         preprocessed.doneMeans(0.2, "Classifying bone condition")
+        val preprocessedVal = preprocessed.map(Uncertain<BufferedImage>::value)
 
-        boneCondition = preprocessed.map(boneConditionClassifier::classify)
+        boneCondition = preprocessedVal.map(boneConditionClassifier::classify)
 
-        val bodypartView: Observable<BodypartView> = Observable.combineLatest(
-            preprocessed,
+        val bodypartView: Observable<Uncertain<BodypartView>> = Observable.combineLatest(
+            preprocessedVal,
             bodypart,
             BiFunction(bodypartViewClassifier::classify)
         )
         bodypartView.doneMeans(0.4, "Looking for similar x-rays")
+        val bodypartViewVal = bodypartView.map(Uncertain<BodypartView>::value)
 
         similarNormal = Observable.combineLatest(
-            preprocessed, Observable.just(BoneCondition.NORMAL), bodypartView, nSimilarImages,
+            preprocessedVal, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages,
             Function4(imageMatcher::findMatchingImage)
         )
         similarAbnormal = Observable.combineLatest(
-            preprocessed, Observable.just(BoneCondition.ABNORMAL), bodypartView, nSimilarImages,
+            preprocessedVal, Observable.just(BoneCondition.ABNORMAL), bodypartViewVal, nSimilarImages,
             Function4(imageMatcher::findMatchingImage)
         )
 
-        similarNormal.map { it.first() }.subscribe(imageToOverlay)
+        similarNormal.map { it.first().value }.subscribe(imageToOverlay)
         imageToOverlay.doneMeans(0.6, "Overlaying images")
 
         overlayed = Observable.combineLatest(
-            preprocessed,
-            imageToOverlay.map { it.loadPreprocessedImage() },
-            BiFunction(imageOverlay::fitImage)
+            preprocessedVal,
+            imageToOverlay.map(ImageSample::loadPreprocessedImage),
+            downsample,
+            overlayPrecision,
+            Function4(imageOverlay::fitImage)
         )
         overlayed.doneMeans(0.8, "Highlighting differences")
 
         // TODO Shehab: highlight differences
-        preprocessedHighlighted = overlayed.map { it }
+        preprocessedHighlighted = overlayed.map { it.value }
         preprocessedHighlighted.doneMeans(1.0, "Done!")
     }
 

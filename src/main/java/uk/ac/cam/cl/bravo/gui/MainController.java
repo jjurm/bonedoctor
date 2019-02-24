@@ -2,8 +2,6 @@ package uk.ac.cam.cl.bravo.gui;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
@@ -11,8 +9,6 @@ import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class MainController {
 
@@ -20,6 +16,9 @@ public class MainController {
     private AnalysisController analysisController;
     private PipelineObserver pipelineObserver;
     private Stage stage;
+    private Image inputImage;
+    private Image bestMatchNormal;
+    private Image bestMatchAbnormal;
 
     @FXML
     AnchorPane container;
@@ -46,10 +45,14 @@ public class MainController {
             container.getChildren().add(0, analysisFXML);
 
             // Child controller actions
-            analysisController.setUserImage(img);
-
-            Image match = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
-            analysisController.setMatchImage(match);
+            analysisController.setPaneImage(analysisController.pane1, img);
+            analysisController.setMainController(this);
+            inputImage = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/bowtie.jpg"));
+            bestMatchAbnormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
+            bestMatchNormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
+            analysisController.setPaneImage(analysisController.pane2, bestMatchAbnormal);
+            analysisController.setPaneImage(analysisController.pane3, bestMatchNormal);
+            analysisController.showThirdExplorer(false);
 
             analysisController.launch();
             pipelineObserver.addAnalysisController(analysisController);
@@ -81,13 +84,16 @@ public class MainController {
         }
     }
 
-    public void setStage(Stage newStage) {
-        stage = newStage;
+    public Image getBestMatchNormal() {
+        return bestMatchNormal;
     }
 
-    public void setPipelineObserver(PipelineObserver obs) {
-        pipelineObserver = obs;
+    public Image getBestMatchAbnormal() {
+        return bestMatchAbnormal;
     }
+
+    public Image getInputImage() {
+        return inputImage; }
 
     public void launch() {
 

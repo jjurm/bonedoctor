@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.bravo.preprocessing;
 
 import org.jetbrains.annotations.NotNull;
+import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
 import java.awt.image.BufferedImage;
 
@@ -15,5 +16,5 @@ import java.awt.image.BufferedImage;
  */
 public interface ImagePreprocessor {
     @NotNull
-    BufferedImage preprocess(@NotNull String filePath);
+    Uncertain<BufferedImage> preprocess(@NotNull String filePath);
 }

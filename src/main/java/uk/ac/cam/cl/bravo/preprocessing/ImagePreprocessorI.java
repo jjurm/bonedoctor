@@ -2,21 +2,35 @@ package uk.ac.cam.cl.bravo.preprocessing;
 
 import javafx.util.Pair;
 import org.jetbrains.annotations.NotNull;
-import java.awt.*;
+import uk.ac.cam.cl.bravo.pipeline.Uncertain;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 import javax.imageio.ImageIO;
 
 public class ImagePreprocessorI implements ImagePreprocessor
 {
 
+    public interface PreProcessObserver{
+
+        void progressUpdate(double d);
+
+    }
+
+    PreProcessObserver observer;
+
+    public ImagePreprocessorI(PreProcessObserver obs){
+        observer = obs;
+    }
+
+
     @NotNull
     @Override
-    public BufferedImage preprocess(@NotNull  String imageName){
+    public Uncertain<BufferedImage> preprocess(@NotNull  String imageName){
+
+        observer.progressUpdate(0.0);
 
         BufferedImage srcFile = srcImg(imageName);
         BufferedImage buffFile = buffImg(imageName);
@@ -28,29 +42,34 @@ public class ImagePreprocessorI implements ImagePreprocessor
                     srcFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
         }
 
+        observer.progressUpdate(0.10);
+
         Pair edgeRemoval= EdgeRemoval.edgeRemoval(outputFile, new BufferedImage(outputFile.getWidth(),
                 outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
 
         outputFile = (BufferedImage) edgeRemoval.getKey();
         HashSet<Point2D> band = (HashSet) edgeRemoval.getValue();
 
-        if (fleshy)
-            outputFile = Contrast.contrast(outputFile, new BufferedImage(outputFile.getWidth(),
-                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR), EdgeRemoval.insideOutside(outputFile,
+        observer.progressUpdate(0.75);
+
+        outputFile = Contrast.contrast(outputFile, EdgeRemoval.insideOutside(outputFile,
                     new BufferedImage(outputFile.getWidth(),
-                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR)));
-        else
-            outputFile = Contrast.contrast(outputFile, EdgeRemoval.insideOutside(outputFile,
-                    new BufferedImage(outputFile.getWidth(),
-                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR)));
+                            outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR)));
+
+        observer.progressUpdate(0.95);
 
         outputFile = EdgeRemoval.colourBand(outputFile, new BufferedImage(outputFile.getWidth(),
                 outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR), band);
 
+        observer.progressUpdate(0.98);
+
         outputFile = Crop.crop(outputFile, new BufferedImage(outputFile.getWidth(),
                 outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
 
-        return outputFile;
+        observer.progressUpdate(1.0);
+
+        // TODO Nicole: add confidence argument to the constructor below
+        return new Uncertain<>(outputFile);
 
     }
 
@@ -74,10 +93,5 @@ public class ImagePreprocessorI implements ImagePreprocessor
             return null;
         }
     }
-
-    static boolean fleshy = false;
-
-
-
 
 }

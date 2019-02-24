@@ -33,7 +33,9 @@ public class Main extends Application {
         mainStage.setWidth(screenBounds.getWidth() * 0.83);
         mainStage.setHeight(screenBounds.getHeight() * 0.74);
 
-        mainStage.setScene(new Scene(mainWindow));
+        Scene scene = new Scene(mainWindow);
+        scene.getStylesheets().add("/uk/ac/cam/cl/bravo/gui/style.css");
+        mainStage.setScene(scene);
 
 
         ((Region) mainWindow).prefWidthProperty().bind(mainStage.widthProperty());

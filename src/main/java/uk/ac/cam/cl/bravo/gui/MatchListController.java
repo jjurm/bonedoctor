@@ -1,23 +1,16 @@
 package uk.ac.cam.cl.bravo.gui;
 
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.geometry.Point2D;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
-import java.net.URL;
-import java.util.ResourceBundle;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MatchListController {
 
@@ -25,6 +18,8 @@ public class MatchListController {
     private ListView matches;
     private Stage stage;
     private PipelineObserver pipelineObserver;
+    private AnalysisController analysisController;
+
 
     public MatchListController(Stage stage, PipelineObserver pipelineObserver) {
         this.stage = stage;
@@ -37,6 +32,10 @@ public class MatchListController {
         Image img1 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
         Image img2 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/bowtie.jpg"));
         Image img3 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
+        List<Image> imgList = new ArrayList<>();
+        imgList.add(img1);
+        imgList.add(img2);
+        imgList.add(img3);
 
         ObservableList<String> items = FXCollections.observableArrayList (
                 "RUBY", "APPLE", "VISTA");
@@ -47,18 +46,16 @@ public class MatchListController {
             @Override
             public void updateItem(String name, boolean empty) {
                 super.updateItem(name, empty);
-                matchView.fitHeightProperty().bind(matches.heightProperty());
-                System.out.println("Matches: " + matches.heightProperty());
+
+                matchView.setFitHeight(180);
+                matchView.setFitWidth(180);
+                matchView.setPreserveRatio(true);
+
                 if (empty) {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    if (name.equals("RUBY"))
-                        matchView.setImage(img1);
-                    else if (name.equals("APPLE"))
-                        matchView.setImage(img2);
-                    else if (name.equals("VISTA"))
-                        matchView.setImage(img3);
+                    matchView.setImage(imgList.get(getIndex()));
                     setText(name);
                     setGraphic(matchView);
                 }
@@ -71,11 +68,23 @@ public class MatchListController {
 
         matches.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
-                System.out.println("Clicked on " + matches.getSelectionModel().getSelectedItem());
+                System.out.println("Clicked on " + matches.getSelectionModel().getSelectedIndex());
             }
+
+            int index = matches.getSelectionModel().getSelectedIndex();
+            analysisController.setPaneImage(analysisController.pane2, imgList.get(index));
+
         });
 
         return;
+    }
+
+    public void setAnalysisController(AnalysisController analysisController) {
+        this.analysisController = analysisController;
+    }
+
+    public ListView getMatches() {
+        return this.matches;
     }
     
 }

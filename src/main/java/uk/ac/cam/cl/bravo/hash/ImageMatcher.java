@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.BodypartView;
 import uk.ac.cam.cl.bravo.dataset.BoneCondition;
+import uk.ac.cam.cl.bravo.dataset.ImageSample;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

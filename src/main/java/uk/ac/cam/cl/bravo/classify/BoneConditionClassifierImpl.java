@@ -6,6 +6,7 @@ import org.tensorflow.Output;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import uk.ac.cam.cl.bravo.dataset.BoneCondition;
+import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor;
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI;
 
@@ -21,8 +22,10 @@ import java.util.stream.Stream;
 public class BoneConditionClassifierImpl implements BoneConditionClassifier {
     @Override
     @NotNull
-    public BoneCondition classify(@NotNull BufferedImage image) {
-        return BoneCondition.NORMAL;
+    public Uncertain<BoneCondition> classify(@NotNull BufferedImage image) {
+        // TODO Leon: return classified BoneCondition
+        // TODO Leon: add confidence argument to the constructor below
+        return new Uncertain<>(BoneCondition.NORMAL);
     }
 
     private static BoneCondition classify(Path imagePath) {
@@ -35,7 +38,7 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
     }
 
     private static Tensor<Float> predict(Tensor<Float> input) {
-        byte[] graphDef = readAllBytesOrExit(Paths.get("/Users/leonmlodzian/Desktop/uni/Group Project", "BoneConditionClassifier.pb"));
+        byte[] graphDef = readAllBytesOrExit(Paths.get("/Users/leonmlodzian/Desktop/uni/bonedoctor/python/abnormality_classifier/BoneConditionClassifier.pb"));
         Graph g = new Graph();
         g.importGraphDef(graphDef);
         Session s = new Session(g);
@@ -82,8 +85,10 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
     }
 
     public static void main(String[] args) {
-        File[] files = new File ("/Users/leonmlodzian/Desktop/uni/Group Project/MURA-v1.1/train/XR_ELBOW").listFiles();
-        for (int i = 0; i < 10; i++) {
+        int abnormal = 0;
+        int normal = 0;
+        File[] files = new File ("/Users/leonmlodzian/Desktop/uni/Group Project/MURA-v1.1/train/XR_HAND").listFiles();
+        for (int i = 0; i < 50; i++) {
             File[] f2 = new File(files[i].getAbsolutePath()).listFiles();
             for (File file : f2) {
                 File[] f3 = new File(file.getAbsolutePath()).listFiles();
@@ -91,15 +96,22 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
                     System.out.println("Positive study");
                 } else if (file.getAbsolutePath().endsWith("negative")) {
                     System.out.println("Negative study");
+                    continue;
                 } else {
                     continue;
                 }
-                if (f3 == null)
+                if (f3 == null || f3.length < 1) {
                     continue;
-                for (File file1 : f3) {
-                    classify(Paths.get(file1.getAbsolutePath()));
                 }
+                BoneCondition bc = classify(Paths.get(f3[0].getAbsolutePath()));
+                if (bc == BoneCondition.ABNORMAL)
+                    abnormal++;
+                else
+                    normal++;
             }
         }
+        System.out.println("Number of positive images classified as ...");
+        System.out.println("abnormal: " + abnormal);
+        System.out.println("normal: " + normal);
     }
 }
