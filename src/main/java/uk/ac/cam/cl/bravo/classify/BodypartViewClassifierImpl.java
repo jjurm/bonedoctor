@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -320,6 +321,51 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         }
     }
 
+    /**
+     * Given a file mapping image filenames to each label, imbue the label information into every image filename
+     *
+     * @param outputDir The output directory that contains the required information to decode
+     * @return ret A hashmap mapping each image filename to a specific bodypart view
+     */
+    public static Map<String, BodypartView> buildBodyPartViews(String outputDir){
+        // Build return map
+        Map<String, BodypartView> ret = new HashMap<>();
+
+        // Obtain the mapping file from output directory by body part
+        File[] bodyPartDirs = new File(outputDir).listFiles();
+
+        // Loop through each bodypart folder and build the output
+        for (int i=0; i<bodyPartDirs.length; i++){
+            String imageFilenameToLabelFile = Paths.get(bodyPartDirs[i].toString(), "label_to_image_filenames", "image_filename_to_label_dict.json").toString();
+            Bodypart bodypart = Bodypart.valueOf(bodyPartDirs[i].getName().substring(3)); // remove XR_ prefix using substring
+
+            try {
+                JsonReader reader = new JsonReader(new FileReader(imageFilenameToLabelFile));
+                Map<String, String> data = new Gson().fromJson(reader, Map.class);
+
+                // add to results
+                for (String imageFilename : data.keySet()){
+                    BodypartView view = new BodypartView(bodypart, Integer.valueOf(data.get(imageFilename)));
+                    ret.put(imageFilename, view);
+                }
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        return ret;
+    }
+
+//    /**
+//     * Get the specific body part view of an image filename, to be called in the Dataset API.
+//     * @param imageFilename relative directory to image file
+//     *                      e.g. train/XR_SHOULDER/patient00430/study1/positive/image4.png
+//     * @return
+//     */
+//    public static BodypartView getBodypartViewOf(String imageFilename){
+//        return null;
+//    }
+
 
     private static byte[] bufferedImageToByteArray(BufferedImage image){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -346,25 +392,10 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         return null;
     }
 
-    /**
-     * Given a file mapping image filenames to each label, imbue the label information into every image filename
-     * @param imageFilenameToLabelFile
-     */
-    public static void buildBodyPartViews(String imageFilenameToLabelFile){
-
-    }
-
-    /**
-     * Get the specific body part view of an image filename, to be called in the Dataset API.
-     * @param imageFilename
-     * @return
-     */
-    public static BodypartView getBodypartViewOf(String imageFilename){
-            return null;
-        }
-
-
     public static void main(String[] args) throws IOException {
+        String outputDir = "python/view_clustering/output/";
+        buildBodyPartViews(outputDir);
+
 //        // Test
 //        BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
 //        String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HUMERUS/patient03225/study1_negative/image1.png";
