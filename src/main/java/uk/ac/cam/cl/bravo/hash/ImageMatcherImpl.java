@@ -10,13 +10,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ImageMatcherImpl implements Serializable, ImageMatcher {
+public class ImageMatcherImpl implements Serializable {
 
     private HashMap<BoneCondition, HashMap<Bodypart, HashMap<BodypartView, ImageHasher>>> imageHashers;
+    private HashMap<Pair<Bodypart, Integer>, ImageHasher> normalHashers;
+    private HashMap<Pair<Bodypart, Integer>, ImageHasher> abnormalHashers;
 
-    public List<Pair<File, Integer>> findMatchingImage(@NotNull BufferedImage image, @NotNull BoneCondition boneCondition, @NotNull BodypartView bodypartView, int n) {
-        ImageHasher imageHasher = imageHashers.get(boneCondition).get(bodypartView.getBodypart())
-                .get(bodypartView.getValue());
+    public List<Pair<File, Integer>> findMatchingImage(@NotNull BufferedImage image,
+                                                       @NotNull BoneCondition boneCondition,
+                                                       @NotNull BodypartView bodypartView, int n) {
+
+        ImageHasher imageHasher;
+
+        if (boneCondition.getLabel().equals("positive")){
+            imageHasher = abnormalHashers.get(new Pair<>(bodypartView.getBodypart(), bodypartView.getValue()));
+        } else {
+            imageHasher = normalHashers.get(new Pair<>(bodypartView.getBodypart(), bodypartView.getValue()));
+        }
 
         return imageHasher.getNPairs(image, n);
     }
@@ -25,7 +35,6 @@ public class ImageMatcherImpl implements Serializable, ImageMatcher {
         try {
             FileInputStream fileInputStream = new FileInputStream(f);
             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-
             return (ImageMatcherImpl) objectInputStream.readObject();
         } catch (IOException | ClassNotFoundException e){
             System.out.println(e.getMessage());
@@ -33,62 +42,51 @@ public class ImageMatcherImpl implements Serializable, ImageMatcher {
         }
     }
 
-    public static void trainImageMatcher(File f){
+    public static void trainImageMatcher(File f, Dataset dataset){
         try{
-
+            ImageMatcherImpl imageMatcher = new ImageMatcherImpl(dataset);
+            f.createNewFile();
+            FileOutputStream fileOutputStream = new FileOutputStream(f);
+            ObjectOutputStream objOut = new ObjectOutputStream(fileOutputStream);
+            objOut.writeObject(imageMatcher);
+            objOut.close();
         } catch (Exception e){
-
+            System.err.println(e.getMessage());
         }
     }
 
-    private ImageMatcherImpl(){
-        imageHashers = new HashMap<>();
+    private ImageMatcherImpl(Dataset dataset){
+        normalHashers = new HashMap<>();
+        abnormalHashers = new HashMap<>();
 
-        for (BoneCondition boneCondition : BoneCondition.values()){
-            for (Bodypart bodypart : Bodypart.values()){
-                //for (BodypartView bodypartView : BodypartView.values()){
-
-                try {
-                    Dataset dataset = new Dataset();
-                    Map<String, ImageSample> m = dataset.getTraining();
-                    m.values();
-                } catch (IOException e){
-                    System.out.println(e.getMessage());
-                }
+        Map<String, ImageSample> trainingMap = dataset.getTraining();
 
 
-                //}
+        ImageSample imageSample;
+        BodypartView bodypartView;
+        BoneCondition boneCondition;
+        ImageHasher imageHasher;
+
+        for (String path : trainingMap.keySet()){
+            imageSample = trainingMap.get(path);
+            bodypartView = imageSample.getBodypartView();
+            boneCondition = imageSample.getBoneCondition();
+            HashMap<Pair<Bodypart, Integer>, ImageHasher> hasherMap;
+
+            if (boneCondition.getLabel().equals("positive")){
+                hasherMap = abnormalHashers;
+            } else {
+                hasherMap = normalHashers;
             }
-        }
 
+            imageHasher = hasherMap.getOrDefault(new Pair<>(bodypartView.getBodypart(), bodypartView.getValue()), null);
 
-        for (Bodypart bodypart:Bodypart.values()) {
-            ImageHasher a = new ImageHasher();
-
-            File category = new File("train/XR_"+bodypart);
-
-            System.out.println("Starting "+category.getName());
-
-            File[] patientFiles = category.listFiles();
-            if (patientFiles != null) {
-                for (File patientFile : patientFiles) {
-                    File[] photoFiles = patientFile.listFiles();
-                    if (photoFiles != null) {
-                        for (File photoFile : photoFiles) {
-                            File[] imageFiles = photoFile.listFiles();
-                            if (imageFiles != null) {
-                                for (File image : imageFiles) {
-                                    a.addImageFile(image);
-                                }
-                            }
-                        }
-                    }
-                }
+            if (imageHasher == null){
+                imageHasher = new ImageHasher();
+                hasherMap.put(new Pair<>(bodypartView.getBodypart(), bodypartView.getValue()), imageHasher);
             }
-        }
-    }
 
-    public static void main(String[] args){
-        ImageMatcherImpl imageMatcher = new ImageMatcherImpl();
+            imageHasher.addImageFile(new File(path));
+        }
     }
 }
