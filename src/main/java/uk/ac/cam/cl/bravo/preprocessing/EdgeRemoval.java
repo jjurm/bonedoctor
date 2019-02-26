@@ -45,7 +45,7 @@ public class EdgeRemoval {
             }
         }
 
-        if (circle) { //TODO: Is it safe to assume that all circles need to be inverted?
+        if (circle) {
             outputFile = Inversion.invertImage(outputFile, new BufferedImage(srcFile.getWidth(),
                     srcFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
         }
@@ -172,7 +172,7 @@ public class EdgeRemoval {
 
     private static HashSet<Point2D> getBand(Point2D p, int w, int h){
 
-        int t = 10; //TODO: Define the best thickness for the band
+        int t = 10;
 
         int lx = (int)Math.max(p.x()-t, 0);
         int rx = (int)Math.min(p.x()+t, w);
@@ -199,7 +199,7 @@ public class EdgeRemoval {
             dist.add(Math.sqrt(Math.pow(e.x()-x,2)+Math.pow(e.y()-y,2)));
 
 
-        return (Statistics.var(dist)<100); //TODO: is this value ok?
+        return (Statistics.var(dist)<100);
 
     }
 }

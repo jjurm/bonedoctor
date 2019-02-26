@@ -88,7 +88,7 @@ class EdgeDetection
 
         for (int x =0; x<w; x++){
             for (int y = 0; y<h; y++){
-                int b = 100; //TODO: find the best threshold for the edges
+                int b = 100;
                 if ((getGrayScale(inputFile.getRGB(x, y))>b))
                     pts.add(new Point2D(x, y));
             }
