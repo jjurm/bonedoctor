@@ -8,9 +8,21 @@ Large databases of labelled X-ray images such as the MURA dataset of broken bone
 
 ## Getting Started
 
-1. `git clone git@github.com:jjurm/bonedoctor`
-2. Download the MURA dataset and unzip it to `MURA-v1.1` inside the project directory
-3. `./gradlew run` (or set your IDE appropriately)
+1. Ensure you have Java 11 installed and the `JAVA_HOME` environment variable points to it
+2. `git clone git@github.com:jjurm/bonedoctor`
+3. Download the MURA dataset and unzip it to `MURA-v1.1` inside the project directory
+
+### Running the pre-processing
+
+`./gradlew preprocess --args 'all'`, or specify the tasks to run as in `./gradlew preprocess --args 'images matcher'`
+
+Pre-processing is a prerequisite for running the application and consists of the following:
+* Pre-processing the images in the dataset (task `images`)
+* Calculating hashes of the images for fast lookup of similar images (task `matcher`)
+
+### Running the application
+
+`./gradlew run` (or set your IDE appropriately)
 
 ## Authors
 
