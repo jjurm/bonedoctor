@@ -10,21 +10,21 @@ import uk.ac.cam.cl.bravo.classify.BodypartViewClassifier
 import uk.ac.cam.cl.bravo.classify.BodypartViewClassifierImpl
 import uk.ac.cam.cl.bravo.classify.BoneConditionClassifier
 import uk.ac.cam.cl.bravo.classify.BoneConditionClassifierImpl
-import uk.ac.cam.cl.bravo.dataset.Bodypart
-import uk.ac.cam.cl.bravo.dataset.BodypartView
-import uk.ac.cam.cl.bravo.dataset.BoneCondition
-import uk.ac.cam.cl.bravo.dataset.ImageSample
-import uk.ac.cam.cl.bravo.hash.ImageHasher
+import uk.ac.cam.cl.bravo.dataset.*
 import uk.ac.cam.cl.bravo.hash.ImageMatcher
+import uk.ac.cam.cl.bravo.hash.ImageMatcherImpl
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI
 import java.awt.image.BufferedImage
+import java.io.File
 
 /**
  * Responsible: Juraj Micko (jm2186)
  */
 class MainPipeline {
+
+    val dataset = Dataset()
 
     // ===== SUBJECTS =====
     // Subjects can hold a value (an input, a parameter, etc.).
@@ -92,7 +92,7 @@ class MainPipeline {
     })
     private val boneConditionClassifier: BoneConditionClassifier = BoneConditionClassifierImpl()
     private val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl()
-    lateinit private var imageMatcher: ImageMatcher // TODO Shehab: instantiate ImageMatcher
+    private var imageMatcher: ImageMatcher = ImageMatcherImpl.getImageMatcher(File(Dataset.IMAGE_MATCHER_FILE))
     private val imageOverlay: ImageOverlay = ImageOverlayImpl(
         arrayOf(
             InnerWarpTransformer(
@@ -143,28 +143,43 @@ class MainPipeline {
         val path = userInput.map(Pair<String, *>::first)
         val bodypart = userInput.map(Pair<*, Bodypart>::second)
 
-        preprocessed = path.map(preprocessor::preprocess)
+        preprocessed = path.map(preprocessor::preprocess.withTag("Preprocessing")).withCache()
         preprocessed.doneMeans(0.2, "Classifying bone condition")
         val preprocessedVal = preprocessed.map(Uncertain<BufferedImage>::value)
 
-        boneCondition = preprocessedVal.map(boneConditionClassifier::classify)
+        boneCondition =
+            preprocessedVal.map(boneConditionClassifier::classify.withTag("BoneCondition classifier")).withCache()
 
         val bodypartView: Observable<Uncertain<BodypartView>> = Observable.combineLatest(
             preprocessedVal,
             bodypart,
-            BiFunction(bodypartViewClassifier::classify)
-        )
+            BiFunction(bodypartViewClassifier::classify.withTag("BodypartView classifier"))
+        ).withCache()
         bodypartView.doneMeans(0.4, "Looking for similar x-rays")
         val bodypartViewVal = bodypartView.map(Uncertain<BodypartView>::value)
 
+        // Output of ImageMatcher contains Files; so convert it to ImageSamples, by looking up the path in the Dataset
+        val matchingFunction =
+            { image: BufferedImage, boneCondition: BoneCondition, bpView: BodypartView, n: Int ->
+                imageMatcher.findMatchingImage(image, boneCondition, bpView, n).map {
+                    try {
+                        // throws exception if ImageSample not loaded in the dataset
+                        val imageSample = dataset.combined.getValue(it.key.toString())
+                        Rated(value = imageSample, score = it.value.toDouble())
+                    } catch (e: NoSuchElementException) {
+                        throw RuntimeException("Image ${it.key} returned by ImageMatcher is not in the dataset", e)
+                    }
+                }
+            }.withTag("ImageMatcher")
+
         similarNormal = Observable.combineLatest(
             preprocessedVal, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages,
-            Function4(imageMatcher::findMatchingImage)
-        )
+            Function4(matchingFunction)
+        ).withCache()
         similarAbnormal = Observable.combineLatest(
             preprocessedVal, Observable.just(BoneCondition.ABNORMAL), bodypartViewVal, nSimilarImages,
-            Function4(imageMatcher::findMatchingImage)
-        )
+            Function4(matchingFunction)
+        ).withCache()
 
         similarNormal.map { it.first().value }.subscribe(imageToOverlay)
         imageToOverlay.doneMeans(0.6, "Overlaying images")
@@ -174,13 +189,37 @@ class MainPipeline {
             imageToOverlay.map(ImageSample::loadPreprocessedImage),
             downsample,
             overlayPrecision,
-            Function4(imageOverlay::fitImage)
-        )
+            Function4(imageOverlay::fitImage.withTag("Overlay"))
+        ).withCache()
         overlayed.doneMeans(0.8, "Highlighting differences")
 
         // TODO Shehab: highlight differences
-        preprocessedHighlighted = overlayed.map { it.value }
+        preprocessedHighlighted = overlayed.map { it.value }.withCache()
         preprocessedHighlighted.doneMeans(1.0, "Done!")
     }
+
+    /**
+     * This passively mediates many subscriptions by using only a single subscription to the receiver Observable.
+     * Passively because 'subscribe' calls to the returned Observable do not propagate back to the receiver Observable.
+     */
+    private fun <T> Observable<T>.withCache(): Observable<T> {
+        val subject = BehaviorSubject.create<T>()
+        subscribe(subject)
+        return subject
+    }
+
+    // --- Functions for easier debugging ---
+
+    fun <R> tag(tag: String, f: () -> R): R {
+        println("STARTED:  $tag")
+        val r = f()
+        println("FINISHED: $tag")
+        return r
+    }
+
+    private fun <A, R> ((A) -> R).withTag(s: String): (A) -> R = { tag(s) { this(it) } }
+    private fun <A, B, R> ((A, B) -> R).withTag(s: String): (A, B) -> R = { a, b -> tag(s) { this(a, b) } }
+    private fun <A, B, C, D, R> ((A, B, C, D) -> R).withTag(s: String): (A, B, C, D) -> R =
+        { a, b, c, d -> tag(s) { this(a, b, c, d) } }
 
 }
