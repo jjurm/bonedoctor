@@ -20,6 +20,12 @@ model.add(densenet)
 model.add(Flatten())
 model.add(Dense(1, activation='sigmoid'))
 
+# loss function
+normal_fraction =
+abnormal_fraction =
+def weighted_binary_crossentropy(y_true, y_pred):
+    return - normal_fraction * y_true * math.log(y_pred) - abnormal_fraction * (1 - y_true) * math.log(1 - y_pred)
+
 # compile model
 print('compiling model')
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
