@@ -17,14 +17,16 @@ class Dataset @Throws(IOException::class) constructor() {
     companion object {
         const val DIR = "MURA-v1.1/"
         const val DIR_PREPROCESSED = "MURA-preprocessed/"
+        const val IMAGE_MATCHER_FILE = DIR_PREPROCESSED + "image_matcher.ser"
         private const val CSV_TRAIN_IMAGE_PATHS = DIR + "train_image_paths.csv"
         private const val CSV_VALID_IMAGE_PATHS = DIR + "valid_image_paths.csv"
         private const val VIEW_CLUSTERING_OUTPUT_DIR = "python/view_clustering/output/"
-
     }
 
     val training: Map<String, ImageSample>
     val validation: Map<String, ImageSample>
+
+    val combined: Map<String, ImageSample>
 
     private fun checkDatasetFolderExists() {
         if (!Files.isDirectory(Paths.get(DIR))) {
@@ -70,7 +72,9 @@ class Dataset @Throws(IOException::class) constructor() {
 
         // load list of all images
         training = loadImageSamples(CSV_TRAIN_IMAGE_PATHS)
-        validation = loadImageSamples(CSV_VALID_IMAGE_PATHS)
+        validation = /*loadImageSamples(CSV_VALID_IMAGE_PATHS)*/ mapOf()
+        combined = training + validation
+
         println("${training.size} training samples loaded.")
     }
 }
