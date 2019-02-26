@@ -86,3 +86,8 @@ sourceSets {
         }
     }
 }
+
+task("preprocess", dependsOn: 'classes', type: JavaExec) {
+    main = 'uk.ac.cam.cl.bravo.pipeline.PreprocessPipelineKt'
+    classpath = sourceSets.main.runtimeClasspath
+}

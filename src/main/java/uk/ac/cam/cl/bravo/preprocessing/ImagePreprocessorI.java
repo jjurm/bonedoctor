@@ -2,6 +2,7 @@ package uk.ac.cam.cl.bravo.preprocessing;
 
 import javafx.util.Pair;
 import org.jetbrains.annotations.NotNull;
+import uk.ac.cam.cl.bravo.pipeline.Confidence;
 import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
 import java.awt.image.BufferedImage;
@@ -37,6 +38,8 @@ public class ImagePreprocessorI implements ImagePreprocessor
 
         BufferedImage outputFile = srcFile;
 
+        int e =0;
+
         if (Inversion.shouldInvert(srcFile, buffFile)){
             outputFile = Inversion.invertImage(srcFile, new BufferedImage(srcFile.getWidth(),
                     srcFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
@@ -44,11 +47,16 @@ public class ImagePreprocessorI implements ImagePreprocessor
 
         observer.progressUpdate(0.10);
 
-        Pair edgeRemoval= EdgeRemoval.edgeRemoval(outputFile, new BufferedImage(outputFile.getWidth(),
-                outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
+        HashSet<Point2D> band = new HashSet<>();
 
-        outputFile = (BufferedImage) edgeRemoval.getKey();
-        HashSet<Point2D> band = (HashSet) edgeRemoval.getValue();
+        try{
+            Pair edgeRemoval= EdgeRemoval.edgeRemoval(outputFile, new BufferedImage(outputFile.getWidth(),
+                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
+            outputFile = (BufferedImage) edgeRemoval.getKey();
+            band = (HashSet) edgeRemoval.getValue();
+        }catch (EdgeDetection.EdgeDetectionError edgeDetectionError) {
+            e+=1;
+        }
 
         observer.progressUpdate(0.75);
 
@@ -58,18 +66,30 @@ public class ImagePreprocessorI implements ImagePreprocessor
 
         observer.progressUpdate(0.95);
 
-        outputFile = EdgeRemoval.colourBand(outputFile, new BufferedImage(outputFile.getWidth(),
-                outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR), band);
+        if (band.size()!=0) {
+            outputFile = EdgeRemoval.colourBand(outputFile, new BufferedImage(outputFile.getWidth(),
+                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR), band);
+        }
 
         observer.progressUpdate(0.98);
 
-        outputFile = Crop.crop(outputFile, new BufferedImage(outputFile.getWidth(),
-                outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
+        try {
+            outputFile = Crop.crop(outputFile, new BufferedImage(outputFile.getWidth(),
+                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
+        } catch (Crop.CropError cropError) {
+            e+=1;
+        }
 
         observer.progressUpdate(1.0);
 
-        // TODO Nicole: add confidence argument to the constructor below
-        return new Uncertain<>(outputFile);
+        Confidence c;
+        if (e==0)
+            c= Confidence.HIGH;
+        else if (e==1)
+            c= Confidence.MEDIUM;
+        else
+            c= Confidence.LOW;
+        return new Uncertain<>(outputFile, c);
 
     }
 

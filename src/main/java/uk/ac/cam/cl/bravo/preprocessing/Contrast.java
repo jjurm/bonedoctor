@@ -19,7 +19,7 @@ public class Contrast {
         HashMap<Integer, Integer> histoSorted = Statistics.sortByValue(histo);
 
         int bT = blackThreshold(histo);
-        int wT = whiteThreshold(histo, img.size(), bT);
+        int wT = whiteThreshold(Statistics.padded(histo), img.size(), bT);
 
         BufferedImage outputFile = new BufferedImage(srcFile.getWidth(), srcFile.getHeight(), srcFile.getType());
 

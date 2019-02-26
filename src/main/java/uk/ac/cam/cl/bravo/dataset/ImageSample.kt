@@ -12,7 +12,7 @@ class ImageSample(val path: String, val bodypartView: BodypartView) {
     val preprocessedPath: String get() = Dataset.DIR_PREPROCESSED + path.removePrefix(Dataset.DIR)
 
     fun loadImage() = ImageIO.read(File(path))
-    fun loadPreprocessedImage() = ImageIO.read(File(path))
+    fun loadPreprocessedImage() = ImageIO.read(File(preprocessedPath))
 
     init {
         if (bodypartView.bodypart !== getBodypart(path))

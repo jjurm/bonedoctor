@@ -1,12 +1,16 @@
 package uk.ac.cam.cl.bravo.preprocessing;
 
+
 import java.awt.image.BufferedImage;
 import java.util.*;
 
 class EdgeDetection
 {
 
-    public static ArrayList<Point2D> edges(BufferedImage srcFile, BufferedImage inputFile){
+    public static class EdgeDetectionError extends Exception{
+    }
+
+    public static ArrayList<Point2D> edges(BufferedImage srcFile, BufferedImage inputFile) throws EdgeDetectionError{
 
         inputFile.getGraphics().drawImage(srcFile, 0, 0, null);
 
@@ -70,6 +74,9 @@ class EdgeDetection
         for (int i =0; i<points.size(); i++)
             pts[i] = points.get(i);
 
+        if (pts.length==0)
+            throw new EdgeDetectionError();
+
         GrahamScan graham = new GrahamScan(pts);
         ArrayList<Point2D> hull = new ArrayList<>();
         for (Point2D p: graham.hull())
@@ -86,9 +93,18 @@ class EdgeDetection
 
         ArrayList<Point2D> pts = new ArrayList<>();
 
+        int b=0;
+
         for (int x =0; x<w; x++){
             for (int y = 0; y<h; y++){
-                int b = 100; //TODO: find the best threshold for the edges
+                b+=getGrayScale(inputFile.getRGB(x, y));
+            }
+        }
+
+        b = (b/(w*h))+5;
+
+        for (int x =0; x<w; x++){
+            for (int y = 0; y<h; y++){
                 if ((getGrayScale(inputFile.getRGB(x, y))>b))
                     pts.add(new Point2D(x, y));
             }
@@ -102,9 +118,7 @@ class EdgeDetection
         int g = (rgb >> 8) & 0xff;
         int b = (rgb) & 0xff;
 
-        //from https://en.wikipedia.org/wiki/Grayscale, calculating luminance
         int gray = (int)(0.2126 * r + 0.7152 * g + 0.0722 * b);
-        //int gray = (r + g + b) / 3;
 
         return gray;
     }
