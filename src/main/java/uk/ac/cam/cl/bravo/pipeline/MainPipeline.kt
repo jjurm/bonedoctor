@@ -33,12 +33,10 @@ class MainPipeline {
     /**
      * In our algorithms, there is a trade-off between performance and precision. This argument specifies the precision
      * level (higher values take longer to compute). Values are 0.0 to 1.0
-     *
-     * TODO Juraj: use this in the pipeline
      */
     val precision: Subject<Double> = BehaviorSubject.createDefault(0.5)
 
-    /** A pair of (input image, bodypart of the input image) */
+    /** A pair of (input image path, bodypart of the input image) */
     val userInput: Subject<Pair<String, Bodypart>> = BehaviorSubject.create()
 
     /**
@@ -47,7 +45,7 @@ class MainPipeline {
      * As soon as the list of similar images is computed, the first one is put to this subject.
      * If the user chooses another ImageSample for overlay, call imageToOverlay.onNext(imageChosenByUser)
      */
-    val imageToOverlay = BehaviorSubject.create<ImageSample>()
+    val imageToOverlay: Subject<ImageSample> = BehaviorSubject.create<ImageSample>()
 
     // ===== OBSERVABLES =====
     // One can subscribe to an observable to get updates/results from it,
@@ -164,7 +162,7 @@ class MainPipeline {
                 imageMatcher.findMatchingImage(image, boneCondition, bpView, n).map {
                     try {
                         // throws exception if ImageSample not loaded in the dataset
-                        val imageSample = dataset.combined.getValue(it.key.toString())
+                        val imageSample = dataset.combined.getValue(it.key.toString().replace('\\','/'))
                         Rated(value = imageSample, score = it.value.toDouble())
                     } catch (e: NoSuchElementException) {
                         throw RuntimeException("Image ${it.key} returned by ImageMatcher is not in the dataset", e)

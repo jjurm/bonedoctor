@@ -2,19 +2,13 @@ package uk.ac.cam.cl.bravo
 
 import com.jhlabs.image.GaussianFilter
 import org.apache.commons.lang3.time.StopWatch
-import uk.ac.cam.cl.bravo.classify.BodypartViewClassifier
-import uk.ac.cam.cl.bravo.classify.BodypartViewClassifierImpl
 import uk.ac.cam.cl.bravo.dataset.Bodypart
-import uk.ac.cam.cl.bravo.dataset.BoneCondition
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline
-import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
-import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI
 import uk.ac.cam.cl.bravo.util.ImageTools
 import java.awt.Point
-import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
@@ -23,8 +17,8 @@ const val PLANE_HEIGHT = PLANE_WIDTH
 val PLANE_SIZE = Point(PLANE_WIDTH, PLANE_HEIGHT)
 
 fun main(args: Array<String>) {
-    val (file1, file2) =
-        "images/in/train_XR_HAND_patient09734_study1_positive_image1_edit.png" to "images/in/train_XR_HAND_patient09734_study1_positive_image3_edit.png"
+    //val (file1, file2) =
+    //    "images/in/train_XR_HAND_patient09734_study1_positive_image1_edit.png" to "images/in/train_XR_HAND_patient09734_study1_positive_image3_edit.png"
     //    "images/in/train_XR_FOREARM_patient02116_study1_negative_image1.png" to "images/in/train_XR_FOREARM_patient02132_study1_negative_image1.png"
     //    "images/in/train_XR_SHOULDER_patient00037_study1_positive_image1_edit.png" to "images/in/train_XR_SHOULDER_patient01449_study1_negative_image2_edit.png"
     //tryOverlay(file1, file2)
