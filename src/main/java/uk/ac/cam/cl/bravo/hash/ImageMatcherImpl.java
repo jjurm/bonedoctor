@@ -10,12 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ImageMatcherImpl implements Serializable {
+public class ImageMatcherImpl implements Serializable, ImageMatcher {
 
     private HashMap<BoneCondition, HashMap<Bodypart, HashMap<BodypartView, ImageHasher>>> imageHashers;
     private HashMap<Pair<Bodypart, Integer>, ImageHasher> normalHashers;
     private HashMap<Pair<Bodypart, Integer>, ImageHasher> abnormalHashers;
 
+    @Override
+    @NotNull
     public List<Pair<File, Integer>> findMatchingImage(@NotNull BufferedImage image,
                                                        @NotNull BoneCondition boneCondition,
                                                        @NotNull BodypartView bodypartView, int n) {
