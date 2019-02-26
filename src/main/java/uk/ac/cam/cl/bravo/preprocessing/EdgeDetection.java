@@ -6,7 +6,10 @@ import java.util.*;
 class EdgeDetection
 {
 
-    public static ArrayList<Point2D> edges(BufferedImage srcFile, BufferedImage inputFile){
+    public static class EdgeDetectionError extends Exception{
+    }
+
+    public static ArrayList<Point2D> edges(BufferedImage srcFile, BufferedImage inputFile) throws EdgeDetectionError{
 
         inputFile.getGraphics().drawImage(srcFile, 0, 0, null);
 
@@ -69,6 +72,9 @@ class EdgeDetection
 
         for (int i =0; i<points.size(); i++)
             pts[i] = points.get(i);
+
+        if (pts.length==0)
+            throw new EdgeDetectionError();
 
         GrahamScan graham = new GrahamScan(pts);
         ArrayList<Point2D> hull = new ArrayList<>();

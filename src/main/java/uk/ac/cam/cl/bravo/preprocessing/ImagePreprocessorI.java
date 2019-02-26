@@ -44,11 +44,15 @@ public class ImagePreprocessorI implements ImagePreprocessor
 
         observer.progressUpdate(0.10);
 
-        Pair edgeRemoval= EdgeRemoval.edgeRemoval(outputFile, new BufferedImage(outputFile.getWidth(),
-                outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
+        HashSet<Point2D> band = new HashSet<>();
 
-        outputFile = (BufferedImage) edgeRemoval.getKey();
-        HashSet<Point2D> band = (HashSet) edgeRemoval.getValue();
+        try{
+            Pair edgeRemoval= EdgeRemoval.edgeRemoval(outputFile, new BufferedImage(outputFile.getWidth(),
+                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
+            outputFile = (BufferedImage) edgeRemoval.getKey();
+            band = (HashSet) edgeRemoval.getValue();
+        }catch (EdgeDetection.EdgeDetectionError edgeDetectionError) {
+        }
 
         observer.progressUpdate(0.75);
 
@@ -58,13 +62,18 @@ public class ImagePreprocessorI implements ImagePreprocessor
 
         observer.progressUpdate(0.95);
 
-        outputFile = EdgeRemoval.colourBand(outputFile, new BufferedImage(outputFile.getWidth(),
-                outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR), band);
+        if (band.size()!=0) {
+            outputFile = EdgeRemoval.colourBand(outputFile, new BufferedImage(outputFile.getWidth(),
+                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR), band);
+        }
 
         observer.progressUpdate(0.98);
 
-        outputFile = Crop.crop(outputFile, new BufferedImage(outputFile.getWidth(),
-                outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
+        try {
+            outputFile = Crop.crop(outputFile, new BufferedImage(outputFile.getWidth(),
+                    outputFile.getHeight(), BufferedImage.TYPE_3BYTE_BGR));
+        } catch (Crop.CropError cropError) {
+        }
 
         observer.progressUpdate(1.0);
 

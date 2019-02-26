@@ -6,7 +6,11 @@ import java.util.ArrayList;
 
 class Crop
 {
-    public static BufferedImage crop(BufferedImage srcFile, BufferedImage inputFile) {
+
+    public static class CropError extends Exception{
+    }
+
+    public static BufferedImage crop(BufferedImage srcFile, BufferedImage inputFile) throws CropError {
 
         inputFile.getGraphics().drawImage(srcFile, 0, 0, null);
 
@@ -36,6 +40,9 @@ class Crop
 
         int lcol = Math.max(0, lowerBound(columns));
         int ucol = Math.min(srcFile.getWidth()-1, upperBound(columns));
+
+        if (lcol==ucol || lrow==urow)
+            throw new CropError();
 
         return inputFile.getSubimage(lcol, lrow, ucol-lcol, urow-lrow);
     }

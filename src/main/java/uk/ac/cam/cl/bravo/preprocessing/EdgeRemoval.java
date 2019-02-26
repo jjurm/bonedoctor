@@ -9,7 +9,7 @@ import java.util.HashSet;
 
 public class EdgeRemoval {
 
-    public static Pair<BufferedImage,HashSet<Point2D>> edgeRemoval(BufferedImage srcFile, BufferedImage inputFile){
+    public static Pair<BufferedImage,HashSet<Point2D>> edgeRemoval(BufferedImage srcFile, BufferedImage inputFile) throws EdgeDetection.EdgeDetectionError {
 
         inputFile.getGraphics().drawImage(srcFile, 0, 0, null);
 
