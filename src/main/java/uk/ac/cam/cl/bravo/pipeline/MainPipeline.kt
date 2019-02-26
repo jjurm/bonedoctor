@@ -85,9 +85,9 @@ class MainPipeline {
 
     // ===== COMPONENTS =====
 
-    private val preprocessor: ImagePreprocessor = ImagePreprocessorI({
-        // TODO Juraj: handle progress updates
-    })
+    private val progress0: Subject<Double> = BehaviorSubject.createDefault(0.0)
+
+    private val preprocessor: ImagePreprocessor = ImagePreprocessorI { progress0.onNext(it * 0.2) }
     private val boneConditionClassifier: BoneConditionClassifier = BoneConditionClassifierImpl()
     private val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl()
     private var imageMatcher: ImageMatcher = ImageMatcherImpl.getImageMatcher(File(Dataset.IMAGE_MATCHER_FILE))
@@ -112,9 +112,8 @@ class MainPipeline {
     init {
         // === Subjects ===
 
-        // progress0 has type BehaviorSubject<Double> (so that we can call .onNext(...))
+        // progress0 has type Subject<Double> (so that we can call .onNext(...))
         // but the exposed 'progress' variable is just Observable
-        val progress0 = BehaviorSubject.createDefault(0.0)
         progress = progress0
         val status0 = BehaviorSubject.createDefault("Program started")
         status = status0
