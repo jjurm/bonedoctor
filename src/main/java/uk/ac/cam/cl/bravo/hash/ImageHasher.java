@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
 
 public class ImageHasher implements java.io.Serializable {
     private static final int MATCH_THRESHOLD = 10;
@@ -49,7 +50,7 @@ public class ImageHasher implements java.io.Serializable {
 
                 if (hamming < minHamming){
                     minHamming = hamming;
-                    matches = new ArrayList<>();
+                    matches.clear();
                     matches.add(p.getKey());
                     break; //prevent matching twice to same image
                 } else if (hamming == minHamming){
@@ -65,46 +66,30 @@ public class ImageHasher implements java.io.Serializable {
     public ArrayList<File> getNMatches(BufferedImage img, int n){
         long[] rotations = rotatedAverageHashes(img);
 
-        ArrayList<File> matches = new ArrayList<>();
-        int minHamming = Integer.MAX_VALUE, hamming;
+        // Keep a set of matches, ordered by hamming
+        TreeSet<Pair<Integer, File>> matches = new TreeSet<>(
+                Comparator.comparing(Pair<Integer, File>::getKey).thenComparing(Pair::getValue)
+        );
+
+        int minHamming;
         long imgHash;
         for (Pair<File, Long> p : simpleHash){
             imgHash = p.getValue();
+            minHamming = Integer.MAX_VALUE;
             for(int i = 0; i < rotations.length; i++) {
-                hamming = Long.bitCount(rotations[i] ^ imgHash);
-
-                if (hamming < minHamming){
-                    minHamming = hamming;
-                    matches = new ArrayList<>();
-                    matches.add(p.getKey());
-                    break; //prevent matching twice to same image
-                } else if (hamming == minHamming){
-                    matches.add(p.getKey());
-                    break; //prevent matching twice to same image
-                }
+                minHamming = Math.min(Long.bitCount(rotations[i] ^ imgHash), minHamming);
+            }
+            if (minHamming < MATCH_THRESHOLD) {
+                matches.add(new Pair<>(minHamming, p.getKey()));
+                while (matches.size() > n) matches.pollLast();
             }
         }
 
-        // hamming and minhamming have different meanings in the context below
-        hamming = minHamming + 1;
-        while (matches.size() < n && hamming < MATCH_THRESHOLD){
-            for (Pair<File, Long> p : simpleHash){
-                if (matches.contains(p.getKey())){
-                    continue;
-                } else {
-                    imgHash = p.getValue();
-                    minHamming = Integer.MAX_VALUE;
-                    for (int i = 0; i < rotations.length; i++) {
-                            minHamming = Math.min(Long.bitCount(rotations[i] ^ imgHash), minHamming);
-                    }
-                    if (hamming == minHamming){
-                        matches.add(p.getKey());
-                    }
-                }
-            }
+        ArrayList<File> ret = new ArrayList<>();
+        for (Pair<Integer, File> match : matches) {
+            ret.add(match.getValue());
         }
-
-        return matches;
+        return ret;
     }
 
     public List<Pair<File, Integer>> getNPairs(BufferedImage img, int n){
