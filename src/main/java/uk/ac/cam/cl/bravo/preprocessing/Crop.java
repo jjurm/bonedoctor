@@ -41,7 +41,7 @@ class Crop
         int lcol = Math.max(0, lowerBound(columns));
         int ucol = Math.min(srcFile.getWidth()-1, upperBound(columns));
 
-        if (lcol==ucol || lrow==urow)
+        if (lcol>=ucol || lrow>=urow)
             throw new CropError();
 
         return inputFile.getSubimage(lcol, lrow, ucol-lcol, urow-lrow);
@@ -53,7 +53,7 @@ class Crop
             if (!vals.get(i))
                 return i-1;
         }
-        return -2; //all black...oops
+        return Integer.MIN_VALUE; //all black...oops
     }
 
     private static int upperBound(ArrayList<Boolean> vals){
@@ -62,7 +62,7 @@ class Crop
             if (!vals.get(i))
                 return i+1;
         }
-        return -1; //all black...oops
+        return Integer.MAX_VALUE; //all black...oops
     }
 
 }
