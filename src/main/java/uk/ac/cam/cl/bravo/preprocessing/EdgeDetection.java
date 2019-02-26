@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.preprocessing;
 
+
 import java.awt.image.BufferedImage;
 import java.util.*;
 
@@ -92,9 +93,18 @@ class EdgeDetection
 
         ArrayList<Point2D> pts = new ArrayList<>();
 
+        int b=0;
+
         for (int x =0; x<w; x++){
             for (int y = 0; y<h; y++){
-                int b = 100;
+                b+=getGrayScale(inputFile.getRGB(x, y));
+            }
+        }
+
+        b = (b/(w*h))+5;
+
+        for (int x =0; x<w; x++){
+            for (int y = 0; y<h; y++){
                 if ((getGrayScale(inputFile.getRGB(x, y))>b))
                     pts.add(new Point2D(x, y));
             }
@@ -108,9 +118,7 @@ class EdgeDetection
         int g = (rgb >> 8) & 0xff;
         int b = (rgb) & 0xff;
 
-        //from https://en.wikipedia.org/wiki/Grayscale, calculating luminance
         int gray = (int)(0.2126 * r + 0.7152 * g + 0.0722 * b);
-        //int gray = (r + g + b) / 3;
 
         return gray;
     }
