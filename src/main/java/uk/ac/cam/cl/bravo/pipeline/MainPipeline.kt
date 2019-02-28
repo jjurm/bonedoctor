@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.pipeline
 
+import com.jhlabs.image.FlipFilter
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function4
@@ -18,6 +19,7 @@ import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI
 import java.awt.image.BufferedImage
 import java.io.File
+import javax.imageio.ImageIO
 
 /**
  * Responsible: Juraj Micko (jm2186)
@@ -69,6 +71,8 @@ class MainPipeline {
     val similarAbnormal: Observable<List<Rated<ImageSample>>>
 
     /** The result of the overlay algorithm, taking 'imageToOverlay' as the input. */
+    val overlaidOriginal: Observable<Rated<BufferedImage>>
+    val overlaidMirrored: Observable<Rated<BufferedImage>>
     val overlaid: Observable<Rated<BufferedImage>>
 
     /** The 'overlaid' image modified to highlight differences from 'preprocessed' */
@@ -155,14 +159,15 @@ class MainPipeline {
         ).withCache()
         bodypartView.doneMeans(0.4, "Looking for similar x-rays")
         val bodypartViewVal = bodypartView.map(Uncertain<BodypartView>::value)
+        bodypartViewVal.subscribe { println("Classified view: ${it.value}") }
 
         // Output of ImageMatcher contains Files; so convert it to ImageSamples, by looking up the path in the Dataset
         val matchingFunction =
             { image: BufferedImage, boneCondition: BoneCondition, bpView: BodypartView, n: Int ->
-                imageMatcher.findMatchingImage(image, boneCondition, bpView, n).map {
+                imageMatcher.findMatchingImage(image, boneCondition, bpView, n, false).map {
                     try {
                         // throws exception if ImageSample not loaded in the dataset
-                        val imageSample = dataset.combined.getValue(it.key.toString().replace('\\','/'))
+                        val imageSample = dataset.combined.getValue(it.key.toString().replace('\\', '/'))
                         Rated(value = imageSample, score = it.value.toDouble())
                     } catch (e: NoSuchElementException) {
                         throw RuntimeException("Image ${it.key} returned by ImageMatcher is not in the dataset", e)
@@ -170,25 +175,41 @@ class MainPipeline {
                 }
             }.withTag("ImageMatcher")
 
+        // TODO Juraj: choose original or preprocessed image for ImageMatcher
         similarNormal = Observable.combineLatest(
-            preprocessedVal, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages,
+            path.map { ImageIO.read(File(it)) }, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages,
             Function4(matchingFunction)
         ).withCache()
         similarAbnormal = Observable.combineLatest(
-            preprocessedVal, Observable.just(BoneCondition.ABNORMAL), bodypartViewVal, nSimilarImages,
+            path.map { ImageIO.read(File(it)) },
+            Observable.just(BoneCondition.ABNORMAL),
+            bodypartViewVal,
+            nSimilarImages,
             Function4(matchingFunction)
         ).withCache()
 
         similarNormal.map { it.first().value }.subscribe(imageToOverlay)
         imageToOverlay.doneMeans(0.6, "Overlaying images")
 
-        overlaid = Observable.combineLatest(
+        val imageToOverlayLoaded = imageToOverlay.map(ImageSample::loadPreprocessedImage).withCache()
+        overlaidOriginal = Observable.combineLatest(
             preprocessedVal,
-            imageToOverlay.map(ImageSample::loadPreprocessedImage),
+            imageToOverlayLoaded,
             downsample,
             overlayPrecision,
             Function4(imageOverlay::fitImage.withTag("Overlay"))
         ).withCache()
+        overlaidMirrored = Observable.combineLatest(
+            preprocessedVal,
+            imageToOverlayLoaded.map { FlipFilter(FlipFilter.FLIP_H).filter(it, null) },
+            downsample,
+            overlayPrecision,
+            Function4(imageOverlay::fitImage.withTag("OverlayMirrored"))
+        ).withCache()
+        overlaid = Observable.combineLatest(
+            overlaidOriginal,
+            overlaidMirrored,
+            BiFunction { a, b -> listOf(a, b).minBy { it.score }!! })
         overlaid.doneMeans(0.8, "Highlighting differences")
 
         // TODO Shehab: highlight differences
