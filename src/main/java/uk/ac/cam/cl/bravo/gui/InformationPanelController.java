@@ -9,6 +9,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
@@ -22,9 +23,19 @@ public class InformationPanelController {
     private PipelineObserver pipelineObserver;
     private MatchListController matchListController;
     private AnalysisController analysisController;
+
+    private static String INPUT = "Input Image";
+    private static String NORMAL = "Best Match, Normal";
+    private static String ABNORMAL = "Best Match, Abormal";
+    private static String ABNORMAL_OVER = "Overlay, Abormal";
+    private static String NORMAL_OVER = "Overlay, Normal";
+
     @FXML
     GridPane infoGrid;
-
+    @FXML
+    FlowPane inputFlow;
+    @FXML
+    FlowPane bestMatchFlow;
 
     public InformationPanelController(Stage stage, PipelineObserver pipelineObserver) {
         this.stage = stage;
@@ -45,7 +56,6 @@ public class InformationPanelController {
 
             // Child controller actions
             matchListController.launch();
-            matchListController.setAnalysisController(this.analysisController);
             pipelineObserver.addMatchListController(matchListController);
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,6 +64,22 @@ public class InformationPanelController {
 
     public void setAnalysisController(AnalysisController analysisController) {
         this.analysisController = analysisController;
+        matchListController.setAnalysisController(analysisController);
     }
 
+    public void setView(String choiceText) {
+        matchListController.setView(choiceText);
+        matchListController.launch();
+        if (choiceText == INPUT) {
+            inputFlow.setVisible(true);
+            inputFlow.setManaged(true);
+            bestMatchFlow.setVisible(false);
+            bestMatchFlow.setManaged(false);
+        } else {
+            inputFlow.setVisible(false);
+            inputFlow.setVisible(false);
+            bestMatchFlow.setVisible(true);
+            bestMatchFlow.setManaged(true);
+        }
+    }
 }

@@ -72,46 +72,16 @@ public class AnalysisController {
     public void launch() {
         try {
             // Initialize controller
-//            FXMLLoader matchListLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/matchList.fxml"));
-//            matchListController = new MatchListController(stage, pipelineObserver);
-//            matchListLoader.setController(matchListController);
-//            Parent matchListFXML = matchListLoader.load();
-//
-//            matchListController.getMatches().setPrefHeight(200);
-//
-//            ObservableList<String> items = FXCollections.observableArrayList(INPUT, NORMAL, ABNORMAL, NORMAL_OVER, ABNORMAL_OVER);
-//
-//            grid.add(matchListFXML, 0, 2);
-//            pane1choice.setItems(items);
-//            pane2choice.setItems(items);
-//            pane3choice.setItems(items);
-//
-//            // Child controller actions
-//            matchListController.launch();
-//            matchListController.setAnalysisController(this);
-//            pipelineObserver.addMatchListController(matchListController);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
             FXMLLoader informationPanelLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/informationPanel.fxml"));
             informationPanelController = new InformationPanelController(stage, pipelineObserver);
             informationPanelLoader.setController(informationPanelController);
             Parent informationPanelFXML = informationPanelLoader.load();
-
-//            matchListController.getMatches().setPrefHeight(200);
 
             grid.add(informationPanelFXML, 0, 2);
 
             // Child controller actions
             informationPanelController.launch();
             informationPanelController.setAnalysisController(this);
-//            pipelineObserver.addMatchListController(matchListController);
-
-//            matchListController.launch();
-//            matchListController.setAnalysisController(this);
-//            pipelineObserver.addMatchListController(matchListController);
-
 
             ObservableList<String> items = FXCollections.observableArrayList(INPUT, NORMAL, ABNORMAL, NORMAL_OVER, ABNORMAL_OVER);
 
@@ -169,6 +139,7 @@ public class AnalysisController {
     @FXML
     protected void handleSelectViewPane1(ActionEvent e) {
         String choiceText = pane1choice.getSelectionModel().getSelectedItem().toString();
+        informationPanelController.setView(choiceText);
         System.out.println(choiceText);
         System.out.println(choiceText == INPUT);
         if (choiceText == INPUT) {

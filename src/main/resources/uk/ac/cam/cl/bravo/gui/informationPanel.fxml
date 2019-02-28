@@ -14,16 +14,22 @@
       <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
    </rowConstraints>
    <children>
-      <FlowPane GridPane.columnIndex="0" GridPane.rowIndex="0">
+      <FlowPane fx:id="inputFlow" GridPane.columnIndex="0" GridPane.rowIndex="0">
          <children>
             <Label text="Bone Condition: " textFill="WHITE">
                <font>
                   <Font size="18.0" />
-               </font></Label>
+               </font>
+               <padding>
+                  <Insets left="5.0" top="5.0" />
+               </padding></Label>
             <Label fx:id="boneCondition" text="Abnormal" textFill="WHITE">
                <font>
                   <Font size="18.0" />
-               </font></Label>
+               </font>
+               <padding>
+                  <Insets top="5.0" />
+               </padding></Label>
             <Label text="Confidence: " textFill="WHITE">
                <opaqueInsets>
                   <Insets />
@@ -34,12 +40,30 @@
                <font>
                   <Font size="18.0" />
                </font>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
             </Label>
             <Label fx:id="boneConditionConfidence" text="High" textFill="WHITE">
                <font>
                   <Font size="18.0" />
-               </font></Label>
+               </font>
+               <padding>
+                  <Insets top="5.0" />
+               </padding></Label>
          </children></FlowPane>
+      <FlowPane fx:id="bestMatchFlow" prefHeight="200.0" prefWidth="200.0">
+         <children>
+            <Label text="We found these matches: " textFill="WHITE">
+               <font>
+                  <Font size="18.0" />
+               </font>
+               <padding>
+                  <Insets left="5.0" top="5.0" />
+               </padding>
+            </Label>
+         </children>
+      </FlowPane>
    </children>
    <columnConstraints>
       <ColumnConstraints hgrow="ALWAYS" />

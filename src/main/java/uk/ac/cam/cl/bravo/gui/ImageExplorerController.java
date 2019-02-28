@@ -153,6 +153,7 @@ public class ImageExplorerController {
 
     public void setAnalysisController(AnalysisController analysisController){
         this.analysisController = analysisController;
+
     }
 
 

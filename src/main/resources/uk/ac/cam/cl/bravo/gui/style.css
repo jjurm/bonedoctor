@@ -20,21 +20,17 @@
 .image-view {
  -fx-padding: 5px;
  -fx-border-width: 2px;
- -fx-border-color: red;
+ -fx-border-color: black;
 }
 
 #explorerContainer {
- -fx-border-width: 2px;
- -fx-border-color: green;
 }
 
 
 #flow-pane {
-  -fx-border-width: 2px;
-  -fx-border-color: white;
 }
 
 #infoGrid {
   -fx-border-width: 2px;
-  -fx-border-color: red;
+  -fx-border-color: black;
 }

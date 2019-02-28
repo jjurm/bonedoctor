@@ -19,15 +19,21 @@ public class MatchListController {
     private Stage stage;
     private PipelineObserver pipelineObserver;
     private AnalysisController analysisController;
+    private List<Image> imgNormalList = new ArrayList<>();
+    private List<Image> imgAbormalList = new ArrayList<>();
 
+    // TODO: Ane - Create enum class?
+    private static String INPUT = "Input Image";
+    private static String NORMAL = "Best Match, Normal";
+    private static String ABNORMAL = "Best Match, Abormal";
+    private static String ABNORMAL_OVER = "Overlay, Abormal";
+    private static String NORMAL_OVER = "Overlay, Normal";
+
+    private String view;
 
     public MatchListController(Stage stage, PipelineObserver pipelineObserver) {
         this.stage = stage;
         this.pipelineObserver = pipelineObserver;
-    }
-
-    public void launch() {
-        // ------ CREATE SCROLLABLE LIST VIEW --------
 
         Image img1 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img2.png"));
         Image img2 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img3.png"));
@@ -38,19 +44,44 @@ public class MatchListController {
         Image img7 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
         Image img8 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img5.png"));
         Image img9 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
-        List<Image> imgList = new ArrayList<>();
-        imgList.add(img1);
-        imgList.add(img2);
-        imgList.add(img3);
-        imgList.add(img4);
-        imgList.add(img5);
-        imgList.add(img6);
-        imgList.add(img7);
-        imgList.add(img8);
-        imgList.add(img9);
+        imgNormalList.add(img1);
+        imgNormalList.add(img2);
+        imgNormalList.add(img3);
+        imgNormalList.add(img4);
+        imgNormalList.add(img5);
+        imgNormalList.add(img6);
+        imgNormalList.add(img7);
+        imgNormalList.add(img8);
+        imgNormalList.add(img9);
+
+        imgAbormalList.add(img9);
+        imgAbormalList.add(img8);
+        imgAbormalList.add(img7);
+        imgAbormalList.add(img6);
+        imgAbormalList.add(img5);
+        imgAbormalList.add(img4);
+        imgAbormalList.add(img3);
+        imgAbormalList.add(img2);
+        imgAbormalList.add(img1);
+    }
+
+    public void setView(String view) {
+        this.view = view;
+    }
+
+    public void launch() {
+        // ------ CREATE SCROLLABLE LIST VIEW --------
 
         ObservableList<String> items = FXCollections.observableArrayList("img1.png", "img2.png", "img3.png", "img4.png", "img5.png", "img6.png", "img7.png", "img8.png", "img9.png");
         matches.setItems(items);
+
+        List<Image> imgList;
+        if (view == NORMAL) {
+            imgList = imgNormalList;
+        } else {
+            imgList = imgAbormalList;
+        }
+
         matches.setCellFactory(param -> new ListCell<String>() {
             private ImageView matchView = new ImageView();
 
@@ -71,9 +102,7 @@ public class MatchListController {
                     setGraphic(matchView);
                 }
             }
-
         });
-
 
         // ----- ENABLE SELECT NEW MATCH -----
 
