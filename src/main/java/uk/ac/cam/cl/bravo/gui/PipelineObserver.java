@@ -24,9 +24,9 @@ public class PipelineObserver  {
     private MainPipeline mainPipeline;
 
     public PipelineObserver() {
-        mainPipeline.getBoneCondition().subscribe(item -> {reportBoneCondition(item);});
-        mainPipeline.getSimilarNormal().subscribe(item -> {updateNormalList(item);});
-        mainPipeline.getSimilarAbnormal().subscribe(item -> {updateAbormalList(item);});
+//        mainPipeline.getBoneCondition().subscribe(item -> {reportBoneCondition(item);});
+//        mainPipeline.getSimilarNormal().subscribe(item -> {updateNormalList(item);});
+//        mainPipeline.getSimilarAbnormal().subscribe(item -> {updateAbormalList(item);});
     }
 
     public void overallProgress(double progress) {
@@ -58,7 +58,7 @@ public class PipelineObserver  {
     }
 
     public void updateAbormalList(List<Rated<ImageSample>> imageSampleList) {
-        mainController.setAbormalList(imageSampleList);
+        mainController.setAbnormalList(imageSampleList);
     }
 
     public void addUploadController(UploadController ctrl) {

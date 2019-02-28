@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<Pane stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" fx:id="container" xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      VBox.vgrow="ALWAYS" >
-    <ImageView xmlns="http://javafx.com/javafx"
-               xmlns:fx="http://javafx.com/fxml" fx:id="imageView" pickOnBounds="true" preserveRatio="true"
-    />
-</Pane>
+<GridPane fx:id="explorerContainer" alignment="CENTER" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+    <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="true" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" />
+   <columnConstraints>
+      <ColumnConstraints />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+   </rowConstraints>
+</GridPane>

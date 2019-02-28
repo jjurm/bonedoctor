@@ -57,9 +57,9 @@ public class MainController {
             // Child controller actions
             analysisController.setPaneImage(analysisController.pane1, img);
             analysisController.setMainController(this);
-            inputImage = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/bowtie.jpg"));
-            bestMatchAbnormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
-            bestMatchNormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
+            inputImage = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img2.png"));
+            bestMatchAbnormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img3.png"));
+            bestMatchNormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img4.png"));
             analysisController.setPaneImage(analysisController.pane2, bestMatchAbnormal);
             analysisController.setPaneImage(analysisController.pane3, bestMatchNormal);
             analysisController.showThirdExplorer(false);
@@ -98,7 +98,7 @@ public class MainController {
         normalList = imageSamples;
     }
 
-    public void setAbormalList(List<Rated<ImageSample>> imageSamples) {
+    public void setAbnormalList(List<Rated<ImageSample>> imageSamples) {
         abnormalList = imageSamples;
     }
 
@@ -108,7 +108,7 @@ public class MainController {
         return writableImage;
     }
 
-    public Image getBestMatchAbormal() {
+    public Image getBestMatchAbnormal() {
         BufferedImage img = abnormalList.get(0).getValue().loadImage();
         WritableImage writableImage = SwingFXUtils.toFXImage(img, null);
         return writableImage;

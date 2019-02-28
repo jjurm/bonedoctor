@@ -2,10 +2,12 @@ package uk.ac.cam.cl.bravo.gui;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
@@ -15,8 +17,12 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 
 public class AnalysisController {
@@ -98,19 +104,7 @@ public class AnalysisController {
             imageExplorerLoader.setController(imageExplorerController);
             Parent imageExplorerFXML = imageExplorerLoader.load();
 
-            if (pane.getChildren().size() > 1) {
-                pane.getChildren().clear();
-                if (pane.getId().equals("pane1")) {
-                    pane.add(pane1choice, 0, 0);
-                } else if (pane.getId().equals("pane2")) {
-                    pane.add(pane2choice, 0, 0);
-                } else if (pane.getId().equals("pane3")) {
-                    pane.add(pane3choice, 0, 0);
-                }
-                pane.add(imageExplorerFXML, 0, 1);
-            } else {
-                pane.add(imageExplorerFXML, 0, 1);
-            }
+            pane.add(imageExplorerFXML, 0, 1);
 
             // Child controller actions
             imageExplorerController.setImage(imgFile);
@@ -188,5 +182,20 @@ public class AnalysisController {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+    }
+
+    public void handleSaveFile(ActionEvent e) {
+        Image img = mainController.getInputImage();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Image");
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(img,
+                        null), "png", file);
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
     }
 }

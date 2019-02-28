@@ -1,14 +1,35 @@
 #container {
-    -fx-border-color: red;
+    -fx-background-color: #646464;;
     -fx-border-width: 2px;
 }
 
-#imageView {
-    -fx-border-color: red;
-    -fx-border-width: 2px;
+.list-view .list-cell:even {
+    -fx-background-color: #646464;
+    -fx-text-fill: black;
 }
 
-#pane1, #pane2 {
-    -fx-border-color: black;
-    -fx-border-width: 2px;
+.list-view .list-cell:odd {
+    -fx-background-color: #545454;
+    -fx-text-fill: black;
+}
+
+#matches .list-cell {
+    -fx-alignment: center;
+}
+
+.image-view {
+ -fx-padding: 5px;
+ -fx-border-width: 2px;
+ -fx-border-color: red;
+}
+
+#explorerContainer {
+ -fx-border-width: 2px;
+ -fx-border-color: green;
+}
+
+
+#flow-pane {
+  -fx-border-width: 2px;
+  -fx-border-color: white;
 }

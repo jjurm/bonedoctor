@@ -29,16 +29,27 @@ public class MatchListController {
     public void launch() {
         // ------ CREATE SCROLLABLE LIST VIEW --------
 
-        Image img1 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/glasses.jpg"));
-        Image img2 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/bowtie.jpg"));
-        Image img3 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/superthumb.jpg"));
+        Image img1 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img2.png"));
+        Image img2 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img3.png"));
+        Image img3 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img4.png"));
+        Image img4 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img5.png"));
+        Image img5 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
+        Image img6 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img5.png"));
+        Image img7 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
+        Image img8 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img5.png"));
+        Image img9 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
         List<Image> imgList = new ArrayList<>();
         imgList.add(img1);
         imgList.add(img2);
         imgList.add(img3);
+        imgList.add(img4);
+        imgList.add(img5);
+        imgList.add(img6);
+        imgList.add(img7);
+        imgList.add(img8);
+        imgList.add(img9);
 
-        ObservableList<String> items = FXCollections.observableArrayList (
-                "RUBY", "APPLE", "VISTA");
+        ObservableList<String> items = FXCollections.observableArrayList("img1.png", "img2.png", "img3.png", "img4.png", "img5.png", "img6.png", "img7.png", "img8.png", "img9.png");
         matches.setItems(items);
         matches.setCellFactory(param -> new ListCell<String>() {
             private ImageView matchView = new ImageView();

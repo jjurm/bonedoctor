@@ -20,7 +20,7 @@ public class ImageExplorerController {
     double height;
 
     @FXML
-    private Pane container;
+    private GridPane explorerContainer;
 
     @FXML
     private ImageView imageView;
@@ -97,15 +97,15 @@ public class ImageExplorerController {
             }
         });
 
-        GridPane.setVgrow(container, Priority.ALWAYS);
-        GridPane.setHgrow(container, Priority.ALWAYS);
-        ReadOnlyDoubleProperty gridWidth = ((GridPane) container.getParent()).widthProperty();
-        ReadOnlyDoubleProperty gridHeight = ((GridPane) container.getParent()).heightProperty();
+        GridPane.setVgrow(explorerContainer, Priority.ALWAYS);
+        GridPane.setHgrow(explorerContainer, Priority.ALWAYS);
+        ReadOnlyDoubleProperty gridWidth = ((GridPane) explorerContainer.getParent()).widthProperty();
+        ReadOnlyDoubleProperty gridHeight = ((GridPane) explorerContainer.getParent()).heightProperty();
         imageView.fitWidthProperty().bind(gridWidth);
-        imageView.fitHeightProperty().bind(gridHeight);
+        imageView.fitHeightProperty().bind(gridHeight.add(-30));
 
-        System.out.println("Height:" + container.heightProperty());
-        System.out.println("Width:" + container.widthProperty());
+        System.out.println("Height:" + explorerContainer.heightProperty());
+        System.out.println("Width:" + explorerContainer.widthProperty());
 
     }
 
@@ -155,8 +155,5 @@ public class ImageExplorerController {
         this.analysisController = analysisController;
     }
 
-    public Pane getContainer() {
-        return this.container;
-    }
 
 }
