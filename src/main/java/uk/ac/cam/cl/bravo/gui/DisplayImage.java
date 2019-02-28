@@ -21,6 +21,7 @@ public class DisplayImage {
      * they are next to each other)
      */
     private static AtomicInteger xLocation = new AtomicInteger(5);
+    private static int screenWidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
 
     public DisplayImage(@NotNull BufferedImage img) {
         this(img, null);
@@ -34,7 +35,7 @@ public class DisplayImage {
         lbl.setIcon(icon);
         frame.add(lbl);
         frame.pack();
-        frame.setLocation(xLocation.getAndAdd(img.getWidth() + 11), 50);
+        frame.setLocation(xLocation.getAndUpdate(v -> (v + img.getWidth() + 11) % (screenWidth - 11)), 50);
         frame.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent ke) {  // handler
                 if (ke.getKeyCode() == KeyEvent.VK_ESCAPE) {
