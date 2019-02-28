@@ -62,6 +62,7 @@ public class AnalysisController {
     private ComboBox pane2choice;
     @FXML
     private ComboBox pane3choice;
+    private InformationPanelController informationPanelController;
 
     public AnalysisController(Stage stage, PipelineObserver pipelineObserver) {
         this.stage = stage;
@@ -71,24 +72,53 @@ public class AnalysisController {
     public void launch() {
         try {
             // Initialize controller
-            FXMLLoader matchListLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/matchList.fxml"));
-            matchListController = new MatchListController(stage, pipelineObserver);
-            matchListLoader.setController(matchListController);
-            Parent matchListFXML = matchListLoader.load();
+//            FXMLLoader matchListLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/matchList.fxml"));
+//            matchListController = new MatchListController(stage, pipelineObserver);
+//            matchListLoader.setController(matchListController);
+//            Parent matchListFXML = matchListLoader.load();
+//
+//            matchListController.getMatches().setPrefHeight(200);
+//
+//            ObservableList<String> items = FXCollections.observableArrayList(INPUT, NORMAL, ABNORMAL, NORMAL_OVER, ABNORMAL_OVER);
+//
+//            grid.add(matchListFXML, 0, 2);
+//            pane1choice.setItems(items);
+//            pane2choice.setItems(items);
+//            pane3choice.setItems(items);
+//
+//            // Child controller actions
+//            matchListController.launch();
+//            matchListController.setAnalysisController(this);
+//            pipelineObserver.addMatchListController(matchListController);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
-            matchListController.getMatches().setPrefHeight(200);
+            FXMLLoader informationPanelLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/informationPanel.fxml"));
+            informationPanelController = new InformationPanelController(stage, pipelineObserver);
+            informationPanelLoader.setController(informationPanelController);
+            Parent informationPanelFXML = informationPanelLoader.load();
+
+//            matchListController.getMatches().setPrefHeight(200);
+
+            grid.add(informationPanelFXML, 0, 2);
+
+            // Child controller actions
+            informationPanelController.launch();
+            informationPanelController.setAnalysisController(this);
+//            pipelineObserver.addMatchListController(matchListController);
+
+//            matchListController.launch();
+//            matchListController.setAnalysisController(this);
+//            pipelineObserver.addMatchListController(matchListController);
+
 
             ObservableList<String> items = FXCollections.observableArrayList(INPUT, NORMAL, ABNORMAL, NORMAL_OVER, ABNORMAL_OVER);
 
-            grid.add(matchListFXML, 0, 2);
             pane1choice.setItems(items);
             pane2choice.setItems(items);
             pane3choice.setItems(items);
 
-            // Child controller actions
-            matchListController.launch();
-            matchListController.setAnalysisController(this);
-            pipelineObserver.addMatchListController(matchListController);
         } catch (IOException e) {
             e.printStackTrace();
         }

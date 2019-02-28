@@ -17,13 +17,13 @@
   </columnConstraints>
   <rowConstraints>
     <RowConstraints minHeight="30.0" vgrow="ALWAYS" />
-    <RowConstraints minHeight="30.0" vgrow="ALWAYS" />
+    <RowConstraints minHeight="150.0" vgrow="ALWAYS" />
       <RowConstraints vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
       <GridPane fx:id="pane1" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.vgrow="ALWAYS">
          <children>
-            <FlowPane id="flow-pane" alignment="CENTER" prefHeight="200.0" prefWidth="200.0">
+            <FlowPane id="flow-pane" alignment="CENTER" prefHeight="200.0" prefWidth="200.0" >
                <children>
                   <ComboBox fx:id="pane1choice" minHeight="30.0" onAction="#handleSelectViewPane1" prefHeight="30.0" promptText="- Select View -" />
                   <Button alignment="CENTER" ellipsisString="Export" minHeight="30.0" mnemonicParsing="false" onAction="#handleSaveFile" text="Export" textAlignment="CENTER" />
@@ -87,8 +87,8 @@
          <children>
             <FlowPane alignment="CENTER">
                <children>
-                  <ComboBox fx:id="pane3choice" onAction="#handleSelectViewPane3" promptText="- Select View -" minHeight="30.0"/>
-                  <Button alignment="CENTER" ellipsisString="Export" minHeight="30.0" mnemonicParsing="false" onAction="#handleSaveFile" text="Export" textAlignment="CENTER"  />
+                  <ComboBox fx:id="pane3choice" minHeight="30.0" onAction="#handleSelectViewPane3" promptText="- Select View -" />
+                  <Button alignment="CENTER" ellipsisString="Export" minHeight="30.0" mnemonicParsing="false" onAction="#handleSaveFile" text="Export" textAlignment="CENTER" />
                </children>
             </FlowPane>
          </children>
