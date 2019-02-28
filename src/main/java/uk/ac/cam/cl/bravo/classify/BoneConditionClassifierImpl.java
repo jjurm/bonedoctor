@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class BoneConditionClassifierImpl implements BoneConditionClassifier {
     private final String inputNodeName = "densenet169_input";
     private final String outputNodeName = "dense_1/Sigmoid";
-    private String graphDefFilename = "python/abnormality_classifier/BoneConeditionClassifier.pb";
+    private String graphDefFilename = "python/abnormality_classifier/BoneConditionClassifier.pb";
 
     @Override
     @NotNull
