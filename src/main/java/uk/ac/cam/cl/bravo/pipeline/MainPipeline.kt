@@ -69,9 +69,9 @@ class MainPipeline {
     val similarAbnormal: Observable<List<Rated<ImageSample>>>
 
     /** The result of the overlay algorithm, taking 'imageToOverlay' as the input. */
-    val overlayed: Observable<Rated<BufferedImage>>
+    val overlaid: Observable<Rated<BufferedImage>>
 
-    /** The 'overlayed' image modified to highlight differences from 'preprocessed' */
+    /** The 'overlaid' image modified to highlight differences from 'preprocessed' */
     val preprocessedHighlighted: Observable<BufferedImage>
 
 
@@ -110,6 +110,7 @@ class MainPipeline {
     )
 
     init {
+        // TODO Juraj: implement parallel execution
         // === Subjects ===
 
         // progress0 has type Subject<Double> (so that we can call .onNext(...))
@@ -181,17 +182,17 @@ class MainPipeline {
         similarNormal.map { it.first().value }.subscribe(imageToOverlay)
         imageToOverlay.doneMeans(0.6, "Overlaying images")
 
-        overlayed = Observable.combineLatest(
+        overlaid = Observable.combineLatest(
             preprocessedVal,
             imageToOverlay.map(ImageSample::loadPreprocessedImage),
             downsample,
             overlayPrecision,
             Function4(imageOverlay::fitImage.withTag("Overlay"))
         ).withCache()
-        overlayed.doneMeans(0.8, "Highlighting differences")
+        overlaid.doneMeans(0.8, "Highlighting differences")
 
         // TODO Shehab: highlight differences
-        preprocessedHighlighted = overlayed.map { it.value }.withCache()
+        preprocessedHighlighted = overlaid.map { it.value }.withCache()
         preprocessedHighlighted.doneMeans(1.0, "Done!")
     }
 

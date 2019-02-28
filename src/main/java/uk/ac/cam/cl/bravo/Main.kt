@@ -54,8 +54,12 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
 
     val pipeline = MainPipeline()
     pipeline.status.subscribe(::println)
-    pipeline.preprocessed.subscribe { DisplayImage(it.value, "Confidence: ${it.confidence}") }
-    pipeline.overlayed.subscribe { DisplayImage(it.value, "Score: ${it.score}") }
+    pipeline.preprocessed.subscribe { DisplayImage(it.value, "Preprocessed (confidence: ${it.confidence})") }
+    pipeline.boneCondition.subscribe { println("BoneCondition: ${it.value}, confidence: ${it.confidence}") }
+    pipeline.similarNormal.subscribe { it.forEachIndexed { i, img ->
+        DisplayImage(img.value.preprocessedPath, "Similar $i")
+    } }
+    pipeline.overlaid.subscribe { DisplayImage(it.value, "Overlaid (score: ${it.score})") }
 
     pipeline.userInput.onNext(Pair(inputFile, bodypart))
 }
