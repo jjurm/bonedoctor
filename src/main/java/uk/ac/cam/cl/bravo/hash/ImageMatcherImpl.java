@@ -6,13 +6,10 @@ import uk.ac.cam.cl.bravo.dataset.*;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ImageMatcherImpl implements Serializable, ImageMatcher {
 
-    private HashMap<BoneCondition, HashMap<Bodypart, HashMap<BodypartView, ImageHasher>>> imageHashers;
     private HashMap<Pair<Bodypart, Integer>, ImageHasher> normalHashers;
     private HashMap<Pair<Bodypart, Integer>, ImageHasher> abnormalHashers;
 
@@ -20,17 +17,44 @@ public class ImageMatcherImpl implements Serializable, ImageMatcher {
     @NotNull
     public List<Pair<File, Integer>> findMatchingImage(@NotNull BufferedImage image,
                                                        @NotNull BoneCondition boneCondition,
-                                                       @NotNull BodypartView bodypartView, int n) {
+                                                       @NotNull BodypartView bodypartView, int n, boolean useClusters) {
 
-        ImageHasher imageHasher;
+        if (useClusters) {
 
-        if (boneCondition.getLabel().equals("positive")){
-            imageHasher = abnormalHashers.get(new Pair<>(bodypartView.getBodypart(), bodypartView.getValue()));
+            ImageHasher imageHasher;
+
+            if (boneCondition.getLabel().equals("positive")){
+                imageHasher = abnormalHashers.get(new Pair<>(bodypartView.getBodypart(), bodypartView.getValue()));
+            } else {
+                imageHasher = normalHashers.get(new Pair<>(bodypartView.getBodypart(), bodypartView.getValue()));
+            }
+
+            return imageHasher.getNPairs(image, n);
+
         } else {
-            imageHasher = normalHashers.get(new Pair<>(bodypartView.getBodypart(), bodypartView.getValue()));
-        }
 
-        return imageHasher.getNPairs(image, n);
+            List<Pair<File, Integer>> matches = new ArrayList<>();
+
+            if (boneCondition.getLabel().equals("positive")){
+                for (ImageHasher hasher : abnormalHashers.values()){
+                    matches.addAll(hasher.getNPairs(image, n));
+                }
+            } else {
+                for (ImageHasher hasher : normalHashers.values()){
+                    matches.addAll(hasher.getNPairs(image, n));
+                }
+            }
+
+            matches.sort(new Comparator<>() {
+                @Override
+                public int compare(Pair<File, Integer> o1, Pair<File, Integer> o2) {
+                    return o1.getValue() - o2.getValue();
+                }
+            });
+
+            return matches.subList(0,n);
+
+        }
     }
 
     public static ImageMatcherImpl getImageMatcher(File f){

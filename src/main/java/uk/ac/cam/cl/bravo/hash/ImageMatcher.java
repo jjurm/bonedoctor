@@ -22,7 +22,7 @@ public interface ImageMatcher {
             @NotNull BufferedImage image,
             @NotNull BoneCondition boneCondition,
             @NotNull BodypartView bodypartView,
-            int n
+            int n, boolean useClusters
     );
 
 }
