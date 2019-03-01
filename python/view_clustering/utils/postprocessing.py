@@ -4,6 +4,7 @@ Script for post processing results from python ETL pipeline for use in Java API.
 import json
 import os
 import pickle as pkl
+import re
 
 
 def convert_to_java_readable_format(feat_file, output_dir):
@@ -37,12 +38,9 @@ def swap_keys(json_file):
 
 	for label, image_filenames in labels_to_image_filenames_dict.items():
 		for filename in image_filenames:
-			filename = filename.replace("_", "/")
-
-			# Restore XR_ prefix to directory
-			filename_list = filename.split("XR")
-			filename_list[-1] = filename_list[-1][1:] # Remove extra slash
-			filename = "XR_".join(filename_list) # join back XR_prefix
+			# Clean the filename
+			m = re.search(r"(.*)_(XR_.*)_(patient.*)_(study.*)_(image.*)", filename)
+			filename = "/".join(m.groups())
 
 			image_filename_to_label_dict[filename] = label
 
