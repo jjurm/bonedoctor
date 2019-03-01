@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static uk.ac.cam.cl.bravo.classify.Utils.*;
+
 public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     private Map<Bodypart, Map<Integer, List<String>>> bodyPartToLabelToFilenamesMap = new HashMap<>();
     private Map<Bodypart, Map<Integer, float[]>> bodyPartToLabelToMeanFeaturesMap = new HashMap<>();
@@ -39,6 +41,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         // Convert image to byte array for inference
         byte[] imageBytes = bufferedImageToByteArray(image);
+
         // Preprocess image first to get float tensor of shape [1, 299, 299, 3]
         Tensor<Float> preprocessedImage = executePreprocessingGraph(imageBytes);
 
@@ -47,9 +50,6 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         // Obtained flattened array as output
         float[] outputArray = executeInferenceGraph(graphDef, preprocessedImage, inputNodeName, outputNodeName);
-
-        // Standardize output array before comparison
-        standardize(outputArray);
 
         // Obtain the right hashmaps for this bodypart for comparison
         Map<Integer, List<String>> labelToFilenamesMap = bodyPartToLabelToFilenamesMap.get(bodypart);
@@ -71,49 +71,14 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         // Obtain the confidence for the prediction
         Confidence confidenceLevel = getConfidenceLevel(minL2Distance, outputArray, labelToMeanFeaturesMap);
-        System.out.println(confidenceLevel);
 
         return new Uncertain<>(new BodypartView(bodypart, topLabel), confidenceLevel);
     }
 
-    /**
-     * Assesses the confidence of the label produced given the distance to each cluster centroid mean features
-     * Let x and y be the L2 distances to each centroids from the current image features.
-     * The ratio we compute is min(x,y)/max(x,y) and if this ratio is close to 0 we have a very high confidence.
-     * otherwise, if x ~= y, then we have the ratio close to 1.0, which indicates the model is ambivalent about
-     * the cluster assigned.
-     *
-     * Assumes that all arrays are standardized already.
-     *
-     * @param labelToMeanFeaturesMap Map containing the features for the cluster done
-     * @param minL2Distance Minimum distance from one feature to the centroids
-     * @return
-     */
-    private Confidence getConfidenceLevel(double minL2Distance, float[] outputArray, Map<Integer, float[]> labelToMeanFeaturesMap){
-        double dist0 = computeL2Distance(outputArray, labelToMeanFeaturesMap.get(0));
-        double dist1 = computeL2Distance(outputArray, labelToMeanFeaturesMap.get(1));
-
-        double ratio = Math.min(dist0, dist1) / Math.max(dist0, dist1);
-        System.out.println("ratio: " + ratio);
-
-        // Perform the bucketing here
-        if (ratio < 0.333){
-            return Confidence.HIGH;
-        }
-
-        else if(ratio < 0.666){
-            return Confidence.MEDIUM;
-        }
-
-        else{
-            return Confidence.LOW;
-        }
-    }
-
 
     /**
-     * Given the body part view,
-      * @param bodypartview
+     * Given the body part view object, return a list of string representing image filenames
+     * @param bodypartview
      * @return ret A list of string representing the image filenames from the same cluster of the
      */
     public List<String> getClusterFiles(BodypartView bodypartview){
@@ -122,74 +87,15 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         return ret;
     }
 
-    private double computeMean(float[] feat){
-        double mean = 0.0;
-
-        for (int i=0; i<feat.length; i++){
-            mean += feat[i];
-        }
-
-        return mean/feat.length;
-    }
-
-    private double computeStd(float[] feat, double mean){
-        double std = 0.0;
-
-        for (int i=0; i<feat.length; i++){
-            std += Math.pow(feat[i] - mean, 2.0);
-        }
-
-        return std;
-    }
-
-    private void standardize(float[] feat){
-        double mean = computeMean(feat);
-        double std = computeStd(feat, mean);
-
-        for (int i=0; i<feat.length; i++){
-            feat[i] = (float) ((feat[i] - mean) / std);
-        }
-    }
-
-    /**
-     * Function to compute the euclidean distance between two float arrays, for finding to which centroid the current
-     * image belongs to
-     * @param inputFeatures features from the extracted image that was given by user
-     * @param meanFeatures the mean features of the images in the cluster
-     * @return ret L2 distance between the two features
-     */
-    private double computeL2Distance(float[] inputFeatures, float[] meanFeatures){
-        double ret = 0.0;
-
-        for (int i=0; i<inputFeatures.length; i++){
-            ret += Math.pow((inputFeatures[i] - meanFeatures[i]), 2.0);
-        }
-
-        return Math.sqrt(ret);
-    }
-
-    private double computeL1Distance(float[] feat0, float[] feat1){
-        double ret = 0.0;
-
-        for (int i=0; i<feat0.length; i++){
-            ret += Math.abs(feat0[i] - feat1[i]);
-        }
-
-        return ret;
-    }
-
-
     /**
      *
      * @param input input image bytes stored in graph as a constant
      * @param H     output height of preprocessed image
      * @param W     output width of preprocessed image
-     * @param mean  mean value to normalize image
-     * @param scale scale value to normalize image
      * @param b     Graph builder to add on more nodes to the graph
      * @return preprocessedInput    output from image preprocessing graph ready for inference.
      */
-    private Output<Float> preprocessImage(Output<String> input, int H, int W, float mean, float scale, GraphBuilder b){
+    private Output<Float> preprocessImage(Output<String> input, int H, int W, GraphBuilder b){
         // Decode input as jpeg and cast as float
         Output<Float> preprocessedInput = b.cast(b.decodeJpeg(input, 3), Float.class);
 
@@ -199,14 +105,14 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         // Resize the input image with bilinear interpol
         preprocessedInput = b.resizeBilinear(preprocessedInput, b.constant("size", new int[] {H, W}));
 
-        // Perform mean normalization
-        preprocessedInput = b.sub(preprocessedInput, b.constant("mean", mean));
-        preprocessedInput = b.div(preprocessedInput, b.constant("scale", scale));
+        // Perform Inception preprocessing according to paper
+        // X = ((X/255.0) - 0.5) / 0.5) = (X/127.5) - 1.0
+        preprocessedInput = b.div(preprocessedInput, b.constant("max", 127.5f));
+        preprocessedInput = b.sub(preprocessedInput, b.constant("scale0", 1.0f));
 
         return preprocessedInput;
 
     }
-
 
     /**
      * Build graph to preprocess and normalize image before feeding
@@ -225,13 +131,10 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
             // Define fixed parameters
             final int H = 299;
             final int W = 299;
-            final float mean = 117f;
-            final float scale = 1f;
 
             // Setup input and output nodes
             final Output<String> input = b.constant("input", imageBytes);
-            final Output<Float> output = preprocessImage(input, H, W, mean, scale, b);
-
+            final Output<Float> output = preprocessImage(input, H, W, b);
             // Build a session and obtain the preprocessed image
             try (Session s = new Session(g)){
                 return s.runner().fetch(output.op().name()).run().get(0).expect(Float.class);
@@ -384,9 +287,6 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
                 // Decode mean features
                 float[] meanFeatures = decodeMeanFeaturesFile(file.toString());
 
-                // Standardize the features
-                standardize(meanFeatures);
-
                 // Add it to required hashmap
                 if (bodyPartToLabelToMeanFeaturesMap.get(bodypart) == null){
                     Map<Integer, float[]> toPut = new HashMap<>();
@@ -444,53 +344,17 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         return ret;
     }
 
-//    /**
-//     * Get the specific body part view of an image filename, to be called in the Dataset API.
-//     * @param imageFilename relative directory to image file
-//     *                      e.g. train/XR_SHOULDER/patient00430/study1/positive/image4.png
-//     * @return
-//     */
-//    public static BodypartView getBodypartViewOf(String imageFilename){
-//        return null;
-//    }
-
-
-    private static byte[] bufferedImageToByteArray(BufferedImage image){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(image, "jpg", baos);
-
-            byte[] bytes = baos.toByteArray();
-
-            return bytes;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-    private static byte[] readBytesFromFile(String filename){
-        try{
-            return Files.readAllBytes(new File(filename).toPath());
-        }catch (IOException e){
-            System.err.println("Cannot find [" + filename + "]: " + e.getMessage());
-            System.exit(1);
-        }
-        return null;
-    }
 
     public static void main(String[] args) throws IOException {
-//        String outputDir = "python/view_clustering/output/";
-//        buildBodyPartViews(outputDir);
-
         // Test
         BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
-        String testImage = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1 (copy 1)/train/XR_HUMERUS/patient03160/study1_negative/image1.png";
+        String testImage = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1 (copy 1)/train/XR_HAND/patient10943/study1_negative/image2.png";
         BufferedImage image = ImageIO.read(new File(testImage));
-        Uncertain result = classifier.classify(image, Bodypart.HUMERUS);
-        System.out.println(result.getValue());
-//        System.out.println(result.getBodypart());
+        Uncertain result = classifier.classify(image, Bodypart.HAND);
+
+        // Obtain the cluster files
+        List<String> clusterFiles = classifier.getClusterFiles((BodypartView) result.getValue());
+//        System.out.println(clusterFiles);
     }
 
 }

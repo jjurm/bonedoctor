@@ -2,6 +2,12 @@ package uk.ac.cam.cl.bravo.classify;
 
 import uk.ac.cam.cl.bravo.pipeline.Confidence;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 
 public class Utils {
@@ -97,6 +103,31 @@ public class Utils {
         }
     }
 
+
+    protected static byte[] bufferedImageToByteArray(BufferedImage image){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "jpg", baos);
+
+            byte[] bytes = baos.toByteArray();
+
+            return bytes;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    protected static byte[] readBytesFromFile(String filename){
+        try{
+            return Files.readAllBytes(new File(filename).toPath());
+        }catch (IOException e){
+            System.err.println("Cannot find [" + filename + "]: " + e.getMessage());
+            System.exit(1);
+        }
+        return null;
+    }
 
 
 }
