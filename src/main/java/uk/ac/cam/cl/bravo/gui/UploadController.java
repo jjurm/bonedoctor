@@ -72,7 +72,7 @@ public class UploadController {
         String s = this.imgFile.getPath();
         System.out.println(s);
 
-        Pair<String, Bodypart> userInput = new Pair<>(this.imgFile.getPath(), bodypart);
+        Pair<String, Bodypart> userInput = new Pair<>(this.imgFile.getAbsolutePath(), bodypart);
 
         mainPipeline.getUserInput().onNext(userInput);
         mainPipeline.getUserInput().onComplete();

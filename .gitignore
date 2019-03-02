@@ -134,5 +134,6 @@ gradle-app.setting
 
 # Bone Doctor
 MURA-v1.1/
+MURA-preprocessed/
 .idea/
 
