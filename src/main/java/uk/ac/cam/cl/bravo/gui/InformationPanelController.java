@@ -60,6 +60,12 @@ public class InformationPanelController {
             // Child controller actions
             matchListController.launch();
             this.subscribe();
+
+            inputFlow.setVisible(true);
+            inputFlow.setManaged(true);
+            bestMatchFlow.setVisible(false);
+            bestMatchFlow.setManaged(false);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
