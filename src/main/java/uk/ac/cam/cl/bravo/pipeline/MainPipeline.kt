@@ -99,17 +99,17 @@ class MainPipeline {
         arrayOf(
             InnerWarpTransformer(
                 parameterScale = 0.8,
-                parameterPenaltyScale = 1.0,
+                parameterPenaltyScale = 4.0,
                 resolution = 4
             ),
             AffineTransformer(
                 parameterScale = 1.0,
-                parameterPenaltyScale = 0.1
+                parameterPenaltyScale = 1.0
             )
         ),
         PixelSimilarity(
             ignoreBorderWidth = 0.25
-        ) + ParameterPenaltyFunction() * 0.05,
+        ) + ParameterPenaltyFunction() * 1.0,
         bigPlaneSize = PLANE_SIZE
     )
 
@@ -144,6 +144,7 @@ class MainPipeline {
 
         val path = userInput.map(Pair<String, *>::first)
         val bodypart = userInput.map(Pair<*, Bodypart>::second)
+        val inputImage = path.map { ImageIO.read(File(it)) }.withCache()
 
         preprocessed = path.map(preprocessor::preprocess.withTag("Preprocessing")).withCache()
         preprocessed.doneMeans(0.2, "Classifying bone condition")
@@ -153,7 +154,7 @@ class MainPipeline {
             preprocessedVal.map(boneConditionClassifier::classify.withTag("BoneCondition classifier")).withCache()
 
         val bodypartView: Observable<Uncertain<BodypartView>> = Observable.combineLatest(
-            preprocessedVal,
+            inputImage,
             bodypart,
             BiFunction(bodypartViewClassifier::classify.withTag("BodypartView classifier"))
         ).withCache()
@@ -177,14 +178,11 @@ class MainPipeline {
 
         // TODO Juraj: choose original or preprocessed image for ImageMatcher
         similarNormal = Observable.combineLatest(
-            path.map { ImageIO.read(File(it)) }, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages,
+            inputImage, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages,
             Function4(matchingFunction)
         ).withCache()
         similarAbnormal = Observable.combineLatest(
-            path.map { ImageIO.read(File(it)) },
-            Observable.just(BoneCondition.ABNORMAL),
-            bodypartViewVal,
-            nSimilarImages,
+            inputImage, Observable.just(BoneCondition.ABNORMAL), bodypartViewVal, nSimilarImages,
             Function4(matchingFunction)
         ).withCache()
 

@@ -58,6 +58,7 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
     pipeline.boneCondition.subscribe { println("BoneCondition: ${it.value}, confidence: ${it.confidence}") }
 
     pipeline.similarNormal.subscribe { it.forEachIndexed { i, img ->
+        println("Similar $i: ${img.value.path}")
         DisplayImage(img.value.preprocessedPath, "Similar $i")
     } }
     pipeline.overlaidOriginal.subscribe { DisplayImage(it.value, "OverlaidOriginal (score: ${it.score})") }

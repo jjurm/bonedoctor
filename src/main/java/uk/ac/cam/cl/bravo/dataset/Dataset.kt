@@ -58,7 +58,7 @@ class Dataset @Throws(IOException::class) constructor() {
     private fun getBodypartViewOf(path: String): BodypartView {
         // This throws an exception if the path is not found in the map
         try {
-            val key = path.removePrefix("MURA-v1.1/").substringBeforeLast('_') + "/" + path.substringAfterLast('_')
+            val key = path.removePrefix("MURA-v1.1/")
             return bodypartViews.getValue(key)
         } catch (e: NoSuchElementException) {
             throw RuntimeException("The image $path has no BodypartView assigned in $VIEW_CLUSTERING_OUTPUT_DIR")
