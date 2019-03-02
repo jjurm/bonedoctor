@@ -84,7 +84,6 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
     }
 
     public static void main(String[] args) throws IOException {
-        // Test
         PreciseImageMatcherImpl matcher = new PreciseImageMatcherImpl();
         String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient10943/study1_negative/image2.png";
 

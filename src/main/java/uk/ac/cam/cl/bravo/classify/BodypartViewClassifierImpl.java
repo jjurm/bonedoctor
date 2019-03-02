@@ -110,6 +110,7 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
     }
 
+
     /**
      * Build graph to preprocess and normalize image before feeding
      * into main model inference graph. The input size image must be of
@@ -169,6 +170,12 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     }
 
 
+    /**
+     * Executes the inference graph for multiple preprocessed input images. The images to perform
+     * inference on is stored in imageInferenceMap.
+     * @param imageInferenceMap map output array to image sample objects
+     * @return Map returning image sample to output array
+     */
     protected Map<ImageSample, float[]> executeInferenceGraphConsecutively(Map<ImageSample, Tensor<Float>> imageInferenceMap){
 
         Map<ImageSample, float[]> outputImagesMap = new HashMap<>();
@@ -205,7 +212,16 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     }
 
 
-
+    /**
+     * Executes the inference graph for multiple preprocessed input images. The images to perform
+     * inference on is stored in imageInferenceMap.
+     *
+     * @param graphDef The graph definition required for inference read from the pb file
+     * @param imageInferenceMap map containing images to perform inference on
+     * @param inputNodeName Input node name for graph, entry point of tensor
+     * @param outputNodeName output node name for graph, output collection point of tensor
+     * @return Map mapping filenames to the output array inference
+     */
     public Map<String, float[]> executeInferenceGraphConsecutively(byte[] graphDef,
                                           Map<String, Tensor<Float>> imageInferenceMap,
                                           String inputNodeName,
@@ -411,13 +427,18 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         return ret;
     }
 
+    /**
+     * Prototype function used to find closest image given one image information.
+     * @param image image read, for inference
+     * @param bodypart corresponding bodypart of the image
+     * @param limit the number of examples to perform inference on
+     * @return The closest image filename matching the input image visually.
+     * @throws IOException
+     */
     public String getClosestImages(
             BufferedImage image,
             Bodypart bodypart,
             int limit) throws IOException {
-        // TODO: Optimize and remove redundant steps, esp graph building.
-
-//        String imageDirectory = Dataset.DIR;
         String imageDirectory = "/home/kwotsin/Desktop/group_project/data/MURA/";
 
         // Run inference once on the image to get the array's features
@@ -464,21 +485,12 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         for (String imageFilename : outputImagesMap.keySet()){
             double currDistance = computeCosineSimilarity(outputArray, outputImagesMap.get(imageFilename));
-//            double currDistance = computeL2Distance(outputArray, outputImagesMap.get(imageFilename));
-            System.out.println(imageFilename);
-            System.out.println("Score : " + currDistance);
-
 
             if (currDistance > minDistance){
                 bestImageFilename = imageFilename;
                 minDistance = currDistance;
             }
         }
-
-        System.out.println("Best Image: " + bestImageFilename);
-        System.out.println("Best Score: " + minDistance);
-
-        // Use priority queie
 
         return bestImageFilename;
     }
@@ -489,15 +501,6 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
         String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient10943/study1_negative/image2.png";
         BufferedImage image = ImageIO.read(new File(testImage));
-
-//        // Extract results
-//        Uncertain result = classifier.classify(image, Bodypart.HAND);
-//        BodypartView bodypartView = (BodypartView) result.getValue();
-//        Confidence confidence = result.getConfidence();
-
-//        // Obtain the cluster files
-//        List<String> clusterFiles = classifier.getClusterFiles((BodypartView) result.getValue());
-//        System.out.println(clusterFiles);
 
         // Test getting the closest N images
         System.out.println(classifier.getClosestImages(
