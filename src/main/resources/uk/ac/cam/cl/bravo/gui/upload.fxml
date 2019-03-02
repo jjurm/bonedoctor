@@ -34,5 +34,6 @@
 
     <Button fx:id="analyzeButton" mnemonicParsing="false" onAction="#handleAnalyzeButtonAction" text="Analyze" GridPane.columnIndex="1" GridPane.rowIndex="2" />
     <ComboBox fx:id="bodypartChoice" onAction="#handleSelectBodypart" prefWidth="150.0" promptText="- Select Bodypart - " GridPane.rowIndex="2" />
+   <Label fx:id="analyzeCheck" text="Label" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
 </GridPane>
