@@ -76,8 +76,6 @@ class MainPipeline {
 
     /** List of matched images (similar to 'preprocessed') that are NORMAL */
     val similarNormal: Observable<List<Rated<ImageSample>>>
-    /** List of matched images (similar to 'preprocessed') that are ABNORMAL */
-    val similarAbnormal: Observable<List<Rated<ImageSample>>>
 
     /** The result of the overlay algorithm, taking 'imageToOverlay' as the input. */
     val overlaidOriginal: Observable<Rated<BufferedImage>>
@@ -189,10 +187,6 @@ class MainPipeline {
         // TODO Juraj: choose original or preprocessed image for ImageMatcher
         similarNormal = Observable.combineLatest(
             inputImage, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages,
-            Function4(matchingFunction)
-        ).withCache()
-        similarAbnormal = Observable.combineLatest(
-            inputImage, Observable.just(BoneCondition.ABNORMAL), bodypartViewVal, nSimilarImages,
             Function4(matchingFunction)
         ).withCache()
 

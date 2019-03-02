@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.gui;
 
+import io.reactivex.Observer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -18,7 +19,7 @@ public class MatchListController {
     private ListView matches;
     private Stage stage;
     private AnalysisController analysisController;
-    private List<Image> imgList = new ArrayList<>();
+    private List<Image> imgNormalList = new ArrayList<>();
 
     private View view;
 
@@ -34,15 +35,15 @@ public class MatchListController {
         Image img7 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
         Image img8 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img5.png"));
         Image img9 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
-        imgList.add(img1);
-        imgList.add(img2);
-        imgList.add(img3);
-        imgList.add(img4);
-        imgList.add(img5);
-        imgList.add(img6);
-        imgList.add(img7);
-        imgList.add(img8);
-        imgList.add(img9);
+        imgNormalList.add(img1);
+        imgNormalList.add(img2);
+        imgNormalList.add(img3);
+        imgNormalList.add(img4);
+        imgNormalList.add(img5);
+        imgNormalList.add(img6);
+        imgNormalList.add(img7);
+        imgNormalList.add(img8);
+        imgNormalList.add(img9);
     }
 
     public void setView(View view) {
@@ -71,7 +72,7 @@ public class MatchListController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    matchView.setImage(imgList.get(getIndex()));
+                    matchView.setImage(imgNormalList.get(getIndex()));
                     setText(name);
                     setGraphic(matchView);
                 }
@@ -86,7 +87,7 @@ public class MatchListController {
             }
 
             int index = matches.getSelectionModel().getSelectedIndex();
-            analysisController.setPaneImage(analysisController.pane2, imgList.get(index), view);
+            analysisController.setPaneImage(analysisController.pane2, imgNormalList.get(index), view);
 
         });
 

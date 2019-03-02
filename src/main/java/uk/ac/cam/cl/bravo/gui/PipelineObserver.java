@@ -43,7 +43,6 @@ public class PipelineObserver  {
     public void createSubscriptions(){
         mainPipeline.getBoneCondition().subscribe(item -> {reportBoneCondition(item);});
         mainPipeline.getSimilarNormal().subscribe(item -> {updateNormalList(item);});
-        mainPipeline.getSimilarAbnormal().subscribe(item -> {updateAbormalList(item);});
     }
 
     public void overallProgress(double progress) {
