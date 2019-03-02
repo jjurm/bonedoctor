@@ -50,8 +50,6 @@ public class MatchListController {
         launch();
     }
 
-    private void onNext() {}
-
     public void launch() {
         // ------ CREATE SCROLLABLE LIST VIEW --------
 
