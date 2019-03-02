@@ -3,7 +3,9 @@ package uk.ac.cam.cl.bravo.pipeline
 import com.jhlabs.image.FlipFilter
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
+import io.reactivex.functions.Function3
 import io.reactivex.functions.Function4
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 import uk.ac.cam.cl.bravo.PLANE_SIZE
@@ -152,21 +154,31 @@ class MainPipeline {
 
         val path = userInput.map(Pair<String, *>::first)
         val bodypart = userInput.map(Pair<*, Bodypart>::second)
-        val inputImage = path.map { ImageIO.read(File(it)) }.withCache()
+        val inputImage = path
+            .map { ImageIO.read(File(it)) }
+            .observeOn(Schedulers.io())
+            .withCache()
 
-        preprocessed = path.map(preprocessor::preprocess.withTag("Preprocessing")).withCache()
+        preprocessed = path
+            .observeOn(Schedulers.newThread())
+            .map(preprocessor::preprocess.withTag("Preprocessing"))
+            .withCache()
         preprocessed.doneMeans(0.2, "Classifying bone condition")
+
         val preprocessedVal = preprocessed.map(Uncertain<BufferedImage>::value)
 
-        boneCondition =
-            preprocessedVal.map(boneConditionClassifier::classify.withTag("BoneCondition classifier")).withCache()
+        boneCondition = inputImage
+            .observeOn(Schedulers.newThread())
+            .map(boneConditionClassifier::classify.withTag("BoneCondition classifier"))
+            .withCache()
 
-        val bodypartView: Observable<Uncertain<BodypartView>> = Observable.combineLatest(
-            inputImage,
-            bodypart,
-            BiFunction(bodypartViewClassifier::classify.withTag("BodypartView classifier"))
-        ).withCache()
+        val bodypartView = combineObservables(inputImage, bodypart)
+            .observeOn(Schedulers.newThread())
+            .mapDestructing(bodypartViewClassifier::classify.withTag("BodypartView classifier"))
+            .withCache()
+
         bodypartView.doneMeans(0.4, "Looking for similar x-rays")
+
         val bodypartViewVal = bodypartView.map(Uncertain<BodypartView>::value)
         bodypartViewVal.subscribe { println("Classified view: ${it.value}") }
 
@@ -185,42 +197,56 @@ class MainPipeline {
             }.withTag("ImageMatcher")
 
         // TODO Juraj: choose original or preprocessed image for ImageMatcher
-        similarNormal = Observable.combineLatest(
-            inputImage, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages,
-            Function4(matchingFunction)
-        ).withCache()
+        similarNormal =
+            combineObservables(inputImage, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages)
+                .observeOn(Schedulers.newThread())
+                .mapDestructing(matchingFunction)
+                .withCache()
 
         similarNormal.map { it.first().value }.subscribe(imageToOverlay)
         imageToOverlay.doneMeans(0.6, "Overlaying images")
 
-        val imageToOverlayLoaded = imageToOverlay.map(ImageSample::loadPreprocessedImage).withCache()
-        overlaidOriginal = Observable.combineLatest(
+        val imageToOverlayLoaded = imageToOverlay
+            .observeOn(Schedulers.io())
+            .map(ImageSample::loadPreprocessedImage)
+            .withCache()
+
+        val imageToOverlayLoadedMirrored = imageToOverlayLoaded
+            .observeOn(Schedulers.newThread())
+            .map { FlipFilter(FlipFilter.FLIP_H).filter(it, null) }
+            .withCache()
+
+        overlaidOriginal = combineObservables(
             preprocessedVal,
             imageToOverlayLoaded,
             downsample,
-            overlayPrecision,
-            Function4(imageOverlay::fitImage.withTag("Overlay"))
-        ).withCache()
-        overlaidMirrored = Observable.combineLatest(
+            overlayPrecision
+        )
+            .observeOn(Schedulers.newThread())
+            .mapDestructing(imageOverlay::fitImage.withTag("Overlay"))
+            .withCache()
+
+        overlaidMirrored = combineObservables(
             preprocessedVal,
-            imageToOverlayLoaded.map { FlipFilter(FlipFilter.FLIP_H).filter(it, null) },
+            imageToOverlayLoadedMirrored,
             downsample,
-            overlayPrecision,
-            Function4(imageOverlay::fitImage.withTag("OverlayMirrored"))
-        ).withCache()
-        overlaid = Observable.combineLatest(
-            overlaidOriginal,
-            overlaidMirrored,
-            BiFunction { a, b -> listOf(a, b).minBy { it.score }!! })
+            overlayPrecision
+        )
+            .observeOn(Schedulers.newThread())
+            .mapDestructing(imageOverlay::fitImage.withTag("OverlayMirrored"))
+            .withCache()
+
+        overlaid = combineObservables(overlaidOriginal, overlaidMirrored)
+            .mapDestructing { a, b -> listOf(a, b).minBy { it.score }!! }
         overlaid.doneMeans(0.8, "Highlighting differences")
 
-        Observable.combineLatest(
-            inputImage,
-            imageToOverlayLoaded,
-            highlightAmount,
-            highlightGradient,
-            Function4(fractureHighlighter::highlight)
-        ).subscribe()
+        combineObservables(
+            inputImage, imageToOverlayLoaded, highlightAmount, highlightGradient
+        )
+            .observeOn(Schedulers.newThread())
+            .mapDestructing(fractureHighlighter::highlight.withTag("FractureHighlighter"))
+            .subscribe()
+
         fracturesHighlighted = fractureHighlighter.partialResults
         fracturesHighlighted.doneMeans(1.0, "Done!")
     }
@@ -249,4 +275,35 @@ class MainPipeline {
     private fun <A, B, C, D, R> ((A, B, C, D) -> R).withTag(s: String): (A, B, C, D) -> R =
         { a, b, c, d -> tag(s) { this(a, b, c, d) } }
 
+    private fun <A, B> combineObservables(a: Observable<A>, b: Observable<B>): Observable<Tuple2<A, B>> =
+        Observable.combineLatest(a, b, BiFunction(::Tuple2))
+
+    private fun <A, B, C> combineObservables(
+        a: Observable<A>,
+        b: Observable<B>,
+        c: Observable<C>
+    ): Observable<Tuple3<A, B, C>> =
+        Observable.combineLatest(a, b, c, Function3(::Tuple3))
+
+    private fun <A, B, C, D> combineObservables(
+        a: Observable<A>,
+        b: Observable<B>,
+        c: Observable<C>,
+        d: Observable<D>
+    ): Observable<Tuple4<A, B, C, D>> =
+        Observable.combineLatest(a, b, c, d, Function4(::Tuple4))
+
+    private fun <A, B, R> Observable<Tuple2<A, B>>.mapDestructing(t: (A, B) -> R): Observable<R> =
+        this.map { (a, b) -> t(a, b) }
+
+    private fun <A, B, C, R> Observable<Tuple3<A, B, C>>.mapDestructing(t: (A, B, C) -> R): Observable<R> =
+        this.map { (a, b, c) -> t(a, b, c) }
+
+    private fun <A, B, C, D, R> Observable<Tuple4<A, B, C, D>>.mapDestructing(t: (A, B, C, D) -> R): Observable<R> =
+        this.map { (a, b, c, d) -> t(a, b, c, d) }
+
 }
+
+data class Tuple2<A, B>(val a: A, val b: B)
+data class Tuple3<A, B, C>(val a: A, val b: B, val c: C)
+data class Tuple4<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)

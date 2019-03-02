@@ -40,7 +40,7 @@ public class DisplayImage {
         xLocation += img.getWidth() + 11;
         if (xLocation >= screenWidth - img.getWidth()) {
             xLocation = 5;
-            yLocation += 200;
+            yLocation += 400;
         }
         frame.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent ke) {  // handler

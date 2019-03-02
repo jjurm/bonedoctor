@@ -1,17 +1,12 @@
 package uk.ac.cam.cl.bravo
 
-import com.jhlabs.image.GaussianFilter
-import org.apache.commons.lang3.time.StopWatch
 import uk.ac.cam.cl.bravo.dataset.Bodypart
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
 import uk.ac.cam.cl.bravo.gui.PipelineObserver
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline
-import uk.ac.cam.cl.bravo.util.ImageTools
 import java.awt.Point
-import java.io.File
-import javax.imageio.ImageIO
 
 const val PLANE_WIDTH = 520
 const val PLANE_HEIGHT = PLANE_WIDTH
