@@ -16,17 +16,17 @@ public class Main extends Application {
 
     public static final String APP_NAME = "Bone Doctor";
     private Stage mainStage;
-    private PipelineObserver pipelineObserver = new PipelineObserver();
+    private MainController mainController;
+
 
     @Override
     public void start(Stage stage) throws IOException { // Stage is created by java during runtime.
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/main.fxml"));
-        MainController mainController = new MainController(mainStage, pipelineObserver);
+        mainController = new MainController(mainStage);
         loader.setController(mainController);
         Parent mainWindow = loader.load();
 
         mainController.launch();
-        pipelineObserver.addMainController(mainController);
 
         mainStage = new Stage();
 
@@ -42,12 +42,18 @@ public class Main extends Application {
         ((Region) mainWindow).prefWidthProperty().bind(mainStage.widthProperty());
         ((Region) mainWindow).prefHeightProperty().bind(mainStage.heightProperty());
 
+
         mainStage.setTitle(APP_NAME);
         mainStage.show();
+
     }
 
     public static void main() {
         Application.launch();
+    }
+
+    public MainController getMainController() {
+        return mainController;
     }
 
 }

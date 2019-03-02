@@ -17,23 +17,15 @@ public class MatchListController {
     @FXML
     private ListView matches;
     private Stage stage;
-    private PipelineObserver pipelineObserver;
     private AnalysisController analysisController;
     private List<Image> imgNormalList = new ArrayList<>();
     private List<Image> imgAbormalList = new ArrayList<>();
 
-    // TODO: Ane - Create enum class?
-    private static String INPUT = "Input Image";
-    private static String NORMAL = "Best Match, Normal";
-    private static String ABNORMAL = "Best Match, Abormal";
-    private static String ABNORMAL_OVER = "Overlay, Abormal";
-    private static String NORMAL_OVER = "Overlay, Normal";
 
-    private String view;
+    private View view;
 
-    public MatchListController(Stage stage, PipelineObserver pipelineObserver) {
+    public MatchListController(Stage stage) {
         this.stage = stage;
-        this.pipelineObserver = pipelineObserver;
 
         Image img1 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img2.png"));
         Image img2 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img3.png"));
@@ -65,8 +57,9 @@ public class MatchListController {
         imgAbormalList.add(img1);
     }
 
-    public void setView(String view) {
-        this.view = view;
+    public void setView(View view) {
+        this.view= view;
+        launch();
     }
 
     public void launch() {
@@ -75,8 +68,10 @@ public class MatchListController {
         ObservableList<String> items = FXCollections.observableArrayList("img1.png", "img2.png", "img3.png", "img4.png", "img5.png", "img6.png", "img7.png", "img8.png", "img9.png");
         matches.setItems(items);
 
+
+        // TODO: ANE - replace with actual pipeline lists.
         List<Image> imgList;
-        if (view == NORMAL) {
+        if (view == View.NORMAL) {
             imgList = imgNormalList;
         } else {
             imgList = imgAbormalList;
@@ -112,7 +107,7 @@ public class MatchListController {
             }
 
             int index = matches.getSelectionModel().getSelectedIndex();
-            analysisController.setPaneImage(analysisController.pane2, imgList.get(index));
+            analysisController.setPaneImage(analysisController.pane2, imgList.get(index), view);
 
         });
 
@@ -126,5 +121,6 @@ public class MatchListController {
     public ListView getMatches() {
         return this.matches;
     }
-    
+
+
 }

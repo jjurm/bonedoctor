@@ -5,6 +5,7 @@ import org.apache.commons.lang3.time.StopWatch
 import uk.ac.cam.cl.bravo.dataset.Bodypart
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
+import uk.ac.cam.cl.bravo.gui.PipelineObserver
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline
 import uk.ac.cam.cl.bravo.util.ImageTools
@@ -53,6 +54,7 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
     DisplayImage(inputFile, "Input")
 
     val pipeline = MainPipeline()
+
     pipeline.status.subscribe(::println)
     pipeline.preprocessed.subscribe { DisplayImage(it.value, "Preprocessed (confidence: ${it.confidence})") }
     pipeline.boneCondition.subscribe { println("BoneCondition: ${it.value}, confidence: ${it.confidence}") }

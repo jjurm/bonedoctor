@@ -15,18 +15,35 @@ import java.util.List;
 
 public class PipelineObserver  {
 
+    private Main main;
+    private InformationPanelController informationPanelController;
     private UploadController uploadController;
-    private ImageExplorerController imageExplorerController;
+    private List<ImageExplorerController> imageExplorerControllers;
     private MatchListController matchListController;
     private AnalysisController analysisController;
     private MainController mainController;
 
-    private MainPipeline mainPipeline;
+    private MainPipeline mainPipeline = new MainPipeline();
 
+    // TODO: Rename to GUIMainInterface
     public PipelineObserver() {
-//        mainPipeline.getBoneCondition().subscribe(item -> {reportBoneCondition(item);});
-//        mainPipeline.getSimilarNormal().subscribe(item -> {updateNormalList(item);});
-//        mainPipeline.getSimilarAbnormal().subscribe(item -> {updateAbormalList(item);});
+
+        /*
+        * We start from the main GUI function. Then we pass a the main pipeline, created in the main function.
+        * We then create the user interface in here by launching the first main function.
+        * This main function will not yet have any guitomain interface to pass to its children
+        * as the interface is not made.
+        *
+        * We need to wait until all of the interface elements are created.
+        * */
+
+    }
+
+
+    public void createSubscriptions(){
+        mainPipeline.getBoneCondition().subscribe(item -> {reportBoneCondition(item);});
+        mainPipeline.getSimilarNormal().subscribe(item -> {updateNormalList(item);});
+        mainPipeline.getSimilarAbnormal().subscribe(item -> {updateAbormalList(item);});
     }
 
     public void overallProgress(double progress) {
@@ -38,7 +55,7 @@ public class PipelineObserver  {
     }
 
     public void reportBoneCondition(@NotNull Uncertain<BoneCondition> boneCondition) {
-
+        informationPanelController.setBoneCondition(boneCondition);
     }
 
     public void preprocessedUserImage(@NotNull BufferedImage image) {
@@ -61,24 +78,29 @@ public class PipelineObserver  {
         mainController.setAbnormalList(imageSampleList);
     }
 
-    public void addUploadController(UploadController ctrl) {
-        uploadController = ctrl;
+
+
+    public void setInformationPanelController(InformationPanelController informationPanelController) {
+        this.informationPanelController = informationPanelController;
     }
 
-    public void addAnalysisController(AnalysisController ctrl) {
-        analysisController = ctrl;
+    public void setAnalysisController(AnalysisController analysisController) {
+        this.analysisController = analysisController;
     }
 
-    public void addImageExplorerController(ImageExplorerController ctrl) {
-        imageExplorerController = ctrl;
+    public void addImageExplorerController(ImageExplorerController imageExplorerController) {
+        this.imageExplorerControllers.add(imageExplorerController);
     }
 
-    public void addMainController(MainController ctrl) {
-        mainController = ctrl;
+    public void setMatchListController(MatchListController matchListController) {
+        this.matchListController = matchListController;
     }
 
-    public void addMatchListController(MatchListController ctrl) {
-        matchListController = ctrl;
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
     }
 
+    public void setUploadController(UploadController uploadController) {
+        this.uploadController = uploadController;
+    }
 }

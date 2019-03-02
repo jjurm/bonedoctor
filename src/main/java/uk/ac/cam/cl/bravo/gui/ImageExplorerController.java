@@ -13,8 +13,8 @@ public class ImageExplorerController {
 
     private static final int MIN_PIXELS = 10;
     private final Stage stage;
-    private PipelineObserver pipelineObserver;
     private AnalysisController analysisController;
+    private View view;
 
     double width;
     double height;
@@ -24,11 +24,12 @@ public class ImageExplorerController {
 
     @FXML
     private ImageView imageView;
+    private MainController mainController;
 
 
-    public ImageExplorerController(Stage stage, PipelineObserver pipelineObserver) {
+    public ImageExplorerController(Stage stage, View view) {
         this.stage = stage;
-        this.pipelineObserver = pipelineObserver;
+        this.view = view;
     }
 
     public void setImage(Image userInImg) {
@@ -97,6 +98,11 @@ public class ImageExplorerController {
             }
         });
 
+        imageView.setOnMouseClicked(e -> {
+            setActiveExplorer();
+            explorerContainer.setStyle("-fx-background-color: #545454"); // test
+        });
+
         GridPane.setVgrow(explorerContainer, Priority.ALWAYS);
         GridPane.setHgrow(explorerContainer, Priority.ALWAYS);
         ReadOnlyDoubleProperty gridWidth = ((GridPane) explorerContainer.getParent()).widthProperty();
@@ -153,8 +159,17 @@ public class ImageExplorerController {
 
     public void setAnalysisController(AnalysisController analysisController){
         this.analysisController = analysisController;
-
     }
 
+    public void setActiveExplorer() {
+        analysisController.setActiveExplorer(this);
+    }
 
+    public View getView() {
+        return view;
+    }
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
+    }
 }

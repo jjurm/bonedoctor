@@ -3,22 +3,28 @@ package uk.ac.cam.cl.bravo.gui;
 import java.io.File;
 import java.io.IOException;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
+import kotlin.Pair;
+import uk.ac.cam.cl.bravo.dataset.Bodypart;
+import uk.ac.cam.cl.bravo.pipeline.MainPipeline;
 
 public class UploadController {
 
     private File imgFile;
+    private Bodypart bodypart;
     private MainController mainController;
     private Stage stage;
-    private PipelineObserver pipelineObserver;
 
     @FXML
     private Button selectButton;
@@ -28,13 +34,20 @@ public class UploadController {
     private ImageView imageView;
     @FXML
     private Button analyzeButton;
+    @FXML
+    private ComboBox bodypartChoice;
 
 
-    public UploadController(Stage stage, PipelineObserver pipelineObserver) {
+    public UploadController(Stage stage) {
         this.stage = stage;
-        this.pipelineObserver = pipelineObserver;
+
+
     }
 
+    public void launch() {
+        ObservableList<Bodypart> items = FXCollections.observableArrayList(Bodypart.ELBOW, Bodypart.FINGER, Bodypart.FOREARM, Bodypart.HUMERUS, Bodypart.SHOULDER, Bodypart.HAND, Bodypart.WRIST);
+        bodypartChoice.setItems(items);
+    }
 
     public void setMainController(MainController main) {
         mainController = main;
@@ -54,7 +67,21 @@ public class UploadController {
 
     @FXML
     protected void handleAnalyzeButtonAction(ActionEvent event) throws IOException {
+        MainPipeline mainPipeline = mainController.getMainPipeline();
+
+        Pair<String, Bodypart> userInput = new Pair<>(imgFile.toURI().toString(), bodypart);
+
+        mainPipeline.getUserInput().onNext(userInput);
         mainController.loadAnalysis(imageView.getImage());
+    }
+
+    @FXML
+    protected void handleSelectBodypart(ActionEvent event) throws IOException {
+        this.bodypart = (Bodypart) bodypartChoice.getSelectionModel().getSelectedItem();
+    }
+
+    private void subscribe() {
+        MainPipeline mainPipeline = mainController.getMainPipeline();
     }
 
 }
