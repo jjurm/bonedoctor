@@ -69,6 +69,28 @@ public class Utils {
         return ret;
     }
 
+    /**
+     * Computes cosine similarity based on the formula (A dot B) / (norm(A) * norm(B))
+     * @param feat0
+     * @param feat1
+     * @return
+     */
+    public static double computeCosineSimilarity(float[] feat0, float[] feat1){
+        double dotProduct = 0.0;
+        double norm0 = 0.0;
+        double norm1 = 0.0;
+
+        for (int i=0; i<feat0.length; i++){
+            dotProduct += feat0[i] * feat1[i];
+            norm0 += Math.pow(feat0[i], 2);
+            norm1 += Math.pow(feat1[i], 2);
+        }
+
+        norm0 = Math.sqrt(norm0);
+        norm1 = Math.sqrt(norm1);
+
+        return dotProduct / (norm0 * norm1);
+    }
 
     /**
      * Assesses the confidence of the label produced given the distance to each cluster centroid mean features

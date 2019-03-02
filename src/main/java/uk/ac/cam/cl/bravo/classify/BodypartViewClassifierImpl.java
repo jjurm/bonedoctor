@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.tensorflow.*;
 import uk.ac.cam.cl.bravo.dataset.Bodypart;
 import uk.ac.cam.cl.bravo.dataset.BodypartView;
+import uk.ac.cam.cl.bravo.dataset.BoneCondition;
 import uk.ac.cam.cl.bravo.pipeline.Confidence;
 import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
@@ -14,10 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static uk.ac.cam.cl.bravo.classify.Utils.*;
 
@@ -30,6 +28,9 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     // Input and output node names based on python nodes inspection.
     private final String inputNodeName = "input_1";
     private final String outputNodeName = "mixed10/concat";
+
+    // Read the graphdef only once, since this needn't change.
+    private byte[] graphDef = readBytesFromFile(graphDefFilename);
 
     @NotNull
     @Override
@@ -44,9 +45,6 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         // Preprocess image first to get float tensor of shape [1, 299, 299, 3]
         Tensor<Float> preprocessedImage = executePreprocessingGraph(imageBytes);
-
-        // Build the graph definition for use
-        byte[] graphDef = readBytesFromFile(graphDefFilename);
 
         // Obtained flattened array as output
         float[] outputArray = executeInferenceGraph(graphDef, preprocessedImage, inputNodeName, outputNodeName);
@@ -143,7 +141,6 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         }
     }
 
-
     /**
      * Performs the inference on one image and obtain a flattened array output for L2 distance comparison
      * @param graphDef protobuf file converted to byte array
@@ -156,6 +153,8 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
                                           Tensor<Float> image,
                                           String inputNodeName,
                                           String outputNodeName){
+
+
         try(Graph g = new Graph()){
             // First restore the graph definition from frozen graph
             g.importGraphDef(graphDef);
@@ -175,6 +174,45 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
             }
         }
+    }
+
+
+    private Map<String, float[]> executeInferenceGraphConsecutively(byte[] graphDef,
+                                          Map<String, Tensor<Float>> imageInferenceMap,
+                                          String inputNodeName,
+                                          String outputNodeName){
+
+        Map<String, float[]> outputImagesMap = new HashMap<>();
+
+        for (String imageFilename : imageInferenceMap.keySet()){
+            long timeNow = System.currentTimeMillis();
+            Tensor<Float> image = imageInferenceMap.get(imageFilename);
+
+            try(Graph g = new Graph()){
+                // First restore the graph definition from frozen graph
+                g.importGraphDef(graphDef);
+
+                // Initiate a session to perform inference and try to get the res
+                try(Session s = new Session(g);
+                    Tensor<Float> result = s.runner().feed(
+                            inputNodeName, image).fetch(outputNodeName).run().get(0).expect(Float.class)){
+                    // Obtain shape of the result
+                    final long[] shape = result.shape();
+
+                    // Output result is shape [1, 8, 8, 2048] tensor, so we flatten it.
+                    float[][][][] retArray = result.copyTo(new float [(int) shape[0]][(int) shape[1]][(int) shape[2]][(int) shape[3]]);
+                    float[] flattenedArray = flattenArray(retArray);
+
+                    // Add to results
+                    outputImagesMap.put(imageFilename, flattenedArray);
+
+                    System.out.println("Ran Inference on " + imageFilename + " " + (System.currentTimeMillis() - timeNow)/1000.0 + "sec");
+                }
+            }
+        }
+
+        return outputImagesMap;
+
     }
 
 
@@ -344,17 +382,96 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         return ret;
     }
 
+    public String getClosestImages(
+            BufferedImage image,
+            Bodypart bodypart,
+            String imageDirectory,
+            int limit) throws IOException {
+        // TODO: Optimize and remove redundant steps, esp graph building.
+
+        // Run inference once on the image to get the array's features
+        Tensor<Float> preprocessedImage = executePreprocessingGraph(bufferedImageToByteArray(image));
+        float[] outputArray = executeInferenceGraph(graphDef, preprocessedImage, inputNodeName, outputNodeName);
+
+        // Classify the image to get its resulting bodypartview object
+        Uncertain<BodypartView> result = classify(image, bodypart);
+        BodypartView bodypartView = result.getValue();
+
+        // Using the bodypart view object, get the list of image filenames in the same cluster
+        List<String> clusterImageFilenames = getClusterFiles(bodypartView);
+
+        // Limit the filenames for scalability
+        clusterImageFilenames = clusterImageFilenames.subList(0, limit);
+
+        // Map filenames to results obtained
+        Map<String, Tensor<Float>> imageInferenceMap = new HashMap<>();
+
+        // Loop through the cluster images to preprocess into tensors
+        for (String imageFilename : clusterImageFilenames){
+            // Read image for inference
+            BufferedImage currImage = ImageIO.read(Paths.get(imageDirectory, imageFilename).toAbsolutePath().toFile());
+
+            // Get preprocessed input
+            Tensor<Float> preprocessedInput = executePreprocessingGraph(bufferedImageToByteArray(currImage));
+
+            // Add to results
+            imageInferenceMap.put(imageFilename, preprocessedInput);
+
+        }
+
+        // Find the float outputs of preprocessed inputs, but use this function
+        // so that inference graph is built only once (costly).
+        Map<String, float[]> outputImagesMap = executeInferenceGraphConsecutively(
+                graphDef,
+                imageInferenceMap,
+                inputNodeName,
+                outputNodeName);
+
+        // Loop through the images to find the best fit
+        String bestImageFilename = null;
+        double minDistance = Double.MIN_VALUE;
+
+        for (String imageFilename : outputImagesMap.keySet()){
+            double currDistance = computeCosineSimilarity(outputArray, outputImagesMap.get(imageFilename));
+//            double currDistance = computeL2Distance(outputArray, outputImagesMap.get(imageFilename));
+            System.out.println(imageFilename);
+            System.out.println("Score : " + currDistance);
+
+
+            if (currDistance > minDistance){
+                bestImageFilename = imageFilename;
+                minDistance = currDistance;
+            }
+        }
+
+        System.out.println("Best Image: " + bestImageFilename);
+        System.out.println("Best Score: " + minDistance);
+
+        return bestImageFilename;
+    }
+
 
     public static void main(String[] args) throws IOException {
         // Test
         BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
         String testImage = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1 (copy 1)/train/XR_HAND/patient10943/study1_negative/image2.png";
         BufferedImage image = ImageIO.read(new File(testImage));
-        Uncertain result = classifier.classify(image, Bodypart.HAND);
 
-        // Obtain the cluster files
-        List<String> clusterFiles = classifier.getClusterFiles((BodypartView) result.getValue());
+//        // Extract results
+//        Uncertain result = classifier.classify(image, Bodypart.HAND);
+//        BodypartView bodypartView = (BodypartView) result.getValue();
+//        Confidence confidence = result.getConfidence();
+
+//        // Obtain the cluster files
+//        List<String> clusterFiles = classifier.getClusterFiles((BodypartView) result.getValue());
 //        System.out.println(clusterFiles);
+
+        // Test getting the closest N images
+        System.out.println(classifier.getClosestImages(
+                image,
+                Bodypart.HAND,
+                "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1 (copy 1)",
+                30));
     }
 
 }
