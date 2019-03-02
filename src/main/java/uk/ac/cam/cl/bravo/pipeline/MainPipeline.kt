@@ -12,8 +12,7 @@ import uk.ac.cam.cl.bravo.classify.BodypartViewClassifierImpl
 import uk.ac.cam.cl.bravo.classify.BoneConditionClassifier
 import uk.ac.cam.cl.bravo.classify.BoneConditionClassifierImpl
 import uk.ac.cam.cl.bravo.dataset.*
-import uk.ac.cam.cl.bravo.hash.ImageMatcher
-import uk.ac.cam.cl.bravo.hash.ImageMatcherImpl
+import uk.ac.cam.cl.bravo.hash.*
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI
@@ -37,6 +36,16 @@ class MainPipeline {
      * level (higher values take longer to compute). Values are 0.0 to 1.0
      */
     val precision: Subject<Double> = BehaviorSubject.createDefault(0.5)
+
+    /**
+     * A value between 0.0 and 1.0
+     */
+    val highlightAmount: Subject<Double> = BehaviorSubject.createDefault(0.0)
+
+    /**
+     * A value between 0.0 and 1.0
+     */
+    val highlightGradient: Subject<Double> = BehaviorSubject.createDefault(0.5)
 
     /** A pair of (input image path, bodypart of the input image) */
     val userInput: Subject<Pair<String, Bodypart>> = BehaviorSubject.create()
@@ -76,7 +85,7 @@ class MainPipeline {
     val overlaid: Observable<Rated<BufferedImage>>
 
     /** The 'overlaid' image modified to highlight differences from 'preprocessed' */
-    val preprocessedHighlighted: Observable<BufferedImage>
+    val fracturesHighlighted: Observable<BufferedImage>
 
 
     // ===== Constants =====
@@ -112,6 +121,7 @@ class MainPipeline {
         ) + ParameterPenaltyFunction() * 1.0,
         bigPlaneSize = PLANE_SIZE
     )
+    private val fractureHighlighter: FractureHighlighter2 = FractureHighlighter2Impl()
 
     init {
         // TODO Juraj: implement parallel execution
@@ -210,9 +220,15 @@ class MainPipeline {
             BiFunction { a, b -> listOf(a, b).minBy { it.score }!! })
         overlaid.doneMeans(0.8, "Highlighting differences")
 
-        // TODO Shehab: highlight differences
-        preprocessedHighlighted = overlaid.map { it.value }.withCache()
-        preprocessedHighlighted.doneMeans(1.0, "Done!")
+        Observable.combineLatest(
+            inputImage,
+            imageToOverlayLoaded,
+            highlightAmount,
+            highlightGradient,
+            Function4(fractureHighlighter::highlight)
+        ).subscribe()
+        fracturesHighlighted = fractureHighlighter.partialResults
+        fracturesHighlighted.doneMeans(1.0, "Done!")
     }
 
     /**

@@ -64,6 +64,7 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
     pipeline.overlaidOriginal.subscribe { DisplayImage(it.value, "OverlaidOriginal (score: ${it.score})") }
     pipeline.overlaidMirrored.subscribe { DisplayImage(it.value, "OverlaidMirrored (score: ${it.score})") }
     //pipeline.overlaid.subscribe { DisplayImage(it.value, "Overlaid (best) (score: ${it.score})") }
+    pipeline.fracturesHighlighted.subscribe { DisplayImage(it, "Fractures highlighted") }
 
     pipeline.userInput.onNext(Pair(inputFile, bodypart))
 }
