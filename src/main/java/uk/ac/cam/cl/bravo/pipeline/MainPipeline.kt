@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.pipeline
 
+import com.jhlabs.image.FlipFilter
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function4
@@ -11,13 +12,13 @@ import uk.ac.cam.cl.bravo.classify.BodypartViewClassifierImpl
 import uk.ac.cam.cl.bravo.classify.BoneConditionClassifier
 import uk.ac.cam.cl.bravo.classify.BoneConditionClassifierImpl
 import uk.ac.cam.cl.bravo.dataset.*
-import uk.ac.cam.cl.bravo.hash.ImageMatcher
-import uk.ac.cam.cl.bravo.hash.ImageMatcherImpl
+import uk.ac.cam.cl.bravo.hash.*
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI
 import java.awt.image.BufferedImage
 import java.io.File
+import javax.imageio.ImageIO
 
 /**
  * Responsible: Juraj Micko (jm2186)
@@ -35,6 +36,16 @@ class MainPipeline {
      * level (higher values take longer to compute). Values are 0.0 to 1.0
      */
     val precision: Subject<Double> = BehaviorSubject.createDefault(0.5)
+
+    /**
+     * A value between 0.0 and 1.0
+     */
+    val highlightAmount: Subject<Double> = BehaviorSubject.createDefault(0.0)
+
+    /**
+     * A value between 0.0 and 1.0
+     */
+    val highlightGradient: Subject<Double> = BehaviorSubject.createDefault(0.5)
 
     /** A pair of (input image path, bodypart of the input image) */
     val userInput: Subject<Pair<String, Bodypart>> = BehaviorSubject.create()
@@ -69,10 +80,12 @@ class MainPipeline {
     val similarAbnormal: Observable<List<Rated<ImageSample>>>
 
     /** The result of the overlay algorithm, taking 'imageToOverlay' as the input. */
+    val overlaidOriginal: Observable<Rated<BufferedImage>>
+    val overlaidMirrored: Observable<Rated<BufferedImage>>
     val overlaid: Observable<Rated<BufferedImage>>
 
     /** The 'overlaid' image modified to highlight differences from 'preprocessed' */
-    val preprocessedHighlighted: Observable<BufferedImage>
+    val fracturesHighlighted: Observable<BufferedImage>
 
 
     // ===== Constants =====
@@ -95,19 +108,20 @@ class MainPipeline {
         arrayOf(
             InnerWarpTransformer(
                 parameterScale = 0.8,
-                parameterPenaltyScale = 1.0,
+                parameterPenaltyScale = 4.0,
                 resolution = 4
             ),
             AffineTransformer(
                 parameterScale = 1.0,
-                parameterPenaltyScale = 0.1
+                parameterPenaltyScale = 1.0
             )
         ),
         PixelSimilarity(
             ignoreBorderWidth = 0.25
-        ) + ParameterPenaltyFunction() * 0.05,
+        ) + ParameterPenaltyFunction() * 1.0,
         bigPlaneSize = PLANE_SIZE
     )
+    private val fractureHighlighter: FractureHighlighter2 = FractureHighlighter2Impl()
 
     init {
         // TODO Juraj: implement parallel execution
@@ -140,6 +154,7 @@ class MainPipeline {
 
         val path = userInput.map(Pair<String, *>::first)
         val bodypart = userInput.map(Pair<*, Bodypart>::second)
+        val inputImage = path.map { ImageIO.read(File(it)) }.withCache()
 
         preprocessed = path.map(preprocessor::preprocess.withTag("Preprocessing")).withCache()
         preprocessed.doneMeans(0.2, "Classifying bone condition")
@@ -149,20 +164,21 @@ class MainPipeline {
             preprocessedVal.map(boneConditionClassifier::classify.withTag("BoneCondition classifier")).withCache()
 
         val bodypartView: Observable<Uncertain<BodypartView>> = Observable.combineLatest(
-            preprocessedVal,
+            inputImage,
             bodypart,
             BiFunction(bodypartViewClassifier::classify.withTag("BodypartView classifier"))
         ).withCache()
         bodypartView.doneMeans(0.4, "Looking for similar x-rays")
         val bodypartViewVal = bodypartView.map(Uncertain<BodypartView>::value)
+        bodypartViewVal.subscribe { println("Classified view: ${it.value}") }
 
         // Output of ImageMatcher contains Files; so convert it to ImageSamples, by looking up the path in the Dataset
         val matchingFunction =
             { image: BufferedImage, boneCondition: BoneCondition, bpView: BodypartView, n: Int ->
-                imageMatcher.findMatchingImage(image, boneCondition, bpView, n).map {
+                imageMatcher.findMatchingImage(image, boneCondition, bpView, n, false).map {
                     try {
                         // throws exception if ImageSample not loaded in the dataset
-                        val imageSample = dataset.combined.getValue(it.key.toString().replace('\\','/'))
+                        val imageSample = dataset.combined.getValue(it.key.toString().replace('\\', '/'))
                         Rated(value = imageSample, score = it.value.toDouble())
                     } catch (e: NoSuchElementException) {
                         throw RuntimeException("Image ${it.key} returned by ImageMatcher is not in the dataset", e)
@@ -170,30 +186,49 @@ class MainPipeline {
                 }
             }.withTag("ImageMatcher")
 
+        // TODO Juraj: choose original or preprocessed image for ImageMatcher
         similarNormal = Observable.combineLatest(
-            preprocessedVal, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages,
+            inputImage, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages,
             Function4(matchingFunction)
         ).withCache()
         similarAbnormal = Observable.combineLatest(
-            preprocessedVal, Observable.just(BoneCondition.ABNORMAL), bodypartViewVal, nSimilarImages,
+            inputImage, Observable.just(BoneCondition.ABNORMAL), bodypartViewVal, nSimilarImages,
             Function4(matchingFunction)
         ).withCache()
 
         similarNormal.map { it.first().value }.subscribe(imageToOverlay)
         imageToOverlay.doneMeans(0.6, "Overlaying images")
 
-        overlaid = Observable.combineLatest(
+        val imageToOverlayLoaded = imageToOverlay.map(ImageSample::loadPreprocessedImage).withCache()
+        overlaidOriginal = Observable.combineLatest(
             preprocessedVal,
-            imageToOverlay.map(ImageSample::loadPreprocessedImage),
+            imageToOverlayLoaded,
             downsample,
             overlayPrecision,
             Function4(imageOverlay::fitImage.withTag("Overlay"))
         ).withCache()
+        overlaidMirrored = Observable.combineLatest(
+            preprocessedVal,
+            imageToOverlayLoaded.map { FlipFilter(FlipFilter.FLIP_H).filter(it, null) },
+            downsample,
+            overlayPrecision,
+            Function4(imageOverlay::fitImage.withTag("OverlayMirrored"))
+        ).withCache()
+        overlaid = Observable.combineLatest(
+            overlaidOriginal,
+            overlaidMirrored,
+            BiFunction { a, b -> listOf(a, b).minBy { it.score }!! })
         overlaid.doneMeans(0.8, "Highlighting differences")
 
-        // TODO Shehab: highlight differences
-        preprocessedHighlighted = overlaid.map { it.value }.withCache()
-        preprocessedHighlighted.doneMeans(1.0, "Done!")
+        Observable.combineLatest(
+            inputImage,
+            imageToOverlayLoaded,
+            highlightAmount,
+            highlightGradient,
+            Function4(fractureHighlighter::highlight)
+        ).subscribe()
+        fracturesHighlighted = fractureHighlighter.partialResults
+        fracturesHighlighted.doneMeans(1.0, "Done!")
     }
 
     /**

@@ -55,12 +55,19 @@ class AffineTransformer(
         val plane = getPlaneImage(planeSize)
         val matrix = (parameters zip identity).map { (a, b) -> a + b }.toDoubleArray()
         matrix[4] *= planeSize.x.toDouble() / 2
-        matrix[5] *= planeSize.y.toDouble() / 2 + 200
+        matrix[5] *= planeSize.y.toDouble() / 2
         val transform = calculateInPlaneTransform(image, AffineTransform(matrix), planeSize)
         withGraphics(plane) {
             drawImage(image, transform, null)
         }
         return plane
+    }
+
+    override fun scaleParametersToPenalty(parameters: Iterable<Double>): DoubleArray {
+        val cp = super.scaleParametersToPenalty(parameters)
+        cp[4] = 0.0
+        cp[5] = 0.0
+        return cp
     }
 
 }

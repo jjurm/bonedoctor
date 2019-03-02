@@ -242,11 +242,11 @@ public class PixelHasher {
     }
 
     public void setAllA(){
-        setAPixels(9,9, imgA.getWidth()-9, imgA.getHeight()-9);
+        setAPixels(7,7, imgA.getWidth()-7, imgA.getHeight()-7);
     }
 
     public void scanAllB(){
-        showDiff(9,9,imgB.getWidth()-9, imgB.getHeight()-9);
+        showDiff(7,7,imgB.getWidth()-7, imgB.getHeight()-7);
     }
 
     public void fullScan(){

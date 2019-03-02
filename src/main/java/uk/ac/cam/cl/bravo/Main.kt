@@ -56,10 +56,15 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
     pipeline.status.subscribe(::println)
     pipeline.preprocessed.subscribe { DisplayImage(it.value, "Preprocessed (confidence: ${it.confidence})") }
     pipeline.boneCondition.subscribe { println("BoneCondition: ${it.value}, confidence: ${it.confidence}") }
+
     pipeline.similarNormal.subscribe { it.forEachIndexed { i, img ->
+        println("Similar $i: ${img.value.path}")
         DisplayImage(img.value.preprocessedPath, "Similar $i")
     } }
-    pipeline.overlaid.subscribe { DisplayImage(it.value, "Overlaid (score: ${it.score})") }
+    pipeline.overlaidOriginal.subscribe { DisplayImage(it.value, "OverlaidOriginal (score: ${it.score})") }
+    pipeline.overlaidMirrored.subscribe { DisplayImage(it.value, "OverlaidMirrored (score: ${it.score})") }
+    //pipeline.overlaid.subscribe { DisplayImage(it.value, "Overlaid (best) (score: ${it.score})") }
+    pipeline.fracturesHighlighted.subscribe { DisplayImage(it, "Fractures highlighted") }
 
     pipeline.userInput.onNext(Pair(inputFile, bodypart))
 }
@@ -69,7 +74,7 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
     val subset = dataset.training.filter { it.normality == Normality.positive && it.bodypart == Bodypart.HAND }
 }*/
 
-fun tryOverlay(file1: String, file2: String) {
+/*fun tryOverlay(file1: String, file2: String) {
     println("Loading images...")
 
     val blur = GaussianFilter(2.0f)
@@ -118,4 +123,4 @@ fun tryOverlay(file1: String, file2: String) {
 
     ImageIO.write(overlaid, "png", File("output.png"))
     println("Done")
-}
+}*/
