@@ -18,9 +18,7 @@ public class MatchListController {
     private ListView matches;
     private Stage stage;
     private AnalysisController analysisController;
-    private List<Image> imgNormalList = new ArrayList<>();
-    private List<Image> imgAbormalList = new ArrayList<>();
-
+    private List<Image> imgList = new ArrayList<>();
 
     private View view;
 
@@ -36,25 +34,15 @@ public class MatchListController {
         Image img7 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
         Image img8 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img5.png"));
         Image img9 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
-        imgNormalList.add(img1);
-        imgNormalList.add(img2);
-        imgNormalList.add(img3);
-        imgNormalList.add(img4);
-        imgNormalList.add(img5);
-        imgNormalList.add(img6);
-        imgNormalList.add(img7);
-        imgNormalList.add(img8);
-        imgNormalList.add(img9);
-
-        imgAbormalList.add(img9);
-        imgAbormalList.add(img8);
-        imgAbormalList.add(img7);
-        imgAbormalList.add(img6);
-        imgAbormalList.add(img5);
-        imgAbormalList.add(img4);
-        imgAbormalList.add(img3);
-        imgAbormalList.add(img2);
-        imgAbormalList.add(img1);
+        imgList.add(img1);
+        imgList.add(img2);
+        imgList.add(img3);
+        imgList.add(img4);
+        imgList.add(img5);
+        imgList.add(img6);
+        imgList.add(img7);
+        imgList.add(img8);
+        imgList.add(img9);
     }
 
     public void setView(View view) {
@@ -62,20 +50,13 @@ public class MatchListController {
         launch();
     }
 
+    private void onNext() {}
+
     public void launch() {
         // ------ CREATE SCROLLABLE LIST VIEW --------
 
         ObservableList<String> items = FXCollections.observableArrayList("img1.png", "img2.png", "img3.png", "img4.png", "img5.png", "img6.png", "img7.png", "img8.png", "img9.png");
         matches.setItems(items);
-
-
-        // TODO: ANE - replace with actual pipeline lists.
-        List<Image> imgList;
-        if (view == View.NORMAL) {
-            imgList = imgNormalList;
-        } else {
-            imgList = imgAbormalList;
-        }
 
         matches.setCellFactory(param -> new ListCell<String>() {
             private ImageView matchView = new ImageView();
