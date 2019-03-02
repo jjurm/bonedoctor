@@ -12,7 +12,7 @@ import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
-
+@Deprecated
 public class PipelineObserver  {
 
     private Main main;
