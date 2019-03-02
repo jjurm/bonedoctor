@@ -15,4 +15,6 @@ interface Transformer {
 
     fun transform(image: BufferedImage, parameters: DoubleArray, planeSize: Point): BufferedImage
 
+    fun scaleParametersToPenalty(parameters: Iterable<Double>): DoubleArray
+
 }

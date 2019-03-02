@@ -4,7 +4,10 @@ import java.awt.Point
 import java.awt.image.BufferedImage
 
 abstract class AbstractTransformer(
-    /** Higher scale means lower absolute values, hence higher weight when minimising */
+    /**
+     * Higher scale means lower absolute values, hence higher weight when minimising.
+     * Essentially, [parameterScale] = intensity of the transformation
+     */
     override val parameterScale: Double,
     /** Higher value means higher penalisation for adjusting parameters of this transformer */
     override val parameterPenaltyScale: Double
@@ -25,5 +28,8 @@ abstract class AbstractTransformer(
     abstract fun transform0(image: BufferedImage, parameters: DoubleArray, planeSize: Point): BufferedImage
     override fun transform(image: BufferedImage, parameters: DoubleArray, planeSize: Point): BufferedImage =
         transform0(image, rescaleIn(parameters), planeSize)
+
+    override fun scaleParametersToPenalty(parameters: Iterable<Double>): DoubleArray =
+        parameters.map { it * parameterScale * parameterPenaltyScale }.toDoubleArray()
 
 }

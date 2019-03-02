@@ -43,16 +43,22 @@ class ImageOverlayImpl(
     fun penaltyScaledParameters(parameters: DoubleArray): Iterable<Double> {
         val accParams = ArrayList<Double>(parameterCount)
         transformers.fold(0) { paramOffset, transformer ->
-            val s = transformer.parameterScale * transformer.parameterPenaltyScale
-            for (i in paramOffset until (paramOffset + transformer.parameterCount)) {
-                accParams.add(parameters[i] * s)
-            }
+            accParams.addAll(
+                transformer.scaleParametersToPenalty(
+                    parameters.slice(paramOffset until (paramOffset + transformer.parameterCount))
+                ).asList()
+            )
             paramOffset + transformer.parameterCount
         }
         return accParams
     }
 
-    fun findBestOverlay(base: BufferedImage, sample: BufferedImage, downsample: Double, precision: Double): PointValuePair {
+    fun findBestOverlay(
+        base: BufferedImage,
+        sample: BufferedImage,
+        downsample: Double,
+        precision: Double
+    ): PointValuePair {
         val smallPlaneSize = bigPlaneSize / downsample
 
         val optimizer = BOBYQAOptimizer(
@@ -87,7 +93,12 @@ class ImageOverlayImpl(
         return transformers.transformAll(inPlane, parameters, bigPlaneSize)
     }
 
-    override fun fitImage(base: BufferedImage, sample: BufferedImage, downsample: Double, precision: Double): Rated<BufferedImage> {
+    override fun fitImage(
+        base: BufferedImage,
+        sample: BufferedImage,
+        downsample: Double,
+        precision: Double
+    ): Rated<BufferedImage> {
         val bestOverlay = findBestOverlay(base, sample, downsample, precision)
         val transformed = applyTransformations(sample, bestOverlay.point)
         val score = bestOverlay.value
