@@ -21,6 +21,13 @@ public interface FractureHighlighter {
     BufferedImage getHighlight(int startx, int starty, int endx, int endy);
 
     /**
+     * Automatically selects the full image for the getHighlight method
+     *
+     * @return a highlighted image
+     */
+    BufferedImage getFullHighlight();
+
+    /**
      * Set the bounding rectangle in the 'source' image that you want to learn from
      *
      * @param startx

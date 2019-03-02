@@ -93,7 +93,7 @@ public class ImageHasher implements java.io.Serializable {
     }
 
     public List<Pair<File, Integer>> getNPairs(BufferedImage img, int n){
-        List<File> files = getNMatches(img, n);
+        List<File> files = getNMatches(img, 2*n);
         List<Pair<File, Integer>> pairList = new ArrayList<>();
 
         for (File f: files) {
@@ -107,7 +107,7 @@ public class ImageHasher implements java.io.Serializable {
             }
         });
 
-        return pairList;
+        return pairList.subList(0, n);
     }
 
     public File getBestMatch(File f){

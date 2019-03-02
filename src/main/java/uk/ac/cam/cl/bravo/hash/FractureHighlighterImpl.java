@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 public class FractureHighlighterImpl implements FractureHighlighter {
     BufferedImage source;
     BufferedImage target;
-    private int gradientThreshold = 0;
+    private int gradientThreshold = -20;
     private int hammingThreshold = 0;
     private HashSet<Long> sourcePixelHash;
     private boolean recomputeNeeded;
@@ -33,6 +33,7 @@ public class FractureHighlighterImpl implements FractureHighlighter {
         this.target = target;
         this.deferComputation = deferComputation;
         this.imageConsumer = imageConsumer;
+        setAllSource();
     }
 
     /**
@@ -115,6 +116,16 @@ public class FractureHighlighterImpl implements FractureHighlighter {
 
         imageConsumer.accept(result);
         return result;
+    }
+
+    /**
+     * Automatically selects the full image for the getHighlight method
+     *
+     * @return a highlighted image
+     */
+    @Override
+    public BufferedImage getFullHighlight() {
+        return getHighlight(7, 7, target.getWidth()-7, target.getHeight()-7);
     }
 
     /**
@@ -265,7 +276,8 @@ public class FractureHighlighterImpl implements FractureHighlighter {
     }
 
     public void setAllSource(){
-        setSourcePixels(7,7,  source.getWidth()-7, source.getHeight()-7);
+        setSourcePixels(7,7,  source.getWidth()-7,
+                source.getHeight()-7);
     }
 
 }
