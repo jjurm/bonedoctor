@@ -25,17 +25,17 @@ class EdgeDetection
 
                 //Using Sobel Edge Detection
 
-                int val00 = getGrayScale(inputFile.getRGB(i - 1, j - 1));
-                int val01 = getGrayScale(inputFile.getRGB(i - 1, j));
-                int val02 = getGrayScale(inputFile.getRGB(i - 1, j + 1));
+                int val00 = Statistics.getGrayScale(inputFile.getRGB(i - 1, j - 1));
+                int val01 = Statistics.getGrayScale(inputFile.getRGB(i - 1, j));
+                int val02 = Statistics.getGrayScale(inputFile.getRGB(i - 1, j + 1));
 
-                int val10 = getGrayScale(inputFile.getRGB(i, j - 1));
-                int val11 = getGrayScale(inputFile.getRGB(i, j));
-                int val12 = getGrayScale(inputFile.getRGB(i, j + 1));
+                int val10 = Statistics.getGrayScale(inputFile.getRGB(i, j - 1));
+                int val11 = Statistics.getGrayScale(inputFile.getRGB(i, j));
+                int val12 = Statistics.getGrayScale(inputFile.getRGB(i, j + 1));
 
-                int val20 = getGrayScale(inputFile.getRGB(i + 1, j - 1));
-                int val21 = getGrayScale(inputFile.getRGB(i + 1, j));
-                int val22 = getGrayScale(inputFile.getRGB(i + 1, j + 1));
+                int val20 = Statistics.getGrayScale(inputFile.getRGB(i + 1, j - 1));
+                int val21 = Statistics.getGrayScale(inputFile.getRGB(i + 1, j));
+                int val22 = Statistics.getGrayScale(inputFile.getRGB(i + 1, j + 1));
 
                 int gx =  ((-1 * val00) + (0 * val01) + (1 * val02))
                         + ((-2 * val10) + (0 * val11) + (2 * val12))
@@ -97,7 +97,7 @@ class EdgeDetection
 
         for (int x =0; x<w; x++){
             for (int y = 0; y<h; y++){
-                b+=getGrayScale(inputFile.getRGB(x, y));
+                b+=Statistics.getGrayScale(inputFile.getRGB(x, y));
             }
         }
 
@@ -105,21 +105,11 @@ class EdgeDetection
 
         for (int x =0; x<w; x++){
             for (int y = 0; y<h; y++){
-                if ((getGrayScale(inputFile.getRGB(x, y))>b))
+                if ((Statistics.getGrayScale(inputFile.getRGB(x, y))>b))
                     pts.add(new Point2D(x, y));
             }
         }
 
         return pts;
-    }
-
-    public static int  getGrayScale(int rgb) {
-        int r = (rgb >> 16) & 0xff;
-        int g = (rgb >> 8) & 0xff;
-        int b = (rgb) & 0xff;
-
-        int gray = (int)(0.2126 * r + 0.7152 * g + 0.0722 * b);
-
-        return gray;
     }
 }

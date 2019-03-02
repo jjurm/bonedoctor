@@ -31,7 +31,7 @@ public class Contrast {
                 else {
                     int rgba = srcFile.getRGB(x, y);
                     Color col = new Color(rgba, true);
-                    int gs = (int) (0.3 * col.getRed() + 0.59 * col.getGreen() + 0.11 * col.getBlue());
+                    int gs = Statistics.getGrayScale(col.getRGB());
                     if (gs <= bT)
                         col = new Color(0, 0, 0);
                     else if (gs >= wT)

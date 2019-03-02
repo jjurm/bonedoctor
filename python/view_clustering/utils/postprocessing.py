@@ -4,6 +4,7 @@ Script for post processing results from python ETL pipeline for use in Java API.
 import json
 import os
 import pickle as pkl
+import re
 
 
 def convert_to_java_readable_format(feat_file, output_dir):
@@ -37,13 +38,7 @@ def swap_keys(json_file):
 
 	for label, image_filenames in labels_to_image_filenames_dict.items():
 		for filename in image_filenames:
-			filename = filename.replace("_", "/")
-
-			# Restore XR_ prefix to directory
-			filename_list = filename.split("XR")
-			filename_list[-1] = filename_list[-1][1:] # Remove extra slash
-			filename = "XR_".join(filename_list) # join back XR_prefix
-
+			# Swap keys and labels
 			image_filename_to_label_dict[filename] = label
 
 	# Output the file
@@ -52,14 +47,36 @@ def swap_keys(json_file):
 		json.dump(image_filename_to_label_dict, file)
 
 
+def restore_paths(json_file):
+	with open(json_file, 'r') as file:
+		labels_to_image_filenames_dict = json.load(file)
+
+	for label in labels_to_image_filenames_dict:
+		image_filenames = labels_to_image_filenames_dict[label]
+
+		for i in range(len(image_filenames)):
+			try:
+				m = re.search(r"(.*)_(XR_.*)_(patient.*)_(study.*)_(image.*)", image_filenames[i])
+				image_filenames[i] = "/".join(m.groups())
+			except:
+				continue
+				
+	# Output the file
+	with open(json_file, 'w') as file:
+		json.dump(labels_to_image_filenames_dict, file)
+
+
 if __name__ == "__main__":
 	OUTPUT_DIR = "../output"
 
 	for BODY_PART in os.listdir(OUTPUT_DIR):
 		print("Processing {} folder...".format(BODY_PART))
+		json_file = os.path.join(OUTPUT_DIR, BODY_PART, "label_to_image_filenames/labels_to_image_filenames.json")
+
+		# Perform path restoration
+		restore_paths(json_file)
 
 		# Perform the swapping of keys
-		json_file = os.path.join(OUTPUT_DIR, BODY_PART, "label_to_image_filenames/labels_to_image_filenames.json")
 		swap_keys(json_file)
 
 		# Perform the data conversion
@@ -67,3 +84,4 @@ if __name__ == "__main__":
 		feat_file = os.path.join(output_json_dir, "labels_to_image_mean_feat.pkl")
 
 		convert_to_java_readable_format(feat_file, output_json_dir)
+
