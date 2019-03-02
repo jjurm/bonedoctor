@@ -72,7 +72,7 @@ public class UploadController {
     protected void handleAnalyzeButtonAction(ActionEvent event) throws IOException {
         MainPipeline mainPipeline = mainController.getMainPipeline();
 
-        while (imgFile.equals(null) || bodypart.equals(null)){
+        if (imgFile == null || bodypart == null){
             analyzeCheck.setText("Please choose an image and the corresponding body part to proceed.");
         }
 
