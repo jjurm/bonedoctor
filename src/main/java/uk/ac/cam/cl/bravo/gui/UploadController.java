@@ -69,9 +69,15 @@ public class UploadController {
     protected void handleAnalyzeButtonAction(ActionEvent event) throws IOException {
         MainPipeline mainPipeline = mainController.getMainPipeline();
 
-        Pair<String, Bodypart> userInput = new Pair<>(imgFile.toURI().toString(), bodypart);
+        String s = this.imgFile.getPath();
+        System.out.println(s);
+
+        Pair<String, Bodypart> userInput = new Pair<>(this.imgFile.getPath(), bodypart);
 
         mainPipeline.getUserInput().onNext(userInput);
+        mainPipeline.getUserInput().onComplete();
+        mainPipeline.getUserInput().onError(new Throwable());
+
         mainController.loadAnalysis(imageView.getImage());
     }
 
