@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
@@ -21,8 +22,8 @@ import uk.ac.cam.cl.bravo.pipeline.MainPipeline;
 
 public class UploadController {
 
-    private File imgFile;
-    private Bodypart bodypart;
+    private File imgFile = null;
+    private Bodypart bodypart = null;
     private MainController mainController;
     private Stage stage;
 
@@ -36,6 +37,8 @@ public class UploadController {
     private Button analyzeButton;
     @FXML
     private ComboBox bodypartChoice;
+    @FXML
+    private Label analyzeCheck;
 
 
     public UploadController(Stage stage) {
@@ -68,6 +71,10 @@ public class UploadController {
     @FXML
     protected void handleAnalyzeButtonAction(ActionEvent event) throws IOException {
         MainPipeline mainPipeline = mainController.getMainPipeline();
+
+        while (imgFile.equals(null) || bodypart.equals(null)){
+            analyzeCheck.setText("Please choose an image and the corresponding body part to proceed.");
+        }
 
         Pair<String, Bodypart> userInput = new Pair<>(imgFile.toURI().toString(), bodypart);
 
