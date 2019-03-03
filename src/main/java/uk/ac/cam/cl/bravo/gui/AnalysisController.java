@@ -17,6 +17,7 @@ import uk.ac.cam.cl.bravo.dataset.ImageSample;
 import uk.ac.cam.cl.bravo.pipeline.Rated;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -60,7 +61,6 @@ public class AnalysisController {
         this.stage = stage;
     }
 
-
     public void launch() {
         try {
             // Initialize controller
@@ -76,7 +76,7 @@ public class AnalysisController {
             informationPanelController.launch();
             informationPanelController.setAnalysisController(this);
 
-            ObservableList<View> items = FXCollections.observableArrayList(View.INPUT, View.NORMAL, View.ABNORMAL, View.NORMAL_OVER, View.ABNORMAL_OVER);
+            ObservableList<View> items = FXCollections.observableArrayList(View.INPUT, View.NORMAL, View.NORMAL_OVER);
 
             pane1choice.setItems(items);
             pane2choice.setItems(items);
@@ -167,6 +167,11 @@ public class AnalysisController {
                 img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
                 setPaneImage(pane2, img, choice);
             }
+        } else if (choice.equals(View.NORMAL_OVER)) {
+            if (!(getBestMatchNormal() == null)) {
+                img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
+                setPaneImage(pane2, img, choice);
+            }
         }
 
         informationPanelController.setView(choice);
@@ -247,5 +252,11 @@ public class AnalysisController {
         this.normalList = normals;
         Image img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
         setPaneImage(pane2, img, View.NORMAL);
+    }
+
+    public void showTrans() {
+        BufferedImage buffImg = mainController.getMainPipeline().getImageToOverlay().onNext(activeExplorerController.getCurrentImage());
+        Image img = SwingFXUtils.toFXImage(buffImg, null);
+        setPaneImage(activeExplorerController.getCurrentPane(), img, View.NORMAL_OVER);
     }
 }

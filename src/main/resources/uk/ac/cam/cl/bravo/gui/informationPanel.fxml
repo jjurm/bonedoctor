@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.CheckBox?>
 <GridPane fx:id="infoGrid" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" GridPane.columnSpan="2147483647" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
    <rowConstraints>
       <RowConstraints minHeight="30.0" prefHeight="30.0" />
@@ -68,6 +69,7 @@
       <FlowPane alignment="BOTTOM_RIGHT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
          <children>
             <Button fx:id="addToDatasetButton" mnemonicParsing="false" text="Add to dataset" />
+            <CheckBox fx:id="transformCheckBox" onAction="#showTrans" text="Show Transformation" />
          </children>
       </FlowPane>
    </children>
