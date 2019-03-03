@@ -26,6 +26,10 @@
 #flow-pane {
 }
 
+#addToDatasetButton{
+    text-align: center;
+}
+
 #infoGrid {
   -fx-border-width: 2px;
   -fx-border-color: black;

@@ -77,10 +77,10 @@ public class UploadController {
         } else {
             mainController.setInputImage(new Image(this.imgFile.toURI().toString()));
 
-            Pair<String, Bodypart> userInput = new Pair<>(imgFile.getAbsolutePath(), bodypart);
+//            Pair<String, Bodypart> userInput = new Pair<>(imgFile.getAbsolutePath(), bodypart);
 
-            mainPipeline.getUserInput().onNext(userInput);
-            mainPipeline.getUserInput().onComplete();
+//            mainPipeline.getUserInput().onNext(userInput);
+//            mainPipeline.getUserInput().onComplete();
 //            mainPipeline.getUserInput().onError(new Throwable());
 
             mainController.loadAnalysis(imageView.getImage());
