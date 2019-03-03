@@ -65,7 +65,7 @@
             </Label>
          </children>
       </FlowPane>
-      <FlowPane alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+      <FlowPane alignment="BOTTOM_RIGHT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
          <children>
             <Button fx:id="addToDatasetButton" mnemonicParsing="false" text="Add to dataset" />
          </children>

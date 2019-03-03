@@ -18,7 +18,7 @@
   <rowConstraints>
     <RowConstraints minHeight="30.0" vgrow="ALWAYS" />
     <RowConstraints minHeight="150.0" vgrow="ALWAYS" />
-      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints minHeight="200.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
       <GridPane fx:id="pane1" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.vgrow="ALWAYS">
