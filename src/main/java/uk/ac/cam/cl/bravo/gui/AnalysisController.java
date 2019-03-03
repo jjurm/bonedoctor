@@ -139,8 +139,6 @@ public class AnalysisController {
 
     }
 
-
-
     public void showThirdExplorer(boolean bool) {
         if (bool) {
             grid.getColumnConstraints().get(0).setPercentWidth(30);
@@ -226,7 +224,6 @@ public class AnalysisController {
         this.mainController = mainController;
     }
 
-
     public void handleSaveFile(ActionEvent e) {
         Image img = mainController.getInputImage();
         FileChooser fileChooser = new FileChooser();
@@ -241,7 +238,6 @@ public class AnalysisController {
             }
         }
     }
-
 
     public InformationPanelController getInformationPanelController() {
         return informationPanelController;
@@ -265,6 +261,11 @@ public class AnalysisController {
             // Child controller actions
             datasetUploaderController.setAnalysisController(this);
             datasetUploaderController.setMainController(this.mainController);
+            datasetUploaderController.launch();
+
+            // Set the height
+            datasetUploaderController.setHeight(200.0);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -284,9 +285,11 @@ public class AnalysisController {
         setPaneImage(pane2, img, View.NORMAL);
     }
 
+    @FXML
     public void showTrans() {
-        BufferedImage buffImg = mainController.getMainPipeline().getImageToOverlay().onNext(activeExplorerController.getCurrentImage());
-        Image img = SwingFXUtils.toFXImage(buffImg, null);
-        setPaneImage(activeExplorerController.getCurrentPane(), img, View.NORMAL_OVER);
+
+//        BufferedImage buffImg = mainController.getMainPipeline().getImageToOverlay().onNext(activeExplorerController.getCurrentImage());
+//        Image img = SwingFXUtils.toFXImage(buffImg, null);
+//        setPaneImage(activeExplorerController.getCurrentPane(), img, View.NORMAL_OVER);
     }
 }
