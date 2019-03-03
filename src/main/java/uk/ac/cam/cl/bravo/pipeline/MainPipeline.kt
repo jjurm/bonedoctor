@@ -185,7 +185,7 @@ class MainPipeline {
         // Output of ImageMatcher contains Files; so convert it to ImageSamples, by looking up the path in the Dataset
         val matchingFunction =
             { image: BufferedImage, boneCondition: BoneCondition, bpView: BodypartView, n: Int ->
-                imageMatcher.findMatchingImage(image, boneCondition, bpView, n, false).map {
+                imageMatcher.findMatchingImage(image, boneCondition, bpView, n, true).map {
                     try {
                         // throws exception if ImageSample not loaded in the dataset
                         val imageSample = dataset.combined.getValue(it.key.toString().replace('\\', '/'))
