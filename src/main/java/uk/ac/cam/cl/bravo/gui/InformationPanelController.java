@@ -6,7 +6,10 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -42,8 +45,6 @@ public class InformationPanelController {
     Label boneConditionConfidence;
     @FXML
     Button addToDatasetButton;
-    @FXML
-    CheckBox transformCheckBox;
 
     public InformationPanelController(Stage stage) {
         this.stage = stage;
@@ -131,12 +132,14 @@ public class InformationPanelController {
         this.setBoneCondition(boneCondition);
     }
 
+
     public void hide() {
         infoGrid.setVisible(false);
         infoGrid.setManaged(false);
     }
 
-    public void showTrans() {
-        analysisController.showTrans();
+    public void unhide(){
+        infoGrid.setVisible(true);
+        infoGrid.setManaged(true);
     }
 }
