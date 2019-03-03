@@ -71,11 +71,12 @@ public class UploadController {
     @FXML
     protected void handleAnalyzeButtonAction(ActionEvent event) throws IOException {
         MainPipeline mainPipeline = mainController.getMainPipeline();
-        mainController.setInputImage(new Image(this.imgFile.toURI().toString()));
 
         if (imgFile == null || bodypart == null){
             analyzeCheck.setText("Please choose an image and the corresponding body part to proceed.");
         } else {
+            mainController.setInputImage(new Image(this.imgFile.toURI().toString()));
+
             Pair<String, Bodypart> userInput = new Pair<>(imgFile.getAbsolutePath(), bodypart);
 
             mainPipeline.getUserInput().onNext(userInput);

@@ -6,6 +6,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
@@ -94,6 +95,10 @@ public class AnalysisController {
     //  CREATE SCROLLABLE IMAGE PANE
     public void setPaneImage(GridPane pane, Image imgFile, View view) {
         try {
+
+            if (pane.getChildren().size()>1)
+                pane.getChildren().remove(1);
+
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
             imageExplorerController = new ImageExplorerController(stage, view);
