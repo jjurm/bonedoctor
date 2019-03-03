@@ -14,6 +14,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.BoneCondition;
+import uk.ac.cam.cl.bravo.dataset.ImageSample;
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline;
 import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
@@ -120,6 +121,7 @@ public class InformationPanelController {
 
     public void setActiveController(ImageExplorerController active) {
         this.setView(active.getView());
+        this.matchListController.setActiveController(active);
     }
 
     public void subscribe() {

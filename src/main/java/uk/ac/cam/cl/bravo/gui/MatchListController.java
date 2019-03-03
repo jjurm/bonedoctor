@@ -29,6 +29,7 @@ public class MatchListController {
 
     private View view;
     private MainController mainController;
+    private ImageExplorerController activeController;
 
     public MatchListController(Stage stage) {
         this.stage = stage;
@@ -97,7 +98,7 @@ public class MatchListController {
             int index = matches.getSelectionModel().getSelectedIndex();
 
             ImageSample img = normals.get(index).getValue();
-            analysisController.setPaneImage(analysisController.pane2, img, View.NORMAL);
+            analysisController.setPaneImage(activeController.getCurrentPane(), img, activeController.getView());
 
         });
     }
@@ -123,5 +124,9 @@ public class MatchListController {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+    }
+
+    public void setActiveController(ImageExplorerController activeController) {
+        this.activeController = activeController;
     }
 }

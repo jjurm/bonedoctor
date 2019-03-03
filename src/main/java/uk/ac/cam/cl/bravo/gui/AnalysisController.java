@@ -285,8 +285,10 @@ public class AnalysisController {
     }
 
     public void showTrans() {
-        BufferedImage buffImg = mainController.getMainPipeline().getImageToOverlay().onNext(activeExplorerController.getCurrentImage());
-        Image img = SwingFXUtils.toFXImage(buffImg, null);
-        setPaneImage(activeExplorerController.getCurrentPane(), img, View.NORMAL_OVER);
+//        BufferedImage buffImg = mainController.getMainPipeline().getImageToOverlay().onNext(activeExplorerController.getCurrentImage());
+//        mainController.getMainPipeline().getImageToOverlay().onComplete();
+//        mainController.getMainPipeline().getTransformedAndOverlaid().subscribe((e) -> )
+//        Image img = SwingFXUtils.toFXImage(buffImg, null);
+//        setPaneImage(activeExplorerController.getCurrentPane(), img, View.NORMAL_OVER);
     }
 }
