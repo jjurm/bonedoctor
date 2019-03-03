@@ -59,7 +59,7 @@ public class UploadController {
     @FXML
     protected void handleSelectButtonAction(ActionEvent event) throws IOException {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().addAll(new ExtensionFilter[]{new ExtensionFilter("Image Files", new String[]{"*.png", "*.jpg"})});
+        fileChooser.getExtensionFilters().addAll(new ExtensionFilter[]{new ExtensionFilter("Image Files", new String[]{"*.png", "*.jpeg"})});
         fileChooser.setTitle("Open Image File");
         this.imgFile = fileChooser.showOpenDialog(this.stage);
         String fileName = this.imgFile.getName();
@@ -72,18 +72,20 @@ public class UploadController {
     protected void handleAnalyzeButtonAction(ActionEvent event) throws IOException {
         MainPipeline mainPipeline = mainController.getMainPipeline();
 
+        // TODO: Find out why we get "empty file exception" here
         System.out.println("Can read file: " + new File(imgFile.getAbsolutePath()).canRead());
         if (imgFile == null || bodypart == null){
             analyzeCheck.setText("Please choose an image and the corresponding body part to proceed.");
+        } else {
+            Pair<String, Bodypart> userInput = new Pair<>(imgFile.getAbsolutePath(), bodypart);
+
+            mainPipeline.getUserInput().onNext(userInput);
+            mainPipeline.getUserInput().onComplete();
+//            mainPipeline.getUserInput().onError(new Throwable());
+
+            mainController.loadAnalysis(imageView.getImage());
         }
 
-        Pair<String, Bodypart> userInput = new Pair<>(imgFile.getAbsolutePath(), bodypart);
-
-        mainPipeline.getUserInput().onNext(userInput);
-        mainPipeline.getUserInput().onComplete();
-        mainPipeline.getUserInput().onError(new Throwable());
-
-        mainController.loadAnalysis(imageView.getImage());
     }
 
     @FXML

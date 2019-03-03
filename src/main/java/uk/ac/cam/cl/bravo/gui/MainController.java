@@ -63,12 +63,12 @@ public class MainController {
             // Child controller actions
             analysisController.setMainController(this);
 
-            analysisController.setPaneImage(analysisController.pane1, img);
+            analysisController.setPaneImage(analysisController.pane1, img, View.INPUT);
             inputImage = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img2.png"));
             bestMatchAbnormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img3.png"));
             bestMatchNormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img4.png"));
-            analysisController.setPaneImage(analysisController.pane2, bestMatchAbnormal);
-            analysisController.setPaneImage(analysisController.pane3, bestMatchNormal);
+            analysisController.setPaneImage(analysisController.pane2, bestMatchAbnormal, View.ABNORMAL);
+            analysisController.setPaneImage(analysisController.pane3, bestMatchNormal, View.NORMAL);
             analysisController.showThirdExplorer(false);
 
             analysisController.launch();

@@ -14,6 +14,9 @@ public class ImageExplorerController {
     private static final int MIN_PIXELS = 10;
     private final Stage stage;
     private AnalysisController analysisController;
+    private MainController mainController;
+    private View view;
+
 
     double width;
     double height;
@@ -23,11 +26,11 @@ public class ImageExplorerController {
 
     @FXML
     private ImageView imageView;
-    private MainController mainController;
 
 
-    public ImageExplorerController(Stage stage) {
+    public ImageExplorerController(Stage stage, View view) {
         this.stage = stage;
+        this.view = view;
     }
 
     public void setImage(Image userInImg) {
@@ -163,9 +166,9 @@ public class ImageExplorerController {
         analysisController.setActiveExplorer(this);
     }
 
-//    public View getView() {
-//        return view;
-//    }
+    public View getView() {
+        return view;
+    }
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;

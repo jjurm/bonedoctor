@@ -38,7 +38,6 @@ public class AnalysisController {
     private InformationPanelController informationPanelController;
     private ImageExplorerController activeExplorerController;
 
-
     @FXML
     private GridPane grid;
     @FXML
@@ -98,11 +97,11 @@ public class AnalysisController {
     }
 
     //  CREATE SCROLLABLE IMAGE PANE
-    public void setPaneImage(GridPane pane, Image imgFile) {
+    public void setPaneImage(GridPane pane, Image imgFile, View view) {
         try {
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
-            imageExplorerController = new ImageExplorerController(stage);
+            imageExplorerController = new ImageExplorerController(stage, view);
             imageExplorerLoader.setController(imageExplorerController);
             Parent imageExplorerFXML = imageExplorerLoader.load();
 
@@ -143,13 +142,13 @@ public class AnalysisController {
         String choiceText = pane1choice.getSelectionModel().getSelectedItem().toString();
 
         if (choiceText == View.INPUT.toString()) {
-            setPaneImage(pane1, mainController.getInputImage());
+            setPaneImage(pane1, mainController.getInputImage(), View.INPUT);
             informationPanelController.setView(View.INPUT);
         } else if (choiceText == View.NORMAL.toString()) {
-            setPaneImage(pane1, mainController.getBestMatchNormal());
+            setPaneImage(pane1, mainController.getBestMatchNormal(), View.NORMAL);
             informationPanelController.setView(View.NORMAL);
         } else if (choiceText == View.ABNORMAL.toString()) {
-            setPaneImage(pane1, mainController.getBestMatchAbnormal());
+            setPaneImage(pane1, mainController.getBestMatchAbnormal(), View.ABNORMAL);
             informationPanelController.setView(View.ABNORMAL);
         } else {
             return;
@@ -160,13 +159,13 @@ public class AnalysisController {
     protected void handleSelectViewPane2(ActionEvent e) {
         String choiceText = pane2choice.getSelectionModel().getSelectedItem().toString();
         if (choiceText == View.INPUT.toString()) {
-            setPaneImage(pane2, mainController.getInputImage());
+            setPaneImage(pane2, mainController.getInputImage(), View.INPUT);
             informationPanelController.setView(View.INPUT);
         } else if (choiceText == View.NORMAL.toString()) {
-            setPaneImage(pane2, mainController.getBestMatchNormal());
+            setPaneImage(pane2, mainController.getBestMatchNormal(), View.NORMAL);
             informationPanelController.setView(View.NORMAL);
         } else if (choiceText == View.ABNORMAL.toString()) {
-            setPaneImage(pane2, mainController.getBestMatchAbnormal());
+            setPaneImage(pane2, mainController.getBestMatchAbnormal(), View.ABNORMAL);
             informationPanelController.setView(View.ABNORMAL);
         } else {
             return;
@@ -177,13 +176,13 @@ public class AnalysisController {
     protected void handleSelectViewPane3(ActionEvent e) {
         String choiceText = pane3choice.getSelectionModel().getSelectedItem().toString();
         if (choiceText == View.INPUT.toString()) {
-            setPaneImage(pane3, mainController.getInputImage());
+            setPaneImage(pane3, mainController.getInputImage(), View.INPUT);
             informationPanelController.setView(View.INPUT);
         } else if (choiceText == View.NORMAL.toString()) {
-            setPaneImage(pane3, mainController.getBestMatchNormal());
+            setPaneImage(pane3, mainController.getBestMatchNormal(), View.NORMAL);
             informationPanelController.setView(View.NORMAL);
         } else if (choiceText == View.ABNORMAL.toString()) {
-            setPaneImage(pane3, mainController.getBestMatchAbnormal());
+            setPaneImage(pane3, mainController.getBestMatchAbnormal(), View.ABNORMAL);
             informationPanelController.setView(View.ABNORMAL);
         } else {
             return;

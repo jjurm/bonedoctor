@@ -108,7 +108,7 @@ public class InformationPanelController {
     }
 
     public void setActiveController(ImageExplorerController active) {
-
+        this.setView(active.getView());
     }
 
     public void subscribe() {
