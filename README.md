@@ -24,6 +24,21 @@ Pre-processing is a prerequisite for running the application and consists of the
 
 `./gradlew run` (or set your IDE appropriately)
 
+## The Graphical User Interface
+
+##### Primary Contributor: Ane K Espeseth
+
+Using requirements analysis, we have arrived at a minimum set of features that need to be implemented. These include: 
+* X-Ray selection screen: Select an image from the local computer to start the analysis and image matching process. 
+* X-Ray analysis result screen: Display the analysis result (normal/abnormal or broken/not broken), a confidence level, and the best matching case from the data set. 
+* X-Ray discovery, comparison and inspection screen: Explore the uploaded image (original/pre-processed), the matching X-Ray (side by side/overlay), and the other top image matches (list of images - new selected image replaces the top match in the inspection pane). Zooming and panning functions. This has now been merged together with the result analysis screen. 
+* Image export screen: Export image resulting from one or more of the back-end image processing tools - the original image pre-processed for better bone visibility, a side by side comparison of X-Rays or overlaid images. 
+* New data set item upload screen:  Add a new X-Ray image together with a case file / other relevant files which can be helpful to the user. Selection menus for parameters which will aid the algorithms' searches, most importantly which body part is displayed.
+
+JavaFx has been used to create the various components of the user interface, enabling rearrangement or elements for rough prototyping, and detailed CSS styling of elements for the later stages of the process.  
+
+The main user interface for our product contains an image display for the user input image. Here the user can zoom and pan around the image for exploration. The image information (including analysis results and confidence) and options - for uploading to the dataset or exporting the processed image - will also be available below in a separate frame. In the image frame is a button that allows the user to switch between the original input image and the one enhanced by pre-processing. To the left of the input image display, the user can choose to add up to two more image exploration screens for convenient image comparison. Here they can select which category of images they want to be displayed - Input, Best Match Normal, Best Match Abnormal, Overlay Input/Normal or Overlay Input/Abnormal. Furthermore, if a Best Match option is selected, the user can pick their desired image in that category in the action frame below, from a list of the highest scoring matches. 
+
 ## How Does it Work?
 
 ### The Computation Pipeline
