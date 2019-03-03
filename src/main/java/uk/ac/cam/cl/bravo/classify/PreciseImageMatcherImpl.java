@@ -1,19 +1,17 @@
 package uk.ac.cam.cl.bravo.classify;
 
-import javafx.util.Pair;
+import com.google.common.collect.MinMaxPriorityQueue;
 import org.jetbrains.annotations.NotNull;
 import org.tensorflow.Tensor;
 import uk.ac.cam.cl.bravo.dataset.Bodypart;
 import uk.ac.cam.cl.bravo.dataset.BodypartView;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 import uk.ac.cam.cl.bravo.pipeline.Rated;
-import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static uk.ac.cam.cl.bravo.classify.Utils.bufferedImageToByteArray;
@@ -24,7 +22,7 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
 
     @NotNull
     @Override
-    public PriorityQueue<Pair<ImageSample, Double>> findMatchingImages(@NotNull BufferedImage image, @NotNull List<ImageSample> domain, int n) {
+    public List<Rated<ImageSample>> findMatchingImages(@NotNull BufferedImage image, @NotNull List<ImageSample> domain, int n) {
 //        String imageDirectory = Dataset.DIR;
 //        String imageDirectory = "/home/kwotsin/Desktop/group_project/data/MURA/";
 
@@ -32,14 +30,11 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
         Tensor<Float> preprocessedImage = classifier.executePreprocessingGraph(bufferedImageToByteArray(image));
         float[] outputArray = classifier.executeInferenceGraph(preprocessedImage);
 
-        // Limit the filenames for scalability
-        List<ImageSample> clusterImageSamples = domain.subList(0, Math.min(domain.size(), n));
-
         // Map filenames to results obtained
         Map<ImageSample, Tensor<Float>> imageInferenceMap = new HashMap<>();
 
         // Loop through the cluster images to preprocess into tensors
-        for (ImageSample imageSample : clusterImageSamples){
+        for (ImageSample imageSample : domain){
             try {
                 BufferedImage currImage = ImageIO.read(new File(imageSample.getPath()));
 
@@ -58,29 +53,21 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
 
         // Find the float outputs of preprocessed inputs, but use this function
         // so that inference graph is built only once (costly).
-        Map<ImageSample, float[]> outputImagesMap = classifier.executeInferenceGraphConsecutively(imageInferenceMap);
+        Map<ImageSample, float[]> outputImagesMap = classifier.executeInferenceGraphConcurrently(imageInferenceMap);
 
-        // Build a PQ to find the best results
-        PriorityQueue<Pair<ImageSample, Double>> PQ = new PriorityQueue<>((o1, o2) -> {
-            if (o1.getValue() < o2.getValue()) {
-                return -1;
-            }
-            else if (o1.getValue() > o2.getValue()){
-                return 1;
-            }
-            else {
-                return 0;
-            }
-        });
+        // Build a PQ to find the best results. Order: best matches first. Size limit will discard worst matches.
+        Queue<Rated<ImageSample>> PQ = MinMaxPriorityQueue.maximumSize(n).create();
 
         for (ImageSample imageSample : outputImagesMap.keySet()){
             double currDistance = computeCosineSimilarity(outputArray, outputImagesMap.get(imageSample));
 
-            // Add results to PQ
-            PQ.add(new Pair(imageSample, currDistance));
+            // Add results to PQ. Rated needs better score to be lower
+            PQ.add(new Rated<>(imageSample, -currDistance));
         }
 
-        return PQ;
+        ArrayList<Rated<ImageSample>> list = new ArrayList<>(n);
+        while (!PQ.isEmpty()) list.add(PQ.remove());
+        return list;
     }
 
     public static void main(String[] args) throws IOException {
@@ -101,12 +88,11 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
                 new BodypartView(Bodypart.HAND, 1)));
 
         BufferedImage image = ImageIO.read(new File(testImage));
-        PriorityQueue<Pair<ImageSample, Double>> PQ = matcher.findMatchingImages(image, testDomain, 30);
+        List<Rated<ImageSample>> PQ = matcher.findMatchingImages(image, testDomain, 30);
 
-        while (PQ.size() != 0){
-            Pair<ImageSample, Double> item = PQ.poll();
-            System.out.println(item.getKey().getPath());
-            System.out.println(item.getValue());
+        for (Rated<ImageSample> item : PQ){
+            System.out.println(item.getValue().getPath());
+            System.out.println(item.getScore());
         }
     }
 }

@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.overlay
 
+import uk.ac.cam.cl.bravo.dataset.BodypartView
 import java.awt.Point
 import java.awt.image.BufferedImage
 
@@ -11,6 +12,7 @@ import java.awt.image.BufferedImage
 interface OverlayFunction {
     fun value(
         base: BufferedImage,
+        bodypartView: BodypartView,
         sample: BufferedImage,
         planeSize: Point,
         penaltyScaledParameters: Iterable<Double>
@@ -20,21 +22,22 @@ interface OverlayFunction {
     operator fun plus(other: OverlayFunction): OverlayFunction = object : OverlayFunction {
         override fun value(
             base: BufferedImage,
+            bodypartView: BodypartView,
             sample: BufferedImage,
             planeSize: Point,
             penaltyScaledParameters: Iterable<Double>
-        ) =
-            this@OverlayFunction.value(base, sample, planeSize, penaltyScaledParameters) +
-                    other.value(base, sample, planeSize, penaltyScaledParameters)
+        ) = this@OverlayFunction.value(base, bodypartView, sample, planeSize, penaltyScaledParameters) +
+                other.value(base, bodypartView, sample, planeSize, penaltyScaledParameters)
     }
 
     operator fun times(other: Double): OverlayFunction = object : OverlayFunction {
         override fun value(
             base: BufferedImage,
+            bodypartView: BodypartView,
             sample: BufferedImage,
             planeSize: Point,
             penaltyScaledParameters: Iterable<Double>
         ) =
-            this@OverlayFunction.value(base, sample, planeSize, penaltyScaledParameters) * other
+            this@OverlayFunction.value(base, bodypartView, sample, planeSize, penaltyScaledParameters) * other
     }
 }

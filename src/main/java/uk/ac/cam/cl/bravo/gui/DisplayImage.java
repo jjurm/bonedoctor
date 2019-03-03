@@ -20,8 +20,8 @@ public class DisplayImage {
      * X location of the next window to be opened (so that if more windows are opened at once,
      * they are next to each other)
      */
-    private static int xLocation = 5;
-    private static int yLocation = 50;
+    private static int xLocation = 3;
+    private static int yLocation = 3;
     private static int screenWidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
 
     public DisplayImage(@NotNull BufferedImage img) {
@@ -40,7 +40,7 @@ public class DisplayImage {
         xLocation += img.getWidth() + 11;
         if (xLocation >= screenWidth - img.getWidth()) {
             xLocation = 5;
-            yLocation += 200;
+            yLocation += 400;
         }
         frame.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent ke) {  // handler

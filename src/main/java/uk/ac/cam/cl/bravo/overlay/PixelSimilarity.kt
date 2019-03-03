@@ -1,5 +1,8 @@
 package uk.ac.cam.cl.bravo.overlay
 
+import uk.ac.cam.cl.bravo.dataset.Bodypart
+import uk.ac.cam.cl.bravo.dataset.BodypartView
+import uk.ac.cam.cl.bravo.util.Tuple4
 import uk.ac.cam.cl.bravo.util.area
 import java.awt.Color
 import java.awt.Point
@@ -18,6 +21,7 @@ class PixelSimilarity(
 
     override fun value(
         base: BufferedImage,
+        bodypartView: BodypartView,
         sample: BufferedImage,
         planeSize: Point,
         penaltyScaledParameters: Iterable<Double>
@@ -26,10 +30,17 @@ class PixelSimilarity(
         // image is greyscale => can take any channel from rgb
         fun BufferedImage.pixel(x: Int, y: Int) = Color(getRGB(x, y)).red
 
-        val fromX = (planeSize.x * ignoreBorderWidth).roundToInt()
-        val toX = (planeSize.x * (1 - ignoreBorderWidth)).roundToInt()
-        val fromY = (planeSize.y * ignoreBorderWidth).roundToInt()
-        val toY = (planeSize.y * (1 - ignoreBorderWidth)).roundToInt()
+        val bodypart = bodypartView.bodypart
+        val (ignoreBorderTop, ignoreBorderRight, ignoreBorderBottom, ignoreBorderLeft) =
+            when (bodypart) {
+                Bodypart.HAND -> Tuple4(false, false, true, false)
+                else -> Tuple4(true, true, true, true)
+            }
+
+        val fromX = (planeSize.x * (if (ignoreBorderLeft) ignoreBorderWidth else 0.0)).roundToInt()
+        val toX = (planeSize.x * (1 - (if (ignoreBorderRight) ignoreBorderWidth else 0.0))).roundToInt()
+        val fromY = (planeSize.y * (if (ignoreBorderTop) ignoreBorderWidth else 0.0)).roundToInt()
+        val toY = (planeSize.y * (1 - (if (ignoreBorderBottom) ignoreBorderWidth else 0.0))).roundToInt()
 
         var sum = BigDecimal.ZERO
         for (y in fromY until toY) {

@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.gui;
 
+import io.reactivex.Observer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -19,8 +20,6 @@ public class MatchListController {
     private Stage stage;
     private AnalysisController analysisController;
     private List<Image> imgNormalList = new ArrayList<>();
-    private List<Image> imgAbormalList = new ArrayList<>();
-
 
     private View view;
 
@@ -45,16 +44,6 @@ public class MatchListController {
         imgNormalList.add(img7);
         imgNormalList.add(img8);
         imgNormalList.add(img9);
-
-        imgAbormalList.add(img9);
-        imgAbormalList.add(img8);
-        imgAbormalList.add(img7);
-        imgAbormalList.add(img6);
-        imgAbormalList.add(img5);
-        imgAbormalList.add(img4);
-        imgAbormalList.add(img3);
-        imgAbormalList.add(img2);
-        imgAbormalList.add(img1);
     }
 
     public void setView(View view) {
@@ -67,15 +56,6 @@ public class MatchListController {
 
         ObservableList<String> items = FXCollections.observableArrayList("img1.png", "img2.png", "img3.png", "img4.png", "img5.png", "img6.png", "img7.png", "img8.png", "img9.png");
         matches.setItems(items);
-
-
-        // TODO: ANE - replace with actual pipeline lists.
-        List<Image> imgList;
-        if (view == View.NORMAL) {
-            imgList = imgNormalList;
-        } else {
-            imgList = imgAbormalList;
-        }
 
         matches.setCellFactory(param -> new ListCell<String>() {
             private ImageView matchView = new ImageView();
@@ -92,7 +72,7 @@ public class MatchListController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    matchView.setImage(imgList.get(getIndex()));
+                    matchView.setImage(imgNormalList.get(getIndex()));
                     setText(name);
                     setGraphic(matchView);
                 }
@@ -107,7 +87,8 @@ public class MatchListController {
             }
 
             int index = matches.getSelectionModel().getSelectedIndex();
-            analysisController.setPaneImage(analysisController.pane2, imgList.get(index));
+
+            analysisController.setPaneImage(analysisController.pane2, imgNormalList.get(index));
 
         });
 

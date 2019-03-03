@@ -14,6 +14,11 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import static uk.ac.cam.cl.bravo.classify.Utils.*;
 
@@ -29,6 +34,8 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
     // Read the graphdef only once, since this needn't change.
     private byte[] graphDef = readBytesFromFile(graphDefFilename);
+
+    ExecutorService parallelExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     @NotNull
     @Override
@@ -180,13 +187,13 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         Map<ImageSample, float[]> outputImagesMap = new HashMap<>();
 
-        for (ImageSample imageSample : imageInferenceMap.keySet()){
-            long timeNow = System.currentTimeMillis();
-            Tensor<Float> image = imageInferenceMap.get(imageSample);
+        try(Graph g = new Graph()){
+            // First restore the graph definition from frozen graph
+            g.importGraphDef(graphDef);
 
-            try(Graph g = new Graph()){
-                // First restore the graph definition from frozen graph
-                g.importGraphDef(graphDef);
+            for (ImageSample imageSample : imageInferenceMap.keySet()){
+                long timeNow = System.currentTimeMillis();
+                Tensor<Float> image = imageInferenceMap.get(imageSample);
 
                 // Initiate a session to perform inference and try to get the res
                 try(Session s = new Session(g);
@@ -204,6 +211,63 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
                     System.out.println("Ran Inference on " + imageSample.getPath() + " " + (System.currentTimeMillis() - timeNow)/1000.0 + "sec");
                 }
+            }
+        }
+
+        return outputImagesMap;
+
+    }
+
+    /**
+     * Executes the inference graph for multiple preprocessed input images. The images to perform
+     * inference on is stored in imageInferenceMap.
+     * @param imageInferenceMap map output array to image sample objects
+     * @return Map returning image sample to output array
+     */
+    protected Map<ImageSample, float[]> executeInferenceGraphConcurrently(Map<ImageSample, Tensor<Float>> imageInferenceMap){
+
+        Map<ImageSample, float[]> outputImagesMap = new ConcurrentHashMap<>();
+
+        try(Graph g = new Graph()){
+            // First restore the graph definition from frozen graph
+            g.importGraphDef(graphDef);
+
+            class InferenceTask implements Callable<Void> {
+                private ImageSample imageSample;
+
+                public InferenceTask(ImageSample imageSample) {
+                    this.imageSample = imageSample;
+                }
+
+                @Override
+                public Void call() {
+                    long timeNow = System.currentTimeMillis();
+                    Tensor<Float> image = imageInferenceMap.get(imageSample);
+
+                    // Initiate a session to perform inference and try to get the res
+                    try (Session s = new Session(g);
+                         Tensor<Float> result = s.runner().feed(
+                                 inputNodeName, image).fetch(outputNodeName).run().get(0).expect(Float.class)) {
+                        // Obtain shape of the result
+                        final long[] shape = result.shape();
+
+                        // Output result is shape [1, 8, 8, 2048] tensor, so we flatten it.
+                        float[][][][] retArray = result.copyTo(new float[(int) shape[0]][(int) shape[1]][(int) shape[2]][(int) shape[3]]);
+                        float[] flattenedArray = flattenArray(retArray);
+
+                        // Add to results
+                        outputImagesMap.put(imageSample, flattenedArray);
+
+                        System.out.println("Ran Inference on " + imageSample.getPath() + " " + (System.currentTimeMillis() - timeNow) / 1000.0 + "sec");
+                    }
+                    return null;
+                }
+            }
+
+            try {
+                parallelExecutor.invokeAll(imageInferenceMap.keySet().stream().map(InferenceTask::new).collect(Collectors.toList()));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();  // set interrupt flag and return
             }
         }
 
@@ -439,7 +503,8 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
             BufferedImage image,
             Bodypart bodypart,
             int limit) throws IOException {
-        String imageDirectory = "/home/kwotsin/Desktop/group_project/data/MURA/";
+//        String imageDirectory = "/home/kwotsin/Desktop/group_project/data/MURA/";
+        String imageDirectory = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1 (copy 1)/";
 
         // Run inference once on the image to get the array's features
         Tensor<Float> preprocessedImage = executePreprocessingGraph(bufferedImageToByteArray(image));
@@ -499,7 +564,9 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     public static void main(String[] args) throws IOException {
         // Test
         BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
-        String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient10943/study1_negative/image2.png";
+
+        String testImage = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1 (copy 1)/train/XR_HAND/patient10943/study1_negative/image2.png";
+//        String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient10943/study1_negative/image2.png";
         BufferedImage image = ImageIO.read(new File(testImage));
 
         // Test getting the closest N images

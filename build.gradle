@@ -63,6 +63,8 @@ dependencies {
 
     // GSON
     implementation 'com.google.code.gson:gson:2.8.5'
+
+    compile 'com.google.guava:guava:27.0.1-jre'
 }
 
 javafx {
