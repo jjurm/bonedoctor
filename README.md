@@ -126,6 +126,12 @@ In our algorithms, there is a trade-off between performance and precision. We al
 To allow faster computation of the overlay, we allow the precision to affect the resolution of the image that the algorithm works with. With lower precision, the input image is down-scaled first to allow faster minimisation. The drawback is lower accuracy and a worse match between the original base and sample images.
 The 'precision' argument also affects the 'Stopping trust region radius' of the BOBYQA algorithm, which specifies the target precision of the arguments of the minimised function.
 
+### 6. Highlighting irregularities
+
+##### Primary Contributor: Shehab Alshehabi
+
+The goal of this stage is to help clinicians identify where a fracture could potentially be located. This was a part of our project that we originally dismissed as being too difficult to implement. However, after using the hashing approach to find matching images, we realised that it could be extented to highlight fractures. We do this by hashing each pixel and some parts of it's surroundings. In this way we can find pixels that do not have another similar pixel in an sample healthy images and highlight them. In some cases this works very well automatically but in others the user is required to do tune two parameters which define what is considered similar.
+
 ## Authors
 
 * **Ane Espeseth** ([anespz](https://github.com/anespz))
