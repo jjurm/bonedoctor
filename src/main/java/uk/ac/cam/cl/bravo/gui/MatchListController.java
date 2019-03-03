@@ -96,7 +96,7 @@ public class MatchListController {
 
             int index = matches.getSelectionModel().getSelectedIndex();
 
-            Image img = SwingFXUtils.toFXImage(normals.get(index).getValue().loadImage(), null);
+            ImageSample img = normals.get(index).getValue();
             analysisController.setPaneImage(analysisController.pane2, img, View.NORMAL);
 
         });

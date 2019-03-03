@@ -92,11 +92,33 @@ public class AnalysisController {
     }
 
     //  CREATE SCROLLABLE IMAGE PANE
+    public void setPaneImage(GridPane pane, ImageSample imgFile, View view) {
+        try {
+            // Initialize controller
+            FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
+            imageExplorerController = new ImageExplorerController(stage, view, pane);
+            imageExplorerLoader.setController(imageExplorerController);
+            Parent imageExplorerFXML = imageExplorerLoader.load();
+
+            pane.add(imageExplorerFXML, 0, 1);
+
+            // Child controller actions
+            Image img = SwingFXUtils.toFXImage(imgFile.loadImage(), null);
+            imageExplorerController.setImage(img);
+            imageExplorerController.setImageSample(imgFile);
+            imageExplorerController.setAnalysisController(this);
+            imageExplorerController.setMainController(this.mainController);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //  CREATE SCROLLABLE IMAGE PANE
     public void setPaneImage(GridPane pane, Image imgFile, View view) {
         try {
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
-            imageExplorerController = new ImageExplorerController(stage, view);
+            imageExplorerController = new ImageExplorerController(stage, view, pane);
             imageExplorerLoader.setController(imageExplorerController);
             Parent imageExplorerFXML = imageExplorerLoader.load();
 
@@ -109,7 +131,10 @@ public class AnalysisController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
+
+
 
     public void showThirdExplorer(boolean bool) {
         if (bool) {
@@ -136,13 +161,14 @@ public class AnalysisController {
     protected void handleSelectViewPane1(ActionEvent e) {
         View choice = (View) pane1choice.getSelectionModel().getSelectedItem();
         Image img = null;
+        ImageSample imgS = null;
         if (!(mainController.getInputImage() == null)) {
             img = mainController.getInputImage();
             setPaneImage(pane1, img, choice);
         } else if (choice.equals(View.NORMAL)) {
             if (!(getBestMatchNormal() == null)) {
-                img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
-                setPaneImage(pane1, img, choice);
+                imgS = getBestMatchNormal().getValue();
+                setPaneImage(pane1, imgS, choice);
             }
         }
         informationPanelController.setView(choice);
@@ -152,6 +178,7 @@ public class AnalysisController {
     protected void handleSelectViewPane2(ActionEvent e) {
         View choice = (View) pane2choice.getSelectionModel().getSelectedItem();
         Image img = null;
+        ImageSample imgS = null;
         if (choice.equals(View.INPUT)) {
             if (!(mainController.getInputImage() == null)) {
                 img = mainController.getInputImage();
@@ -159,8 +186,8 @@ public class AnalysisController {
             }
         } else if (choice.equals(View.NORMAL)) {
             if (!(getBestMatchNormal() == null)) {
-                img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
-                setPaneImage(pane2, img, choice);
+                imgS = getBestMatchNormal().getValue();
+                setPaneImage(pane2, imgS, choice);
             }
         }
 
@@ -170,15 +197,18 @@ public class AnalysisController {
     @FXML
     protected void handleSelectViewPane3(ActionEvent e) {
         View choice = (View) pane3choice.getSelectionModel().getSelectedItem();
-        Image img;
+        Image img = null;
+        ImageSample imgS = null;
         if (choice == View.INPUT) {
             if (!(mainController.getInputImage() == null)) {
                 img = mainController.getInputImage();
                 setPaneImage(pane3, img, choice);
             }
-        } else if (!(getBestMatchNormal() == null)) {
-            img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
-            setPaneImage(pane3, img, choice);
+        } else if (choice.equals(View.NORMAL)) {
+            if (!(getBestMatchNormal() == null)) {
+                imgS = getBestMatchNormal().getValue();
+                setPaneImage(pane2, imgS, choice);
+            }
         }
     }
 
@@ -240,7 +270,7 @@ public class AnalysisController {
 
     public void setNormalList(List<Rated<ImageSample>> normals) {
         this.normalList = normals;
-        Image img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
+        ImageSample img = getBestMatchNormal().getValue();
         setPaneImage(pane2, img, View.NORMAL);
     }
 }

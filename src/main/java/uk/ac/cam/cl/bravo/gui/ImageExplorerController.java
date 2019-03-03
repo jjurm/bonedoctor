@@ -8,6 +8,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import uk.ac.cam.cl.bravo.dataset.ImageSample;
 
 public class ImageExplorerController {
 
@@ -16,7 +17,8 @@ public class ImageExplorerController {
     private AnalysisController analysisController;
     private MainController mainController;
     private View view;
-
+    private ImageSample image;
+    private GridPane pane;
 
     double width;
     double height;
@@ -28,14 +30,20 @@ public class ImageExplorerController {
     private ImageView imageView;
 
 
-    public ImageExplorerController(Stage stage, View view) {
+    public ImageExplorerController(Stage stage, View view, GridPane pane) {
         this.stage = stage;
         this.view = view;
+        this.pane = pane;
+    }
+
+    public void setImageSample(ImageSample image) {
+        this.image = image;
     }
 
     public void setImage(Image userInImg) {
         width = userInImg.getWidth();
         height = userInImg.getHeight();
+
 
         imageView.setImage(userInImg);
         reset(imageView, width, height);
@@ -172,5 +180,13 @@ public class ImageExplorerController {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+    }
+
+    public ImageSample getCurrentImage() {
+        return this.image;
+    }
+
+    public GridPane getCurrentPane() {
+        return this.pane;
     }
 }
