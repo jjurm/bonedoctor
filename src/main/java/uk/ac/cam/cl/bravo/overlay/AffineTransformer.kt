@@ -64,10 +64,22 @@ class AffineTransformer(
     }
 
     override fun scaleParametersToPenalty(parameters: Iterable<Double>): DoubleArray {
-        val cp = super.scaleParametersToPenalty(parameters)
-        // TODO Juraj: don't penalise rotation
+        var cp = super.scaleParametersToPenalty(parameters)
+
+        // don't penalise translation
         cp[4] = 0.0
         cp[5] = 0.0
+
+        // don't penalise rotation
+        val matrix = (cp zip identity).map { (a, b) -> a + b }.toDoubleArray()
+        val middlePointX = (matrix[0] + matrix[2]) / 2
+        val middlePointY = (matrix[1] + matrix[3]) / 2
+        val rotation = Math.atan2(middlePointY, middlePointX) - Math.PI / 4
+        val transform = AffineTransform(matrix)
+        transform.rotate(-rotation)
+        transform.getMatrix(cp)
+        cp = (cp zip identity).map { (a,b) -> a - b }.toDoubleArray()
+
         return cp
     }
 
