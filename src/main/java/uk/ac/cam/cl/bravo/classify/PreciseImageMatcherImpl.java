@@ -1,6 +1,6 @@
 package uk.ac.cam.cl.bravo.classify;
 
-import javafx.util.Pair;
+import com.google.common.collect.MinMaxPriorityQueue;
 import org.jetbrains.annotations.NotNull;
 import org.tensorflow.Tensor;
 import uk.ac.cam.cl.bravo.dataset.Bodypart;
@@ -55,22 +55,21 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
         // so that inference graph is built only once (costly).
         Map<ImageSample, float[]> outputImagesMap = classifier.executeInferenceGraphConsecutively(imageInferenceMap);
 
-        // Build a PQ to find the best results. Order: worst matches first
-        PriorityQueue<Rated<ImageSample>> PQ = new PriorityQueue<>();
+        // Build a PQ to find the best results. Order: best matches first. Size limit will discard worst matches.
+        Queue<Rated<ImageSample>> PQ = MinMaxPriorityQueue
+                .orderedBy(Comparator.comparing(Rated<ImageSample>::getScore))
+                .maximumSize(n)
+                .create();
 
-        // TODO parallelise
         for (ImageSample imageSample : outputImagesMap.keySet()){
             double currDistance = computeCosineSimilarity(outputArray, outputImagesMap.get(imageSample));
 
-            // Add results to PQ
-            PQ.add(new Rated<>(imageSample, currDistance));
-
-            // Keep the size =< n
-            if (PQ.size() > n) PQ.poll();
+            // Add results to PQ. Rated needs better score to be lower
+            PQ.add(new Rated<>(imageSample, -currDistance));
         }
 
-        ArrayList<Rated<ImageSample>> list = new ArrayList<>(PQ);
-        Collections.reverse(list);
+        ArrayList<Rated<ImageSample>> list = new ArrayList<>(n);
+        while (!PQ.isEmpty()) list.add(PQ.remove());
         return list;
     }
 

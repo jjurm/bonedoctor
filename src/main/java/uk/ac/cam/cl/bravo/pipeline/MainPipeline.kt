@@ -207,7 +207,7 @@ class MainPipeline {
             nPreciseSimilarImages
         )
             .observeOn(Schedulers.newThread())
-            .mapDestructing(preciseImageMatcher::findMatchingImages)
+            .mapDestructing(preciseImageMatcher::findMatchingImages.withTag("PreciseImageMatcher"))
             .withCache()
 
         similarNormal.map { it.first().value }.subscribe(imageToOverlay)
@@ -279,6 +279,9 @@ class MainPipeline {
 
     private fun <A, R> ((A) -> R).withTag(s: String): (A) -> R = { tag(s) { this(it) } }
     private fun <A, B, R> ((A, B) -> R).withTag(s: String): (A, B) -> R = { a, b -> tag(s) { this(a, b) } }
+    private fun <A, B, C, R> ((A, B, C) -> R).withTag(s: String): (A, B, C) -> R =
+        { a, b, c -> tag(s) { this(a, b, c) } }
+
     private fun <A, B, C, D, R> ((A, B, C, D) -> R).withTag(s: String): (A, B, C, D) -> R =
         { a, b, c, d -> tag(s) { this(a, b, c, d) } }
 
