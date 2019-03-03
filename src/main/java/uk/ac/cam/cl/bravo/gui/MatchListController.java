@@ -33,24 +33,6 @@ public class MatchListController {
     public MatchListController(Stage stage) {
         this.stage = stage;
 
-        Image img1 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img2.png"));
-        Image img2 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img3.png"));
-        Image img3 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img4.png"));
-        Image img4 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img5.png"));
-        Image img5 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
-        Image img6 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img5.png"));
-        Image img7 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
-        Image img8 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img5.png"));
-        Image img9 = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img6.png"));
-        imgNormalList.add(img1);
-        imgNormalList.add(img2);
-        imgNormalList.add(img3);
-        imgNormalList.add(img4);
-        imgNormalList.add(img5);
-        imgNormalList.add(img6);
-        imgNormalList.add(img7);
-        imgNormalList.add(img8);
-        imgNormalList.add(img9);
     }
 
     public void setView(View view) {
@@ -114,7 +96,8 @@ public class MatchListController {
 
             int index = matches.getSelectionModel().getSelectedIndex();
 
-            analysisController.setPaneImage(analysisController.pane2, imgNormalList.get(index), View.NORMAL);
+            Image img = SwingFXUtils.toFXImage(normals.get(index).getValue().loadImage(), null);
+            analysisController.setPaneImage(analysisController.pane2, img, View.NORMAL);
 
         });
     }
