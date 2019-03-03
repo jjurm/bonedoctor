@@ -48,15 +48,12 @@ public class InformationPanelController {
 
     public InformationPanelController(Stage stage) {
         this.stage = stage;
-//        addToDatasetButton.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override public void handle(ActionEvent e) {
-//                label.setText("Accepted");
-//            }
-//        });
     }
 
     public void launch() {
         try {
+            addToDatasetButton.setOnAction(event -> handleUpload());
+
             // Initialize controller
             FXMLLoader matchListLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/matchList.fxml"));
             matchListController = new MatchListController(stage);
@@ -85,7 +82,7 @@ public class InformationPanelController {
     }
 
     @FXML
-    public void handleUpload(ActionEvent event) {
+    public void handleUpload() {
         analysisController.startDatasetUpload();
     }
 

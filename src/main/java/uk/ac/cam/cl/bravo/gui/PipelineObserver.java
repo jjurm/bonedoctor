@@ -77,12 +77,6 @@ public class PipelineObserver  {
         mainController.setAbnormalList(imageSampleList);
     }
 
-
-
-    public void setInformationPanelController(InformationPanelController informationPanelController) {
-        this.informationPanelController = informationPanelController;
-    }
-
     public void setAnalysisController(AnalysisController analysisController) {
         this.analysisController = analysisController;
     }

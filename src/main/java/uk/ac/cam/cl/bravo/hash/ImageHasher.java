@@ -79,10 +79,8 @@ public class ImageHasher implements java.io.Serializable {
             for(int i = 0; i < rotations.length; i++) {
                 minHamming = Math.min(Long.bitCount(rotations[i] ^ imgHash), minHamming);
             }
-            if (minHamming < MATCH_THRESHOLD) {
-                matches.add(new Pair<>(minHamming, p.getKey()));
-                while (matches.size() > n) matches.pollLast();
-            }
+            matches.add(new Pair<>(minHamming, p.getKey()));
+            while (matches.size() > n) matches.pollLast();
         }
 
         ArrayList<File> ret = new ArrayList<>();
