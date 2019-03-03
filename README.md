@@ -1,6 +1,6 @@
 # Bone Doctor
 
-A Part IB (second year) Group Project, created for TPP for the **Computer Science Tripos** at the **University of Cambridge**.
+A Part IB Group Project, created for TPP for the **Computer Science Tripos** at the **University of Cambridge**.
 
 ## Problem Statement
 
@@ -43,7 +43,7 @@ The main user interface for our product contains an image display for the user i
 
 ### The Computation Pipeline
 
-<img src="https://github.com/jjurm/bonedoctor/blob/master/images/read/pipeline.png" width="500" height="400" />
+<img src="https://github.com/jjurm/bonedoctor/blob/master/images/read/pipeline.png" width="500" height="400"/>
 
 ### 1. Image Preprocessing
 
