@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.overlay;
 
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.pipeline.Rated;
 
@@ -16,18 +17,18 @@ public interface ImageOverlay {
     /**
      * Finds the best overlay. Then applies the transformation to the sample image.
      * <p>
-     * Returns a pair of (base image, transformed sample image). The base image contains only necessary modifications
-     * (e.g. make it the same resolution as the sample image)
+     * Returns a Rated pair of (transformed sample image, the two images visually overlaid).
      */
     @NotNull
-    Rated<BufferedImage> fitImage(
+    Rated<Pair<BufferedImage, BufferedImage>> fitImage(
             @NotNull BufferedImage base,
             @NotNull BufferedImage sample,
             double downsample,
             double precision);
 
     /**
-     * Normalises the given image to have the same size as the output of {@link #fitImage(BufferedImage, BufferedImage)}
+     * Normalises the given image to have the same size as the output of
+     * {@link #fitImage(BufferedImage, BufferedImage, double, double)}
      */
     @NotNull
     BufferedImage normalise(@NotNull BufferedImage image);

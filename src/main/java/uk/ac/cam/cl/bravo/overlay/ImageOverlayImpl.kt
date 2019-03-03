@@ -98,11 +98,19 @@ class ImageOverlayImpl(
         sample: BufferedImage,
         downsample: Double,
         precision: Double
-    ): Rated<BufferedImage> {
+    ): Rated<Pair<BufferedImage, BufferedImage>> {
         val bestOverlay = findBestOverlay(base, sample, downsample, precision)
         val transformed = applyTransformations(sample, bestOverlay.point)
+
+        val overlaid = ImageTools.overlay(base, transformed, bigPlaneSize)
+        for (transformer in transformers) {
+            if (transformer is InnerWarpTransformer) {
+                transformer.drawMarks(overlaid, bestOverlay.point, bigPlaneSize)
+            }
+        }
+
         val score = bestOverlay.value
-        return Rated(transformed, score)
+        return Rated(transformed to overlaid, score)
     }
 
     override fun normalise(image: BufferedImage): BufferedImage {

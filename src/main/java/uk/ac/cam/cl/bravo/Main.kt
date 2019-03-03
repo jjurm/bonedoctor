@@ -3,8 +3,6 @@ package uk.ac.cam.cl.bravo
 import uk.ac.cam.cl.bravo.dataset.Bodypart
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
-import uk.ac.cam.cl.bravo.gui.PipelineObserver
-import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline
 import java.awt.Point
 
@@ -58,8 +56,10 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
         println("Similar $i: ${img.value.path}")
         DisplayImage(img.value.preprocessedPath, "Similar $i (score: ${img.score})")
     } }
-    pipeline.overlaidOriginal.subscribe { DisplayImage(it.value, "OverlaidOriginal (score: ${it.score})") }
-    pipeline.overlaidMirrored.subscribe { DisplayImage(it.value, "OverlaidMirrored (score: ${it.score})") }
+    pipeline.transformedAndOverlaid.subscribe {
+        DisplayImage(it.value.first, "Transformed (score: ${it.score})")
+        DisplayImage(it.value.second, "Overlaid (score: ${it.score})")
+    }
     //pipeline.overlaid.subscribe { DisplayImage(it.value, "Overlaid (best) (score: ${it.score})") }
     pipeline.fracturesHighlighted.subscribe { DisplayImage(it, "Fractures highlighted") }
 

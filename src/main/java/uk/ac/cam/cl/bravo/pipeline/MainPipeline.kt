@@ -77,11 +77,9 @@ class MainPipeline {
     val similarNormal: Observable<List<Rated<ImageSample>>>
 
     /** The result of the overlay algorithm, taking 'imageToOverlay' as the input. */
-    val overlaidOriginal: Observable<Rated<BufferedImage>>
-    val overlaidMirrored: Observable<Rated<BufferedImage>>
-    val overlaid: Observable<Rated<BufferedImage>>
+    val transformedAndOverlaid: Observable<Rated<Pair<BufferedImage, BufferedImage>>>
 
-    /** The 'overlaid' image modified to highlight differences from 'preprocessed' */
+    /** The transformed image modified to highlight differences from 'preprocessed' */
     val fracturesHighlighted: Observable<BufferedImage>
 
 
@@ -223,7 +221,7 @@ class MainPipeline {
             .map { FlipFilter(FlipFilter.FLIP_H).filter(it, null) }
             .withCache()
 
-        overlaidOriginal = combineObservables(
+        val transformedAndOverlaidOriginal = combineObservables(
             preprocessedVal,
             imageToOverlayLoaded,
             downsample,
@@ -233,7 +231,7 @@ class MainPipeline {
             .mapDestructing(imageOverlay::fitImage.withTag("Overlay"))
             .withCache()
 
-        overlaidMirrored = combineObservables(
+        val transformedAndOverlaidMirrored = combineObservables(
             preprocessedVal,
             imageToOverlayLoadedMirrored,
             downsample,
@@ -243,9 +241,9 @@ class MainPipeline {
             .mapDestructing(imageOverlay::fitImage.withTag("OverlayMirrored"))
             .withCache()
 
-        overlaid = combineObservables(overlaidOriginal, overlaidMirrored)
+        transformedAndOverlaid = combineObservables(transformedAndOverlaidOriginal, transformedAndOverlaidMirrored)
             .mapDestructing { a, b -> listOf(a, b).minBy { it.score }!! }
-        overlaid.doneMeans(0.8, "Highlighting differences")
+        transformedAndOverlaid.doneMeans(0.8, "Highlighting differences")
 
         combineObservables(
             inputImage, imageToOverlayLoaded, highlightAmount, highlightGradient
@@ -255,7 +253,9 @@ class MainPipeline {
             .subscribe()
 
         fracturesHighlighted = fractureHighlighter.partialResults
-        fracturesHighlighted.doneMeans(1.0, "Done!")
+
+        val done = combineObservables(transformedAndOverlaid, fracturesHighlighted, boneCondition).map { Unit }
+        done.doneMeans(1.0, "Done!")
     }
 
     /**
