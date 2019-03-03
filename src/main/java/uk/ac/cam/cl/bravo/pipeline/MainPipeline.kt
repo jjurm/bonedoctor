@@ -9,10 +9,7 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 import uk.ac.cam.cl.bravo.PLANE_SIZE
-import uk.ac.cam.cl.bravo.classify.BodypartViewClassifier
-import uk.ac.cam.cl.bravo.classify.BodypartViewClassifierImpl
-import uk.ac.cam.cl.bravo.classify.BoneConditionClassifier
-import uk.ac.cam.cl.bravo.classify.BoneConditionClassifierImpl
+import uk.ac.cam.cl.bravo.classify.*
 import uk.ac.cam.cl.bravo.dataset.*
 import uk.ac.cam.cl.bravo.hash.*
 import uk.ac.cam.cl.bravo.overlay.*
@@ -90,7 +87,8 @@ class MainPipeline {
 
     // ===== Constants =====
 
-    private val nSimilarImages = Observable.just(5)
+    private val nSimilarImages = Observable.just(10)
+    private val nPreciseSimilarImages = Observable.just(4)
 
     companion object {
         const val PROGRESS_PREPROCESSING = 0
@@ -103,7 +101,8 @@ class MainPipeline {
     private val preprocessor: ImagePreprocessor = ImagePreprocessorI { progress0.onNext(it * 0.2) }
     private val boneConditionClassifier: BoneConditionClassifier = BoneConditionClassifierImpl()
     private val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl()
-    private var imageMatcher: ImageMatcher = ImageMatcherImpl.getImageMatcher(File(Dataset.IMAGE_MATCHER_FILE))
+    private val imageMatcher: ImageMatcher = ImageMatcherImpl.getImageMatcher(File(Dataset.IMAGE_MATCHER_FILE))
+    private val preciseImageMatcher: PreciseImageMatcher = PreciseImageMatcherImpl()
     private val imageOverlay: ImageOverlay = ImageOverlayImpl(
         arrayOf(
             InnerWarpTransformer(
@@ -124,7 +123,6 @@ class MainPipeline {
     private val fractureHighlighter: FractureHighlighter2 = FractureHighlighter2Impl()
 
     init {
-        // TODO Juraj: implement parallel execution
         // === Subjects ===
 
         // progress0 has type Subject<Double> (so that we can call .onNext(...))
@@ -197,11 +195,20 @@ class MainPipeline {
             }.withTag("ImageMatcher")
 
         // TODO Juraj: choose original or preprocessed image for ImageMatcher
-        similarNormal =
+        val intermediateSimilarNormal =
             combineObservables(inputImage, Observable.just(BoneCondition.NORMAL), bodypartViewVal, nSimilarImages)
                 .observeOn(Schedulers.newThread())
                 .mapDestructing(matchingFunction)
                 .withCache()
+
+        similarNormal = combineObservables(
+            inputImage,
+            intermediateSimilarNormal.map { it.map { it.value } },
+            nPreciseSimilarImages
+        )
+            .observeOn(Schedulers.newThread())
+            .mapDestructing(preciseImageMatcher::findMatchingImages)
+            .withCache()
 
         similarNormal.map { it.first().value }.subscribe(imageToOverlay)
         imageToOverlay.doneMeans(0.6, "Overlaying images")

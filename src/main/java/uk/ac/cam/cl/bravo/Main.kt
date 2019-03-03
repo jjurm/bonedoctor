@@ -56,7 +56,7 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
 
     pipeline.similarNormal.subscribe { it.forEachIndexed { i, img ->
         println("Similar $i: ${img.value.path}")
-        DisplayImage(img.value.preprocessedPath, "Similar $i")
+        DisplayImage(img.value.preprocessedPath, "Similar $i (score: ${img.score})")
     } }
     pipeline.overlaidOriginal.subscribe { DisplayImage(it.value, "OverlaidOriginal (score: ${it.score})") }
     pipeline.overlaidMirrored.subscribe { DisplayImage(it.value, "OverlaidMirrored (score: ${it.score})") }
