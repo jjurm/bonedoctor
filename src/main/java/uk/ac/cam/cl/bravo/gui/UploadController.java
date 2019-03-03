@@ -41,12 +41,20 @@ public class UploadController {
     private Label analyzeCheck;
 
 
+    /**
+     * Constructor: initialises non-FXML-dependant elements.
+     * Call before launcher.
+     * */
     public UploadController(Stage stage) {
         this.stage = stage;
 
 
     }
 
+    /**
+     * Launcher: initialises FXML-dependent elements.
+     * Call after constructor.
+     */
     public void launch() {
         ObservableList<Bodypart> items = FXCollections.observableArrayList(Bodypart.ELBOW, Bodypart.FINGER, Bodypart.FOREARM, Bodypart.HUMERUS, Bodypart.SHOULDER, Bodypart.HAND, Bodypart.WRIST);
         bodypartChoice.setItems(items);

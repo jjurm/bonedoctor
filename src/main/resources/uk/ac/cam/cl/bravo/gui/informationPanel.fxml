@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.FlowPane?>
@@ -9,11 +10,11 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.control.CheckBox?>
 <GridPane fx:id="infoGrid" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" GridPane.columnSpan="2147483647" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
    <rowConstraints>
       <RowConstraints minHeight="30.0" prefHeight="30.0" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+      <RowConstraints vgrow="ALWAYS" />
    </rowConstraints>
    <children>
       <FlowPane fx:id="inputFlow" GridPane.columnIndex="0" GridPane.rowIndex="0">
@@ -70,6 +71,7 @@
          <children>
             <Button fx:id="addToDatasetButton" mnemonicParsing="false" text="Add to dataset" />
             <CheckBox fx:id="transformCheckBox" onAction="#showTrans" text="Show Transformation" />
+            <CheckBox fx:id="preprocessedCheckBox" text="Enhance image" />
          </children>
       </FlowPane>
    </children>

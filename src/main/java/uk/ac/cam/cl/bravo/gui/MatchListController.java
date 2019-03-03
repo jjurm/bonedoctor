@@ -31,6 +31,10 @@ public class MatchListController {
     private MainController mainController;
     private ImageExplorerController activeController;
 
+    /**
+     * Constructor: initialises non-FXML-dependant elements.
+     * Call before launcher.
+     * */
     public MatchListController(Stage stage) {
         this.stage = stage;
 
@@ -48,17 +52,17 @@ public class MatchListController {
 
         return;
     }
-
+    //TODO: Change bc of pipeline
     private void startUIChange(List<Rated<ImageSample>> normals) {
         Platform.runLater(() -> createMatchList(normals));
     }
-
+    //TODO: Change bc of pipeline
     private void createMatchList(List<Rated<ImageSample>> normals) {
 
 
         analysisController.setNormalList(normals);
         ObservableList<String> list = FXCollections.observableArrayList();
-        for (Rated<ImageSample> r: normals){
+        for (Rated<ImageSample> r: normals){ // TODO: Change bc of pipeline
             list.add(r.getValue().getPath());
         }
 
@@ -80,6 +84,7 @@ public class MatchListController {
                     setGraphic(null);
                 } else {
 //                    matchView.setImage(normals.get(getIndex()));
+                    //TODO: Change bc of pipeline
                     Image img = SwingFXUtils.toFXImage(normals.get(getIndex()).getValue().loadImage(), null);
                     matchView.setImage(img);
                     setText(name);
@@ -98,7 +103,7 @@ public class MatchListController {
             int index = matches.getSelectionModel().getSelectedIndex();
 
             ImageSample img = normals.get(index).getValue();
-            analysisController.setPaneImage(activeController.getCurrentPane(), img, activeController.getView());
+            analysisController.setPaneImage(activeController.getCurrentPane(), img, activeController.getView(), false);
 
         });
     }

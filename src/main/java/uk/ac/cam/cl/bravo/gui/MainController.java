@@ -30,7 +30,9 @@ public class MainController {
     @FXML
     AnchorPane container;
 
-
+    /**
+     * Constructor: initialises non-FXML-dependant elements. Call before launcher.
+     * */
     public MainController(Stage stage) {
         this.stage = stage;
     }
@@ -91,7 +93,9 @@ public class MainController {
         }
     }
 
-
+    /**
+     * Launcher: initialises FXML-dependent elements. Call after constructor.
+     */
     public void launch() {
         loadUpload();
     }

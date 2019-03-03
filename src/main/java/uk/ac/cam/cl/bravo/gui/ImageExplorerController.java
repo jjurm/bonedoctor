@@ -10,6 +10,12 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 
+/**
+ *  Controls the operation (zoom, pan) and contains state about an image the user is "exploring".
+ *  Is loaded from AnalysisController.
+ *
+ *  A new ImageExplorerController is created when we change the image we want to display in one of the image panes.
+ */
 public class ImageExplorerController {
 
     private static final int MIN_PIXELS = 10;
@@ -29,7 +35,10 @@ public class ImageExplorerController {
     @FXML
     private ImageView imageView;
 
-
+    /**
+     * Constructor: initialises non-FXML-dependant elements.
+     * Call before launcher.
+     * */
     public ImageExplorerController(Stage stage, View view, GridPane pane) {
         this.stage = stage;
         this.view = view;

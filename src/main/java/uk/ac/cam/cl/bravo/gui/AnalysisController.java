@@ -22,6 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * The main window where all operations take place.
+ * Is loaded in the MainController.
+ */
 public class AnalysisController {
 
     private static final int MIN_PIXELS = 10;
@@ -56,11 +60,18 @@ public class AnalysisController {
     private ComboBox pane3choice;
     private List<Rated<ImageSample>> normalList;
 
-
+    /**
+     * Constructor: initialises non-FXML-dependant elements.
+     * Call before launcher.
+     * */
     public AnalysisController(Stage stage) {
         this.stage = stage;
     }
 
+    /**
+     * Launcher: initialises FXML-dependent elements.
+     * Call after constructor.
+     */
     public void launch() {
         try {
             // Initialize controller
@@ -93,7 +104,7 @@ public class AnalysisController {
     }
 
     //  CREATE SCROLLABLE IMAGE PANE
-    public void setPaneImage(GridPane pane, ImageSample imgFile, View view) {
+    public void setPaneImage(GridPane pane, ImageSample imgFile, View view, boolean usePreProcessed) {
         try {
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
@@ -104,7 +115,11 @@ public class AnalysisController {
             pane.add(imageExplorerFXML, 0, 1);
 
             // Child controller actions
-            Image img = SwingFXUtils.toFXImage(imgFile.loadImage(), null);
+            Image img = null;
+            if (usePreProcessed) {
+                img = SwingFXUtils.toFXImage(imgFile.loadPreprocessedImage(), null);
+            } else
+                img = SwingFXUtils.toFXImage(imgFile.loadImage(), null);
             imageExplorerController.setImage(img);
             imageExplorerController.setImageSample(imgFile);
             imageExplorerController.setAnalysisController(this);
@@ -173,7 +188,7 @@ public class AnalysisController {
         } else if (choice.equals(View.NORMAL)) {
             if (!(getBestMatchNormal() == null)) {
                 imgS = getBestMatchNormal().getValue();
-                setPaneImage(pane1, imgS, choice);
+                setPaneImage(pane1, imgS, choice, false);
             }
         }
         informationPanelController.setView(choice);
@@ -192,7 +207,7 @@ public class AnalysisController {
         } else if (choice.equals(View.NORMAL)) {
             if (!(getBestMatchNormal() == null)) {
                 imgS = getBestMatchNormal().getValue();
-                setPaneImage(pane2, imgS, choice);
+                setPaneImage(pane2, imgS, choice, false);
             }
         } else if (choice.equals(View.NORMAL_OVER)) {
             if (!(getBestMatchNormal() == null)) {
@@ -217,7 +232,7 @@ public class AnalysisController {
         } else if (choice.equals(View.NORMAL)) {
             if (!(getBestMatchNormal() == null)) {
                 imgS = getBestMatchNormal().getValue();
-                setPaneImage(pane2, imgS, choice);
+                setPaneImage(pane2, imgS, choice, false);
             }
         }
     }
@@ -281,13 +296,11 @@ public class AnalysisController {
     public void setNormalList(List<Rated<ImageSample>> normals) {
         this.normalList = normals;
         ImageSample img = getBestMatchNormal().getValue();
-        setPaneImage(pane2, img, View.NORMAL);
+        setPaneImage(pane2, img, View.NORMAL, false);
     }
 
     public void showTrans() {
-//        BufferedImage buffImg = mainController.getMainPipeline().getImageToOverlay().onNext(activeExplorerController.getCurrentImage());
-//        mainController.getMainPipeline().getImageToOverlay().onComplete();
-//        mainController.getMainPipeline().getTransformedAndOverlaid().subscribe((e) -> )
+//        mainController.getMainPipeline().getTransformedAndOverlaid().getResult().subscribe((e) -> )
 //        Image img = SwingFXUtils.toFXImage(buffImg, null);
 //        setPaneImage(activeExplorerController.getCurrentPane(), img, View.NORMAL_OVER);
     }
