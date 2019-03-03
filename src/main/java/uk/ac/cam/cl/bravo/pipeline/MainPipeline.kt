@@ -87,7 +87,7 @@ class MainPipeline {
 
     // ===== Constants =====
 
-    private val nSimilarImages = Observable.just(10)
+    private val nSimilarImages = Observable.just(8)
     private val nPreciseSimilarImages = Observable.just(4)
 
     companion object {
@@ -105,19 +105,19 @@ class MainPipeline {
     private val preciseImageMatcher: PreciseImageMatcher = PreciseImageMatcherImpl()
     private val imageOverlay: ImageOverlay = ImageOverlayImpl(
         arrayOf(
-            InnerWarpTransformer(
-                parameterScale = 0.8,
-                parameterPenaltyScale = 4.0,
-                resolution = 4
-            ),
             AffineTransformer(
                 parameterScale = 1.0,
                 parameterPenaltyScale = 1.0
+            ),
+            InnerWarpTransformer(
+                parameterScale = 0.4,
+                parameterPenaltyScale = 4.0,
+                resolution = 4
             )
         ),
         PixelSimilarity(
-            ignoreBorderWidth = 0.25
-        ) + ParameterPenaltyFunction() * 1.0,
+            ignoreBorderWidth = 0.20
+        ) + ParameterPenaltyFunction(power = 1.2) * 2.0,
         bigPlaneSize = PLANE_SIZE
     )
     private val fractureHighlighter: FractureHighlighter2 = FractureHighlighter2Impl()

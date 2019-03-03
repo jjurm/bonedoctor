@@ -65,6 +65,7 @@ class AffineTransformer(
 
     override fun scaleParametersToPenalty(parameters: Iterable<Double>): DoubleArray {
         val cp = super.scaleParametersToPenalty(parameters)
+        // TODO Juraj: don't penalise rotation
         cp[4] = 0.0
         cp[5] = 0.0
         return cp
