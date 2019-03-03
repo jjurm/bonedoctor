@@ -53,8 +53,8 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
 
         // Find the float outputs of preprocessed inputs, but use this function
         // so that inference graph is built only once (costly).
-//        Map<ImageSample, float[]> outputImagesMap = classifier.executeInferenceGraphConcurrently(imageInferenceMap);
-        Map<ImageSample, float[]> outputImagesMap = classifier.executeInferenceGraphConsecutively(imageInferenceMap);
+        Map<ImageSample, float[]> outputImagesMap = classifier.executeInferenceGraphConcurrently(imageInferenceMap);
+//        Map<ImageSample, float[]> outputImagesMap = classifier.executeInferenceGraphConsecutively(imageInferenceMap);
 
         // Build a PQ to find the best results. Order: best matches first. Size limit will discard worst matches.
         Queue<Rated<ImageSample>> PQ = MinMaxPriorityQueue.maximumSize(n).create();
