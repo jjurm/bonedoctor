@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -18,6 +19,7 @@ import uk.ac.cam.cl.bravo.dataset.BoneCondition;
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline;
 import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,8 @@ public class InformationPanelController {
     Label boneCondition;
     @FXML
     Label boneConditionConfidence;
+    @FXML
+    Button addToDatasetButton;
 
     public InformationPanelController(Stage stage) {
         this.stage = stage;
@@ -60,6 +64,7 @@ public class InformationPanelController {
 
             // Child controller actions
             matchListController.launch();
+            setView(View.INPUT);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -84,14 +89,15 @@ public class InformationPanelController {
             inputFlow.setManaged(true);
             bestMatchFlow.setVisible(false);
             bestMatchFlow.setManaged(false);
+            matchListController.hide();
         } else {
             inputFlow.setVisible(false);
             inputFlow.setVisible(false);
             bestMatchFlow.setVisible(true);
             bestMatchFlow.setManaged(true);
-
             if (view == View.NORMAL ) {
                 System.out.println("Normal");
+                matchListController.show();
             } else if (view == View.ABNORMAL) {
                 System.out.println("Abnormal");
             }
@@ -120,4 +126,13 @@ public class InformationPanelController {
         this.setBoneCondition(boneCondition);
     }
 
+    @FXML
+    public void handleAddToDataset(ActionEvent event) {
+        analysisController.startDatasetUpload();
+    }
+
+    public void hide() {
+        infoGrid.setVisible(false);
+        infoGrid.setManaged(false);
+    }
 }

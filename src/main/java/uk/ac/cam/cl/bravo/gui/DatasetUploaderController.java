@@ -16,11 +16,11 @@ import java.io.IOException;
 public class DatasetUploaderController {
     private File chosenImage;
     protected Stage stage;
-    protected MainPipeline pipeline;
+    private AnalysisController analysisController;
+    private MainController mainController;
 
-    public DatasetUploaderController(Stage stage, MainPipeline pipeline){
+    public DatasetUploaderController(Stage stage){
         this.stage = stage;
-        this.pipeline = pipeline;
     }
 
     @FXML
@@ -45,5 +45,14 @@ public class DatasetUploaderController {
         // Display the image chosen
         uploadedImageView.setImage(new Image(chosenImage.toURI().toString()));
 
+        MainPipeline mainPipeline = mainController.getMainPipeline();
+
+    }
+
+    public void setAnalysisController(AnalysisController analysisController) {
+        this.analysisController = analysisController;
+    }
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
     }
 }

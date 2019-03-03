@@ -104,4 +104,13 @@ public class MatchListController {
     }
 
 
+    public void hide() {
+        matches.setManaged(false);
+        matches.setVisible(false);
+    }
+
+    public void show() {
+        matches.setManaged(true);
+        matches.setVisible(true);
+    }
 }

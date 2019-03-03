@@ -109,16 +109,16 @@ public class MainController {
     }
 
     public Image getBestMatchNormal() {
-        BufferedImage img = normalList.get(0).getValue().loadImage();
-        WritableImage writableImage = SwingFXUtils.toFXImage(img, null);
+//        BufferedImage img = normalList.get(0).getValue().loadImage();
+//        WritableImage writableImage = SwingFXUtils.toFXImage(img, null);
 
-        return writableImage;
+        return bestMatchNormal;
     }
 
     public Image getBestMatchAbnormal() {
-        BufferedImage img = abnormalList.get(0).getValue().loadImage();
-        WritableImage writableImage = SwingFXUtils.toFXImage(img, null);
-        return writableImage;
+//        BufferedImage img = abnormalList.get(0).getValue().loadImage();
+//        WritableImage writableImage = SwingFXUtils.toFXImage(img, null);
+        return bestMatchAbnormal;
     }
 
     public Image getInputImage() {

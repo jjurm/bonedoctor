@@ -13,4 +13,8 @@ enum View {
     public String toString() {
         return string;
     }
+
+    public boolean equals(View view2) {
+        return (this.string.equals(view2.toString()));
+    }
 }

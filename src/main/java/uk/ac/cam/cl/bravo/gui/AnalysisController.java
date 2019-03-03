@@ -7,23 +7,12 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import uk.ac.cam.cl.bravo.dataset.BoneCondition;
-import uk.ac.cam.cl.bravo.pipeline.Uncertain;
-
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -37,6 +26,7 @@ public class AnalysisController {
     private Stage stage;
     private InformationPanelController informationPanelController;
     private ImageExplorerController activeExplorerController;
+    private DatasetUploaderController datasetUploaderController;
 
     @FXML
     private GridPane grid;
@@ -58,6 +48,7 @@ public class AnalysisController {
     private ComboBox pane2choice;
     @FXML
     private ComboBox pane3choice;
+
 
 
     public AnalysisController(Stage stage) {
@@ -139,37 +130,31 @@ public class AnalysisController {
 
     @FXML
     protected void handleSelectViewPane1(ActionEvent e) {
-        String choiceText = pane1choice.getSelectionModel().getSelectedItem().toString();
-
-        if (choiceText == View.INPUT.toString()) {
-            setPaneImage(pane1, mainController.getInputImage(), View.INPUT);
-            informationPanelController.setView(View.INPUT);
-        } else if (choiceText == View.NORMAL.toString()) {
-            setPaneImage(pane1, mainController.getBestMatchNormal(), View.NORMAL);
-            informationPanelController.setView(View.NORMAL);
-        } else if (choiceText == View.ABNORMAL.toString()) {
-            setPaneImage(pane1, mainController.getBestMatchAbnormal(), View.ABNORMAL);
-            informationPanelController.setView(View.ABNORMAL);
-        } else {
-            return;
+        View choice = (View) pane1choice.getSelectionModel().getSelectedItem();
+        if (choice.equals(View.INPUT.toString())) {
+            setPaneImage(pane1, mainController.getInputImage(), choice);
+        } else if (choice.equals(View.NORMAL)) {
+            setPaneImage(pane1, mainController.getBestMatchNormal(), choice);
+        } else if (choice.equals(View.ABNORMAL)) {
+            setPaneImage(pane1, mainController.getBestMatchAbnormal(), choice);
         }
+        informationPanelController.setView(choice);
+        return;
     }
 
     @FXML
     protected void handleSelectViewPane2(ActionEvent e) {
-        String choiceText = pane2choice.getSelectionModel().getSelectedItem().toString();
-        if (choiceText == View.INPUT.toString()) {
-            setPaneImage(pane2, mainController.getInputImage(), View.INPUT);
-            informationPanelController.setView(View.INPUT);
-        } else if (choiceText == View.NORMAL.toString()) {
-            setPaneImage(pane2, mainController.getBestMatchNormal(), View.NORMAL);
-            informationPanelController.setView(View.NORMAL);
-        } else if (choiceText == View.ABNORMAL.toString()) {
-            setPaneImage(pane2, mainController.getBestMatchAbnormal(), View.ABNORMAL);
-            informationPanelController.setView(View.ABNORMAL);
+        View choice = (View) pane2choice.getSelectionModel().getSelectedItem();
+        if (choice.equals(View.INPUT)) {
+            setPaneImage(pane2, mainController.getInputImage(), choice);
+        } else if (choice.equals(View.NORMAL)) {
+            setPaneImage(pane2, mainController.getBestMatchNormal(), choice);
+        } else if (choice.equals(View.ABNORMAL)) {
+            setPaneImage(pane2, mainController.getBestMatchAbnormal(), choice);
         } else {
             return;
         }
+        informationPanelController.setView(choice);
     }
 
     @FXML
@@ -193,6 +178,7 @@ public class AnalysisController {
         this.mainController = mainController;
     }
 
+
     public void handleSaveFile(ActionEvent e) {
         Image img = mainController.getInputImage();
         FileChooser fileChooser = new FileChooser();
@@ -215,5 +201,25 @@ public class AnalysisController {
 
     public ImageExplorerController getImageExplorerController() {
         return imageExplorerController;
+    }
+
+    public void startDatasetUpload() {
+        try {
+            // Initialize controller
+            FXMLLoader datasetUploaderLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/uploadToDataset.fxml"));
+            datasetUploaderController = new DatasetUploaderController(stage);
+            datasetUploaderLoader.setController(datasetUploaderController);
+            Parent datasetUploaderFXML = datasetUploaderLoader.load();
+
+            informationPanelController.hide();
+            grid.add(datasetUploaderFXML, 0, 2);
+
+            // Child controller actions
+            datasetUploaderController.setAnalysisController(this);
+            datasetUploaderController.setMainController(this.mainController);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
