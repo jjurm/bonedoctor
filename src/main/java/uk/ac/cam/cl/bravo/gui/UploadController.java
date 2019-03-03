@@ -72,11 +72,12 @@ public class UploadController {
     protected void handleAnalyzeButtonAction(ActionEvent event) throws IOException {
         MainPipeline mainPipeline = mainController.getMainPipeline();
 
+        System.out.println("Can read file: " + new File(imgFile.getAbsolutePath()).canRead());
         if (imgFile == null || bodypart == null){
             analyzeCheck.setText("Please choose an image and the corresponding body part to proceed.");
         }
 
-        Pair<String, Bodypart> userInput = new Pair<>(imgFile.toURI().toString(), bodypart);
+        Pair<String, Bodypart> userInput = new Pair<>(imgFile.getAbsolutePath(), bodypart);
 
         mainPipeline.getUserInput().onNext(userInput);
         mainPipeline.getUserInput().onComplete();

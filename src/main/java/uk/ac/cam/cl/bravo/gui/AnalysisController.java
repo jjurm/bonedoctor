@@ -98,11 +98,11 @@ public class AnalysisController {
     }
 
     //  CREATE SCROLLABLE IMAGE PANE
-    public void setPaneImage(GridPane pane, Image imgFile, View view) {
+    public void setPaneImage(GridPane pane, Image imgFile) {
         try {
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
-            imageExplorerController = new ImageExplorerController(stage, view);
+            imageExplorerController = new ImageExplorerController(stage);
             imageExplorerLoader.setController(imageExplorerController);
             Parent imageExplorerFXML = imageExplorerLoader.load();
 
@@ -143,13 +143,13 @@ public class AnalysisController {
         String choiceText = pane1choice.getSelectionModel().getSelectedItem().toString();
 
         if (choiceText == View.INPUT.toString()) {
-            setPaneImage(pane1, mainController.getInputImage(), View.INPUT);
+            setPaneImage(pane1, mainController.getInputImage());
             informationPanelController.setView(View.INPUT);
         } else if (choiceText == View.NORMAL.toString()) {
-            setPaneImage(pane1, mainController.getBestMatchNormal(), View.NORMAL);
+            setPaneImage(pane1, mainController.getBestMatchNormal());
             informationPanelController.setView(View.NORMAL);
         } else if (choiceText == View.ABNORMAL.toString()) {
-            setPaneImage(pane1, mainController.getBestMatchAbnormal(), View.ABNORMAL);
+            setPaneImage(pane1, mainController.getBestMatchAbnormal());
             informationPanelController.setView(View.ABNORMAL);
         } else {
             return;
@@ -160,13 +160,13 @@ public class AnalysisController {
     protected void handleSelectViewPane2(ActionEvent e) {
         String choiceText = pane2choice.getSelectionModel().getSelectedItem().toString();
         if (choiceText == View.INPUT.toString()) {
-            setPaneImage(pane2, mainController.getInputImage(), View.INPUT);
+            setPaneImage(pane2, mainController.getInputImage());
             informationPanelController.setView(View.INPUT);
         } else if (choiceText == View.NORMAL.toString()) {
-            setPaneImage(pane2, mainController.getBestMatchNormal(), View.NORMAL);
+            setPaneImage(pane2, mainController.getBestMatchNormal());
             informationPanelController.setView(View.NORMAL);
         } else if (choiceText == View.ABNORMAL.toString()) {
-            setPaneImage(pane2, mainController.getBestMatchAbnormal(), View.ABNORMAL);
+            setPaneImage(pane2, mainController.getBestMatchAbnormal());
             informationPanelController.setView(View.ABNORMAL);
         } else {
             return;
@@ -177,13 +177,13 @@ public class AnalysisController {
     protected void handleSelectViewPane3(ActionEvent e) {
         String choiceText = pane3choice.getSelectionModel().getSelectedItem().toString();
         if (choiceText == View.INPUT.toString()) {
-            setPaneImage(pane3, mainController.getInputImage(), View.INPUT);
+            setPaneImage(pane3, mainController.getInputImage());
             informationPanelController.setView(View.INPUT);
         } else if (choiceText == View.NORMAL.toString()) {
-            setPaneImage(pane3, mainController.getBestMatchNormal(), View.NORMAL);
+            setPaneImage(pane3, mainController.getBestMatchNormal());
             informationPanelController.setView(View.NORMAL);
         } else if (choiceText == View.ABNORMAL.toString()) {
-            setPaneImage(pane3, mainController.getBestMatchAbnormal(), View.ABNORMAL);
+            setPaneImage(pane3, mainController.getBestMatchAbnormal());
             informationPanelController.setView(View.ABNORMAL);
         } else {
             return;

@@ -43,6 +43,7 @@ public class InformationPanelController {
 
     public InformationPanelController(Stage stage) {
         this.stage = stage;
+
     }
 
     public void launch() {
@@ -59,13 +60,6 @@ public class InformationPanelController {
 
             // Child controller actions
             matchListController.launch();
-            this.subscribe();
-
-            inputFlow.setVisible(true);
-            inputFlow.setManaged(true);
-            bestMatchFlow.setVisible(false);
-            bestMatchFlow.setManaged(false);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -77,7 +71,7 @@ public class InformationPanelController {
 
     public void setAnalysisController(AnalysisController analysisController) {
         this.analysisController = analysisController;
-//        matchListController.setAnalysisController(analysisController);
+        matchListController.setAnalysisController(analysisController);
     }
 
     public void setView(View view) {
@@ -109,8 +103,8 @@ public class InformationPanelController {
     }
 
     public void setBoneCondition(Uncertain<BoneCondition> boneCondition) {
-        this.boneCondition.setText(boneCondition.getValue().getLabel());
-        this.boneConditionConfidence.setText(boneCondition.getConfidence().toString());
+//        this.boneCondition.setText(boneCondition.getValue().getLabel());
+//        this.boneConditionConfidence.setText(boneCondition.getConfidence().toString());
     }
 
     public void setActiveController(ImageExplorerController active) {
