@@ -65,6 +65,7 @@ public class InformationPanelController {
             infoGrid.add(matchListFXML, 0, 1);
 
             // Child controller actions
+            matchListController.setMainController(mainController);
             matchListController.launch();
             setView(View.INPUT);
         } catch (IOException e) {
@@ -105,8 +106,6 @@ public class InformationPanelController {
             if (view == View.NORMAL ) {
                 System.out.println("Normal");
                 matchListController.show();
-            } else if (view == View.ABNORMAL) {
-                System.out.println("Abnormal");
             }
         }
     }

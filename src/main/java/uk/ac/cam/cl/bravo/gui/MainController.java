@@ -9,29 +9,23 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
-import uk.ac.cam.cl.bravo.dataset.BoneCondition;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline;
 import uk.ac.cam.cl.bravo.pipeline.Rated;
-import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.channels.Pipe;
 import java.util.List;
 
 public class MainController {
 
     private List<Rated<ImageSample>> normalList;
-    private List<Rated<ImageSample>> abnormalList;
 
     private UploadController uploadController;
     private AnalysisController analysisController;
     private MainPipeline mainPipeline = new MainPipeline();
     private Stage stage;
     private Image inputImage;
-    private Image bestMatchNormal;
-    private Image bestMatchAbnormal;
 
     @FXML
     AnchorPane container;
@@ -64,19 +58,19 @@ public class MainController {
             analysisController.setMainController(this);
 
             analysisController.setPaneImage(analysisController.pane1, img, View.INPUT);
-            inputImage = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img2.png"));
-            bestMatchAbnormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img3.png"));
-            bestMatchNormal = new Image(getClass().getResourceAsStream("/uk/ac/cam/cl/bravo/gui/img4.png"));
-            analysisController.setPaneImage(analysisController.pane2, bestMatchAbnormal, View.ABNORMAL);
-            analysisController.setPaneImage(analysisController.pane3, bestMatchNormal, View.NORMAL);
+
             analysisController.showThirdExplorer(false);
 
             analysisController.launch();
+
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    // TODO: ANE - MOVE UPLOAD SCREEN TO SIDE OF ANALYSIS SCREEN
     public void loadUpload () {
         if (!container.getChildren().isEmpty()) {
             container.getChildren().remove(0);
@@ -100,43 +94,18 @@ public class MainController {
         }
     }
 
-    public void setNormalList(List<Rated<ImageSample>> imageSamples) {
-        normalList = imageSamples;
-    }
-
-    public void setAbnormalList(List<Rated<ImageSample>> imageSamples) {
-        abnormalList = imageSamples;
-    }
-
-    public Image getBestMatchNormal() {
-//        BufferedImage img = normalList.get(0).getValue().loadImage();
-//        WritableImage writableImage = SwingFXUtils.toFXImage(img, null);
-
-        return bestMatchNormal;
-    }
-
-    public Image getBestMatchAbnormal() {
-//        BufferedImage img = abnormalList.get(0).getValue().loadImage();
-//        WritableImage writableImage = SwingFXUtils.toFXImage(img, null);
-        return bestMatchAbnormal;
-    }
-
-    public Image getInputImage() {
-        return inputImage;
-    }
-
 
     public void launch() {
         loadUpload();
     }
 
 
-    public AnalysisController getAnalysisController() {
-        return analysisController;
+    public Image getInputImage() {
+        return inputImage;
     }
 
-    public UploadController getUploadController() {
-        return uploadController;
-    }
 
+    public void setInputImage(Image image) {
+        this.inputImage = image;
+    }
 }

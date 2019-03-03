@@ -12,9 +12,13 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import uk.ac.cam.cl.bravo.dataset.ImageSample;
+import uk.ac.cam.cl.bravo.pipeline.Rated;
+
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class AnalysisController {
 
@@ -48,7 +52,7 @@ public class AnalysisController {
     private ComboBox pane2choice;
     @FXML
     private ComboBox pane3choice;
-
+    private List<Rated<ImageSample>> normalList;
 
 
     public AnalysisController(Stage stage) {
@@ -131,46 +135,50 @@ public class AnalysisController {
     @FXML
     protected void handleSelectViewPane1(ActionEvent e) {
         View choice = (View) pane1choice.getSelectionModel().getSelectedItem();
-        if (choice.equals(View.INPUT.toString())) {
-            setPaneImage(pane1, mainController.getInputImage(), choice);
+        Image img = null;
+        if (!(mainController.getInputImage() == null)) {
+            img = mainController.getInputImage();
+            setPaneImage(pane1, img, choice);
         } else if (choice.equals(View.NORMAL)) {
-            setPaneImage(pane1, mainController.getBestMatchNormal(), choice);
-        } else if (choice.equals(View.ABNORMAL)) {
-            setPaneImage(pane1, mainController.getBestMatchAbnormal(), choice);
+            if (!(getBestMatchNormal() == null)) {
+                img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
+                setPaneImage(pane1, img, choice);
+            }
         }
         informationPanelController.setView(choice);
-        return;
     }
 
     @FXML
     protected void handleSelectViewPane2(ActionEvent e) {
         View choice = (View) pane2choice.getSelectionModel().getSelectedItem();
+        Image img = null;
         if (choice.equals(View.INPUT)) {
-            setPaneImage(pane2, mainController.getInputImage(), choice);
+            if (!(mainController.getInputImage() == null)) {
+                img = mainController.getInputImage();
+                setPaneImage(pane2, img, choice);
+            }
         } else if (choice.equals(View.NORMAL)) {
-            setPaneImage(pane2, mainController.getBestMatchNormal(), choice);
-        } else if (choice.equals(View.ABNORMAL)) {
-            setPaneImage(pane2, mainController.getBestMatchAbnormal(), choice);
-        } else {
-            return;
+            if (!(getBestMatchNormal() == null)) {
+                img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
+                setPaneImage(pane2, img, choice);
+            }
         }
+
         informationPanelController.setView(choice);
     }
 
     @FXML
     protected void handleSelectViewPane3(ActionEvent e) {
-        String choiceText = pane3choice.getSelectionModel().getSelectedItem().toString();
-        if (choiceText == View.INPUT.toString()) {
-            setPaneImage(pane3, mainController.getInputImage(), View.INPUT);
-            informationPanelController.setView(View.INPUT);
-        } else if (choiceText == View.NORMAL.toString()) {
-            setPaneImage(pane3, mainController.getBestMatchNormal(), View.NORMAL);
-            informationPanelController.setView(View.NORMAL);
-        } else if (choiceText == View.ABNORMAL.toString()) {
-            setPaneImage(pane3, mainController.getBestMatchAbnormal(), View.ABNORMAL);
-            informationPanelController.setView(View.ABNORMAL);
-        } else {
-            return;
+        View choice = (View) pane3choice.getSelectionModel().getSelectedItem();
+        Image img;
+        if (choice == View.INPUT) {
+            if (!(mainController.getInputImage() == null)) {
+                img = mainController.getInputImage();
+                setPaneImage(pane3, img, choice);
+            }
+        } else if (!(getBestMatchNormal() == null)) {
+            img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
+            setPaneImage(pane3, img, choice);
         }
     }
 
@@ -221,5 +229,18 @@ public class AnalysisController {
             e.printStackTrace();
         }
 
+    }
+
+    public Rated<ImageSample> getBestMatchNormal() {
+        if (!(normalList == null))
+            return normalList.get(0);
+        else
+            return null;
+    }
+
+    public void setNormalList(List<Rated<ImageSample>> normals) {
+        this.normalList = normals;
+        Image img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
+        setPaneImage(pane2, img, View.NORMAL);
     }
 }

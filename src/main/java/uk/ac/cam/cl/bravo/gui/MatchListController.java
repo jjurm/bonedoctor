@@ -1,14 +1,18 @@
 package uk.ac.cam.cl.bravo.gui;
 
 import io.reactivex.Observer;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import uk.ac.cam.cl.bravo.dataset.ImageSample;
+import uk.ac.cam.cl.bravo.pipeline.Rated;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +26,7 @@ public class MatchListController {
     private List<Image> imgNormalList = new ArrayList<>();
 
     private View view;
+    private MainController mainController;
 
     public MatchListController(Stage stage) {
         this.stage = stage;
@@ -57,6 +62,20 @@ public class MatchListController {
         ObservableList<String> items = FXCollections.observableArrayList("img1.png", "img2.png", "img3.png", "img4.png", "img5.png", "img6.png", "img7.png", "img8.png", "img9.png");
         matches.setItems(items);
 
+        mainController.getMainPipeline().getSimilarNormal().subscribe(normals -> startUIChange(normals));
+
+        return;
+    }
+
+    private void startUIChange(List<Rated<ImageSample>> normals) {
+        Platform.runLater(() -> createMatchList(normals));
+    }
+
+    private void createMatchList(List<Rated<ImageSample>> normals) {
+
+
+        analysisController.setNormalList(normals);
+
         matches.setCellFactory(param -> new ListCell<String>() {
             private ImageView matchView = new ImageView();
 
@@ -72,7 +91,9 @@ public class MatchListController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    matchView.setImage(imgNormalList.get(getIndex()));
+//                    matchView.setImage(normals.get(getIndex()));
+                    Image img = SwingFXUtils.toFXImage(normals.get(getIndex()).getValue().loadImage(), null);
+                    matchView.setImage(img);
                     setText(name);
                     setGraphic(matchView);
                 }
@@ -91,8 +112,6 @@ public class MatchListController {
             analysisController.setPaneImage(analysisController.pane2, imgNormalList.get(index), View.NORMAL);
 
         });
-
-        return;
     }
 
     public void setAnalysisController(AnalysisController analysisController) {
@@ -112,5 +131,9 @@ public class MatchListController {
     public void show() {
         matches.setManaged(true);
         matches.setVisible(true);
+    }
+
+    public void setMainController(MainController mainController) {
+        this.mainController = mainController;
     }
 }
