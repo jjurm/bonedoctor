@@ -47,7 +47,7 @@ public class MatchListController {
     }
 
     public void setView(View view) {
-        this.view= view;
+        this.view = view;
         launch();
     }
 
