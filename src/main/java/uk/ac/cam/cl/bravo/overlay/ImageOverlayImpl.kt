@@ -115,4 +115,8 @@ class ImageOverlayImpl(
         val score = bestOverlay.value
         return Rated(transformed to overlaid, score)
     }
+
+    override fun normalise(image: BufferedImage): BufferedImage {
+        return ImageTools.copyToPlane(image, bigPlaneSize)
+    }
 }

@@ -28,4 +28,11 @@ public interface ImageOverlay {
             double downsample,
             double precision);
 
+    /**
+     * Normalises the given image to have the same size as the output of
+     * {@code fitImage}
+     */
+    @NotNull
+    BufferedImage normalise(@NotNull BufferedImage image);
+
 }
