@@ -15,6 +15,7 @@ import uk.ac.cam.cl.bravo.hash.ImageMatcherImpl
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI
+import uk.ac.cam.cl.bravo.util.ImageTools
 import uk.ac.cam.cl.bravo.util.combineObservables
 import uk.ac.cam.cl.bravo.util.mapDestructing
 import java.awt.image.BufferedImage
@@ -28,6 +29,11 @@ import javax.imageio.ImageIO
 class MainPipeline {
 
     val dataset = Dataset()
+
+    /**
+     * Normalises the given image to have the same size (520x520).
+     */
+    fun normaliseImage(image: BufferedImage) = ImageTools.copyToPlane(image, planeSize = PLANE_SIZE)
 
     // ===== SUBJECTS =====
     // Subjects can hold a value (an input, a parameter, etc.).
