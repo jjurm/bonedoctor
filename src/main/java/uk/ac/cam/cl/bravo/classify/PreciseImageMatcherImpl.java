@@ -56,10 +56,7 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
         Map<ImageSample, float[]> outputImagesMap = classifier.executeInferenceGraphConsecutively(imageInferenceMap);
 
         // Build a PQ to find the best results. Order: best matches first. Size limit will discard worst matches.
-        Queue<Rated<ImageSample>> PQ = MinMaxPriorityQueue
-                .orderedBy(Comparator.comparing(Rated<ImageSample>::getScore))
-                .maximumSize(n)
-                .create();
+        Queue<Rated<ImageSample>> PQ = MinMaxPriorityQueue.maximumSize(n).create();
 
         for (ImageSample imageSample : outputImagesMap.keySet()){
             double currDistance = computeCosineSimilarity(outputArray, outputImagesMap.get(imageSample));
