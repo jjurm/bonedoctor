@@ -24,6 +24,22 @@ Pre-processing is a prerequisite for running the application and consists of the
 
 `./gradlew run` (or set your IDE appropriately)
 
+## How Does it Work?
+
+### The Computation Pipeline
+
+<img src="https://github.com/jjurm/bonedoctor/blob/master/images/read/pipeline.png" width="500" height="400" />
+
+### 1. Image Preprocessing
+
+### 2. Clustering of Images
+
+### 3. Classification of Normal/ Abnormal
+
+### 4. Searching for Matching Images
+
+### 5. Overlaying of Images
+
 ## Authors
 
 * **Ane Espeseth** ([anespz](https://github.com/anespz))
