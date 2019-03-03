@@ -180,13 +180,13 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         Map<ImageSample, float[]> outputImagesMap = new HashMap<>();
 
-        for (ImageSample imageSample : imageInferenceMap.keySet()){
-            long timeNow = System.currentTimeMillis();
-            Tensor<Float> image = imageInferenceMap.get(imageSample);
+        try(Graph g = new Graph()){
+            // First restore the graph definition from frozen graph
+            g.importGraphDef(graphDef);
 
-            try(Graph g = new Graph()){
-                // First restore the graph definition from frozen graph
-                g.importGraphDef(graphDef);
+            for (ImageSample imageSample : imageInferenceMap.keySet()){
+                long timeNow = System.currentTimeMillis();
+                Tensor<Float> image = imageInferenceMap.get(imageSample);
 
                 // Initiate a session to perform inference and try to get the res
                 try(Session s = new Session(g);
@@ -439,7 +439,8 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
             BufferedImage image,
             Bodypart bodypart,
             int limit) throws IOException {
-        String imageDirectory = "/home/kwotsin/Desktop/group_project/data/MURA/";
+//        String imageDirectory = "/home/kwotsin/Desktop/group_project/data/MURA/";
+        String imageDirectory = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1 (copy 1)/";
 
         // Run inference once on the image to get the array's features
         Tensor<Float> preprocessedImage = executePreprocessingGraph(bufferedImageToByteArray(image));
@@ -499,7 +500,9 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     public static void main(String[] args) throws IOException {
         // Test
         BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
-        String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient10943/study1_negative/image2.png";
+
+        String testImage = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1 (copy 1)/train/XR_HAND/patient10943/study1_negative/image2.png";
+//        String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient10943/study1_negative/image2.png";
         BufferedImage image = ImageIO.read(new File(testImage));
 
         // Test getting the closest N images
