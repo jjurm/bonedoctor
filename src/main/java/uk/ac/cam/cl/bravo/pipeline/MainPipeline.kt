@@ -19,6 +19,7 @@ import uk.ac.cam.cl.bravo.util.combineObservables
 import uk.ac.cam.cl.bravo.util.mapDestructing
 import java.awt.image.BufferedImage
 import java.io.File
+import java.util.function.BiFunction
 import javax.imageio.ImageIO
 
 /**
@@ -36,7 +37,7 @@ class MainPipeline {
      * In our algorithms, there is a trade-off between performance and precision. This argument specifies the precision
      * level (higher values take longer to compute). Values are 0.0 to 1.0
      */
-    val precision: Subject<Double> = BehaviorSubject.createDefault(0.5)
+    val precision: Subject<Double> = BehaviorSubject.createDefault(0.8)
 
     /**
      * A value between 0.0 and 1.0
@@ -81,13 +82,20 @@ class MainPipeline {
     /** The result of the overlay algorithm, taking 'imageToOverlay' as the input. */
     val transformedAndOverlaid: Observable<Rated<Pair<BufferedImage, BufferedImage>>>
 
+    /** Intermediate results of the overlay algorithm */
+    val transformedAndOverlaidOriginal: Observable<Rated<Pair<BufferedImage, BufferedImage>>>
+    val transformedAndOverlaidMirrored: Observable<Rated<Pair<BufferedImage, BufferedImage>>>
+
+    /** Image highlighting the difference between the two overlaid images */
+    val overlaidDifferences: Observable<BufferedImage>
+
     /** The transformed image modified to highlight differences from 'preprocessed' */
     val fracturesHighlighted: Observable<BufferedImage>
 
 
     // ===== Constants =====
 
-    private val nSimilarImages = Observable.just(8)
+    private val nSimilarImages = Observable.just(12)
     private val nPreciseSimilarImages = Observable.just(4)
 
     companion object {
@@ -105,21 +113,22 @@ class MainPipeline {
     private val preciseImageMatcher: PreciseImageMatcher = PreciseImageMatcherImpl()
     private val imageOverlay: ImageOverlay = ImageOverlayImpl(
         arrayOf(
-            AffineTransformer(
-                parameterScale = 1.0,
-                parameterPenaltyScale = 1.0
-            ),
             InnerWarpTransformer(
                 parameterScale = 0.4,
                 parameterPenaltyScale = 4.0,
                 resolution = 4
+            ),
+            AffineTransformer(
+                parameterScale = 1.0,
+                parameterPenaltyScale = 1.0
             )
         ),
         PixelSimilarity(
             ignoreBorderWidth = 0.20
-        ) + ParameterPenaltyFunction(power = 1.2) * 2.0,
+        ) + ParameterPenaltyFunction(power = 1.2) * 1.0,
         bigPlaneSize = PLANE_SIZE
     )
+    private val overlayDifference: BiFunction<BufferedImage, BufferedImage, BufferedImage> = ImageDifference()
     private val fractureHighlighter: FractureHighlighter2 = FractureHighlighter2Impl()
 
     init {
@@ -210,7 +219,7 @@ class MainPipeline {
             .mapDestructing(preciseImageMatcher::findMatchingImages.withTag("PreciseImageMatcher"))
             .withCache()
 
-        similarNormal.map { it.first().value }.subscribe(imageToOverlay)
+        similarNormal.map { it.get(0).value }.subscribe(imageToOverlay)
         imageToOverlay.doneMeans(0.6, "Overlaying images")
 
         val imageToOverlayLoaded = imageToOverlay
@@ -223,7 +232,7 @@ class MainPipeline {
             .map { FlipFilter(FlipFilter.FLIP_H).filter(it, null) }
             .withCache()
 
-        val transformedAndOverlaidOriginal = combineObservables(
+        transformedAndOverlaidOriginal = combineObservables(
             preprocessedVal,
             bodypartViewVal,
             imageToOverlayLoaded,
@@ -231,10 +240,10 @@ class MainPipeline {
             overlayPrecision
         )
             .observeOn(Schedulers.newThread())
-            .mapDestructing(imageOverlay::fitImage.withTag("Overlay"))
+            .mapDestructing(imageOverlay::fitImage.withTag("OverlayOriginal"))
             .withCache()
 
-        val transformedAndOverlaidMirrored = combineObservables(
+        transformedAndOverlaidMirrored = combineObservables(
             preprocessedVal,
             bodypartViewVal,
             imageToOverlayLoadedMirrored,
@@ -248,6 +257,19 @@ class MainPipeline {
         transformedAndOverlaid = combineObservables(transformedAndOverlaidOriginal, transformedAndOverlaidMirrored)
             .mapDestructing { a, b -> listOf(a, b).minBy { it.score }!! }
         transformedAndOverlaid.doneMeans(0.8, "Highlighting differences")
+
+        val preprocessedNormalised = preprocessedVal
+            .observeOn(Schedulers.computation())
+            .map(imageOverlay::normalise)
+            .withCache()
+
+        overlaidDifferences = combineObservables(
+            preprocessedNormalised,
+            transformedAndOverlaid.map { it.value.first }
+        )
+            .observeOn(Schedulers.computation())
+            .mapDestructing(overlayDifference::apply)
+            .withCache()
 
         combineObservables(
             inputImage, imageToOverlayLoaded, highlightAmount, highlightGradient

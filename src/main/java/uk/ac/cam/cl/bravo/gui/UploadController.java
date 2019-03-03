@@ -72,8 +72,6 @@ public class UploadController {
     protected void handleAnalyzeButtonAction(ActionEvent event) throws IOException {
         MainPipeline mainPipeline = mainController.getMainPipeline();
 
-        // TODO: Find out why we get "empty file exception" here
-        System.out.println("Can read file: " + new File(imgFile.getAbsolutePath()).canRead());
         if (imgFile == null || bodypart == null){
             analyzeCheck.setText("Please choose an image and the corresponding body part to proceed.");
         } else {

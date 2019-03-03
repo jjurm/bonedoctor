@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.bravo
 
 import uk.ac.cam.cl.bravo.dataset.Bodypart
+import uk.ac.cam.cl.bravo.dataset.BoneCondition
 import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline
@@ -19,7 +20,12 @@ fun main(args: Array<String>) {
 
     val dataset = Dataset()
     val imageSample = dataset.training.values
-        .filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 9734 }.first()
+        //.filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 276 && it.boneCondition == BoneCondition.ABNORMAL }.get(1)
+        //.filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 1863 && it.boneCondition == BoneCondition.ABNORMAL }.get(2)
+        //.filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 1870 && it.boneCondition == BoneCondition.ABNORMAL }.get(0)
+
+        // Hand with metal part
+        .filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 1928 && it.boneCondition == BoneCondition.ABNORMAL }.get(1)
     mainPipeline(imageSample.path, imageSample.bodypartView.bodypart)
 }
 
@@ -52,16 +58,21 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
     pipeline.preprocessed.subscribe { DisplayImage(it.value, "Preprocessed (confidence: ${it.confidence})") }
     pipeline.boneCondition.subscribe { println("BoneCondition: ${it.value}, confidence: ${it.confidence}") }
 
-    pipeline.similarNormal.subscribe { it.forEachIndexed { i, img ->
+    pipeline.similarNormal.subscribe { it.take(4).forEachIndexed { i, img ->
         println("Similar $i: ${img.value.path}")
         DisplayImage(img.value.preprocessedPath, "Similar $i (score: ${img.score})")
     } }
+
+    //pipeline.transformedAndOverlaidOriginal.subscribe {DisplayImage(it.value.second, "OverlaidOriginal (score: ${it.score}")}
+    //pipeline.transformedAndOverlaidMirrored.subscribe {DisplayImage(it.value.second, "OverlaidMirrored (score: ${it.score}")}
     pipeline.transformedAndOverlaid.subscribe {
-        DisplayImage(it.value.first, "Transformed (score: ${it.score})")
+        //DisplayImage(it.value.first, "Transformed (score: ${it.score})")
         DisplayImage(it.value.second, "Overlaid (score: ${it.score})")
     }
     //pipeline.overlaid.subscribe { DisplayImage(it.value, "Overlaid (best) (score: ${it.score})") }
     pipeline.fracturesHighlighted.subscribe { DisplayImage(it, "Fractures highlighted") }
+
+    pipeline.overlaidDifferences.subscribe { DisplayImage(it, "Overlaid differences") }
 
     pipeline.userInput.onNext(Pair(inputFile, bodypart))
 }
