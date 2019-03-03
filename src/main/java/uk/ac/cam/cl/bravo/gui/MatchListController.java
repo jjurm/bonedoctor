@@ -2,7 +2,9 @@ package uk.ac.cam.cl.bravo.gui;
 
 import io.reactivex.Observer;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -11,11 +13,11 @@ import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 import uk.ac.cam.cl.bravo.pipeline.Rated;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MatchListController {
 
@@ -59,9 +61,6 @@ public class MatchListController {
     public void launch() {
         // ------ CREATE SCROLLABLE LIST VIEW --------
 
-        ObservableList<String> items = FXCollections.observableArrayList("img1.png", "img2.png", "img3.png", "img4.png", "img5.png", "img6.png", "img7.png", "img8.png", "img9.png");
-        matches.setItems(items);
-
         mainController.getMainPipeline().getSimilarNormal().subscribe(normals -> startUIChange(normals));
 
         return;
@@ -75,6 +74,12 @@ public class MatchListController {
 
 
         analysisController.setNormalList(normals);
+        ObservableList<String> list = FXCollections.observableArrayList();
+        for (Rated<ImageSample> r: normals){
+            list.add(r.getValue().getPath());
+        }
+
+        matches.setItems(list);
 
         matches.setCellFactory(param -> new ListCell<String>() {
             private ImageView matchView = new ImageView();
