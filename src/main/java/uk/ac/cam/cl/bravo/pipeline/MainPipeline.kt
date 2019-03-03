@@ -2,19 +2,21 @@ package uk.ac.cam.cl.bravo.pipeline
 
 import com.jhlabs.image.FlipFilter
 import io.reactivex.Observable
-import io.reactivex.functions.BiFunction
-import io.reactivex.functions.Function3
-import io.reactivex.functions.Function4
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 import uk.ac.cam.cl.bravo.PLANE_SIZE
 import uk.ac.cam.cl.bravo.classify.*
 import uk.ac.cam.cl.bravo.dataset.*
-import uk.ac.cam.cl.bravo.hash.*
+import uk.ac.cam.cl.bravo.hash.FractureHighlighter2
+import uk.ac.cam.cl.bravo.hash.FractureHighlighter2Impl
+import uk.ac.cam.cl.bravo.hash.ImageMatcher
+import uk.ac.cam.cl.bravo.hash.ImageMatcherImpl
 import uk.ac.cam.cl.bravo.overlay.*
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessor
 import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI
+import uk.ac.cam.cl.bravo.util.combineObservables
+import uk.ac.cam.cl.bravo.util.mapDestructing
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
@@ -223,6 +225,7 @@ class MainPipeline {
 
         val transformedAndOverlaidOriginal = combineObservables(
             preprocessedVal,
+            bodypartViewVal,
             imageToOverlayLoaded,
             downsample,
             overlayPrecision
@@ -233,6 +236,7 @@ class MainPipeline {
 
         val transformedAndOverlaidMirrored = combineObservables(
             preprocessedVal,
+            bodypartViewVal,
             imageToOverlayLoadedMirrored,
             downsample,
             overlayPrecision
@@ -285,35 +289,7 @@ class MainPipeline {
     private fun <A, B, C, D, R> ((A, B, C, D) -> R).withTag(s: String): (A, B, C, D) -> R =
         { a, b, c, d -> tag(s) { this(a, b, c, d) } }
 
-    private fun <A, B> combineObservables(a: Observable<A>, b: Observable<B>): Observable<Tuple2<A, B>> =
-        Observable.combineLatest(a, b, BiFunction(::Tuple2))
-
-    private fun <A, B, C> combineObservables(
-        a: Observable<A>,
-        b: Observable<B>,
-        c: Observable<C>
-    ): Observable<Tuple3<A, B, C>> =
-        Observable.combineLatest(a, b, c, Function3(::Tuple3))
-
-    private fun <A, B, C, D> combineObservables(
-        a: Observable<A>,
-        b: Observable<B>,
-        c: Observable<C>,
-        d: Observable<D>
-    ): Observable<Tuple4<A, B, C, D>> =
-        Observable.combineLatest(a, b, c, d, Function4(::Tuple4))
-
-    private fun <A, B, R> Observable<Tuple2<A, B>>.mapDestructing(t: (A, B) -> R): Observable<R> =
-        this.map { (a, b) -> t(a, b) }
-
-    private fun <A, B, C, R> Observable<Tuple3<A, B, C>>.mapDestructing(t: (A, B, C) -> R): Observable<R> =
-        this.map { (a, b, c) -> t(a, b, c) }
-
-    private fun <A, B, C, D, R> Observable<Tuple4<A, B, C, D>>.mapDestructing(t: (A, B, C, D) -> R): Observable<R> =
-        this.map { (a, b, c, d) -> t(a, b, c, d) }
+    private fun <A, B, C, D, E, R> ((A, B, C, D, E) -> R).withTag(s: String): (A, B, C, D, E) -> R =
+        { a, b, c, d, e -> tag(s) { this(a, b, c, d, e) } }
 
 }
-
-data class Tuple2<A, B>(val a: A, val b: B)
-data class Tuple3<A, B, C>(val a: A, val b: B, val c: C)
-data class Tuple4<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)

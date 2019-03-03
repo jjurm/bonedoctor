@@ -7,6 +7,7 @@ import org.apache.commons.math3.optim.SimpleBounds
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer
+import uk.ac.cam.cl.bravo.dataset.BodypartView
 import uk.ac.cam.cl.bravo.pipeline.Rated
 import uk.ac.cam.cl.bravo.util.ImageTools
 import uk.ac.cam.cl.bravo.util.div
@@ -55,6 +56,7 @@ class ImageOverlayImpl(
 
     fun findBestOverlay(
         base: BufferedImage,
+        bodypartView: BodypartView,
         sample: BufferedImage,
         downsample: Double,
         precision: Double
@@ -71,7 +73,7 @@ class ImageOverlayImpl(
         val result = optimizer.optimize(
             ObjectiveFunction { params ->
                 val transformed = transformers.transformAll(sampleInPlane, params, smallPlaneSize)
-                f.value(baseInPlane, transformed, smallPlaneSize, penaltyScaledParameters(params))
+                f.value(baseInPlane, bodypartView, transformed, smallPlaneSize, penaltyScaledParameters(params))
             },
             GoalType.MINIMIZE,
             initialGuess,
@@ -95,11 +97,12 @@ class ImageOverlayImpl(
 
     override fun fitImage(
         base: BufferedImage,
+        bodypartView: BodypartView,
         sample: BufferedImage,
         downsample: Double,
         precision: Double
     ): Rated<Pair<BufferedImage, BufferedImage>> {
-        val bestOverlay = findBestOverlay(base, sample, downsample, precision)
+        val bestOverlay = findBestOverlay(base, bodypartView, sample, downsample, precision)
         val transformed = applyTransformations(sample, bestOverlay.point)
 
         val overlaid = ImageTools.overlay(base, transformed, bigPlaneSize)
@@ -111,9 +114,5 @@ class ImageOverlayImpl(
 
         val score = bestOverlay.value
         return Rated(transformed to overlaid, score)
-    }
-
-    override fun normalise(image: BufferedImage): BufferedImage {
-        return ImageTools.copyToPlane(image, bigPlaneSize)
     }
 }

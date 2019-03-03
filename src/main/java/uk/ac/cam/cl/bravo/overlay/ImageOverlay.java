@@ -2,6 +2,7 @@ package uk.ac.cam.cl.bravo.overlay;
 
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
+import uk.ac.cam.cl.bravo.dataset.BodypartView;
 import uk.ac.cam.cl.bravo.pipeline.Rated;
 
 import java.awt.image.BufferedImage;
@@ -22,15 +23,9 @@ public interface ImageOverlay {
     @NotNull
     Rated<Pair<BufferedImage, BufferedImage>> fitImage(
             @NotNull BufferedImage base,
+            @NotNull BodypartView bodypartView,
             @NotNull BufferedImage sample,
             double downsample,
             double precision);
-
-    /**
-     * Normalises the given image to have the same size as the output of
-     * {@link #fitImage(BufferedImage, BufferedImage, double, double)}
-     */
-    @NotNull
-    BufferedImage normalise(@NotNull BufferedImage image);
 
 }
