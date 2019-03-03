@@ -21,6 +21,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
+import static uk.ac.cam.cl.bravo.classify.Utils.bufferedImageToByteArray;
+
 public class BoneConditionClassifierImpl implements BoneConditionClassifier {
     private final String inputNodeName = "densenet169_input";
     private final String outputNodeName = "dense_1/Sigmoid";
@@ -89,18 +91,6 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
         Session s = new Session(g);
         Tensor<Float> output = s.runner().feed(inputNodeName, input).fetch(outputNodeName).run().get(0).expect(Float.class);
         return output;
-    }
-
-    private static byte[] bufferedImageToByteArray(BufferedImage image){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(image, "jpg", baos);
-            byte[] bytes = baos.toByteArray();
-            return bytes;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     private static byte[] readAllBytesOrExit(Path path) {

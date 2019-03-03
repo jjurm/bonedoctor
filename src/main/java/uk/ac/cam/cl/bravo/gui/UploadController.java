@@ -85,7 +85,6 @@ public class UploadController {
 
             mainController.loadAnalysis(imageView.getImage());
         }
-
     }
 
     @FXML

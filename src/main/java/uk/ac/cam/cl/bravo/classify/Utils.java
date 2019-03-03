@@ -129,7 +129,7 @@ public class Utils {
     protected static byte[] bufferedImageToByteArray(BufferedImage image){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            ImageIO.write(image, "jpg", baos);
+            ImageIO.write(image, "png", baos);
 
             byte[] bytes = baos.toByteArray();
 

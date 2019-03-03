@@ -2,6 +2,7 @@ package uk.ac.cam.cl.bravo.gui;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -47,7 +48,11 @@ public class InformationPanelController {
 
     public InformationPanelController(Stage stage) {
         this.stage = stage;
-
+//        addToDatasetButton.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override public void handle(ActionEvent e) {
+//                label.setText("Accepted");
+//            }
+//        });
     }
 
     public void launch() {
@@ -77,6 +82,11 @@ public class InformationPanelController {
     public void setAnalysisController(AnalysisController analysisController) {
         this.analysisController = analysisController;
         matchListController.setAnalysisController(analysisController);
+    }
+
+    @FXML
+    public void handleUpload(ActionEvent event) {
+        analysisController.startDatasetUpload();
     }
 
     public void setView(View view) {
@@ -126,10 +136,6 @@ public class InformationPanelController {
         this.setBoneCondition(boneCondition);
     }
 
-    @FXML
-    public void handleAddToDataset(ActionEvent event) {
-        analysisController.startDatasetUpload();
-    }
 
     public void hide() {
         infoGrid.setVisible(false);
