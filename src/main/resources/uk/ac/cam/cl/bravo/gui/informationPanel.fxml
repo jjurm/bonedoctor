@@ -69,9 +69,22 @@
       </FlowPane>
       <FlowPane alignment="BOTTOM_RIGHT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
          <children>
-            <Button fx:id="addToDatasetButton" mnemonicParsing="false" text="Add to dataset" />
-            <CheckBox fx:id="transformCheckBox" onAction="#showTrans" text="Show Transformation" />
-            <CheckBox fx:id="preprocessedCheckBox" text="Enhance image" />
+            <Button fx:id="addToDatasetButton" mnemonicParsing="false" text="Add to dataset" >
+                <FlowPane.margin>
+                    <Insets bottom="20.0" right="30.0" />
+                </FlowPane.margin></Button>
+             <!--<CheckBox fx:id="transformCheckBox" onAction="#showTrans" text="Show Transformation">-->
+                <!--<FlowPane.margin>-->
+                    <!--<Insets bottom="20.0" />-->
+                <!--</FlowPane.margin>-->
+                <!--<padding>-->
+                    <!--<Insets right="30.0" />-->
+                <!--</padding></CheckBox>-->
+             <CheckBox fx:id="preprocessedCheckBox" text="Enhance image" >
+                <FlowPane.margin>
+                    <Insets bottom="20.0" />
+                </FlowPane.margin>
+             </CheckBox>
          </children>
       </FlowPane>
    </children>

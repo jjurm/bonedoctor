@@ -98,12 +98,25 @@ public class AnalysisController {
         }
     }
 
+    /**
+     * Sets the current "Active Explorer", i.e. which image pane the user is currently interacting with.
+     * Important for the InformationPanel, as this will only display information about the active explorer.
+     * Called by an ImageExplorerController when it is clicked on.
+     * @param active
+     */
     public void setActiveExplorer(ImageExplorerController active) {
         activeExplorerController = active;
         informationPanelController.setActiveController(active);
     }
 
-    //  CREATE SCROLLABLE IMAGE PANE
+    /**
+     * Creates a new ImageExplorer with updated state about pane, view and whether or not it is a preprocessed image.
+     * Places it in the requested pane.
+     * @param pane: which pane to insert the explorer into
+     * @param imgFile: which image to insert
+     * @param view: View.INPUT, View.NORMAL or View.NORMAL_OVER (overlay)
+     * @param usePreProcessed: is this image using preprocessing?
+     */
     public void setPaneImage(GridPane pane, ImageSample imgFile, View view, boolean usePreProcessed) {
         try {
             // Initialize controller
@@ -129,7 +142,14 @@ public class AnalysisController {
         }
     }
 
-    //  CREATE SCROLLABLE IMAGE PANE
+    /**
+     * Creates a new ImageExplorer with updated state about pane, view and whether or not it is a preprocessed image.
+     * Places it in the requested pane.
+     * Only for Input image, as it cannot be made into an ImageSample.
+     * @param pane: which pane to insert the explorer into
+     * @param imgFile: which image to insert
+     * @param view: View.INPUT, View.NORMAL or View.NORMAL_OVER (overlay)
+     */
     public void setPaneImage(GridPane pane, Image imgFile, View view) {
         try {
 
@@ -154,8 +174,11 @@ public class AnalysisController {
 
     }
 
-
-
+    /**
+     * Opens a third image explorer if the uses clicks "Add explorer" button.
+     * Can also be closed by setting the boolean to false.  // TODO: Add close button?
+     * @param bool
+     */
     public void showThirdExplorer(boolean bool) {
         if (bool) {
             grid.getColumnConstraints().get(0).setPercentWidth(30);
@@ -171,12 +194,21 @@ public class AnalysisController {
         pane3.setManaged(bool);
     }
 
+    /**
+     * Handle function for "Add Explorer" button
+     * @param event
+     * @throws IOException
+     */
     @FXML
     protected void handleAddExplorerButtonAction(ActionEvent event) throws IOException {
         showThirdExplorer(true);
         System.out.println("removing!!");
     }
 
+    /**
+     * Handle function for "Select View" dropdown menu for first panel/explorer.
+     * @param e
+     */
     @FXML
     protected void handleSelectViewPane1(ActionEvent e) {
         View choice = (View) pane1choice.getSelectionModel().getSelectedItem();
@@ -194,6 +226,10 @@ public class AnalysisController {
         informationPanelController.setView(choice);
     }
 
+    /**
+     * Handle function for "Select View" dropdown menu for second panel/explorer.
+     * @param e
+     */
     @FXML
     protected void handleSelectViewPane2(ActionEvent e) {
         View choice = (View) pane2choice.getSelectionModel().getSelectedItem();
@@ -219,6 +255,10 @@ public class AnalysisController {
         informationPanelController.setView(choice);
     }
 
+    /**
+     * Handle function for "Select View" dropdown menu for third panel/explorer.
+     * @param e
+     */
     @FXML
     protected void handleSelectViewPane3(ActionEvent e) {
         View choice = (View) pane3choice.getSelectionModel().getSelectedItem();
@@ -237,11 +277,19 @@ public class AnalysisController {
         }
     }
 
+    /**
+     * Set the MainController. Important for accessing the mainPipeline.
+     * Called from mainController after analysisController is loaded..
+     * @param mainController
+     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
 
-
+    /**
+     * Handle function for "Export" button, allows user to save image in imageexplorer.
+     * @param e
+     */
     public void handleSaveFile(ActionEvent e) {
         Image img = mainController.getInputImage();
         FileChooser fileChooser = new FileChooser();
@@ -257,15 +305,18 @@ public class AnalysisController {
         }
     }
 
-
+    /**
+     * Getter used by DatasetUploaderController
+     * @return the informationPanelController.
+     */
     public InformationPanelController getInformationPanelController() {
         return informationPanelController;
     }
 
-    public ImageExplorerController getImageExplorerController() {
-        return imageExplorerController;
-    }
-
+    /**
+     * Panel for uploading image to the dataset. Will appear instead of the informationPanel.
+     * Launched when "Add to dataset" button is clicked.
+     */
     public void startDatasetUpload() {
         try {
             // Initialize controller
@@ -280,12 +331,21 @@ public class AnalysisController {
             // Child controller actions
             datasetUploaderController.setAnalysisController(this);
             datasetUploaderController.setMainController(this.mainController);
+            datasetUploaderController.launch();
+
+            // Set the height
+            datasetUploaderController.setHeight(200.0);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
 
+    /**
+     * Getter
+     * @return best match from the match list
+     */
     public Rated<ImageSample> getBestMatchNormal() {
         if (!(normalList == null))
             return normalList.get(0);
@@ -293,14 +353,23 @@ public class AnalysisController {
             return null;
     }
 
+    /**
+     * Setter, used by the matchListController through our informationPanelController.
+     * @param normals: the list of matches returned from the pipeline.
+     */
     public void setNormalList(List<Rated<ImageSample>> normals) {
         this.normalList = normals;
         ImageSample img = getBestMatchNormal().getValue();
         setPaneImage(pane2, img, View.NORMAL, false);
     }
 
+    /**
+     * Show transformed image/image overlay
+     */
+    @FXML
     public void showTrans() {
-//        mainController.getMainPipeline().getTransformedAndOverlaid().getResult().subscribe((e) -> )
+
+//        BufferedImage buffImg = mainController.getMainPipeline().getImageToOverlay().onNext(activeExplorerController.getCurrentImage());
 //        Image img = SwingFXUtils.toFXImage(buffImg, null);
 //        setPaneImage(activeExplorerController.getCurrentPane(), img, View.NORMAL_OVER);
     }

@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Rectangle2D?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
 
-<GridPane fx:id="explorerContainer" alignment="CENTER" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
-    <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="true" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" />
+<GridPane fx:id="explorerContainer" alignment="CENTER" minHeight="200.0" minWidth="200.0" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+    <ImageView fx:id="imageView" pickOnBounds="true" preserveRatio="true" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
+      <viewport>
+         <Rectangle2D height="150.0" width="150.0" />
+      </viewport></ImageView>
    <columnConstraints>
       <ColumnConstraints />
    </columnConstraints>
    <rowConstraints>
       <RowConstraints />
    </rowConstraints>
+   <padding>
+      <Insets top="75.0" />
+   </padding>
 </GridPane>

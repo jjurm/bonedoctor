@@ -5,10 +5,12 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="datasetUploadPane" minHeight="200.0" prefHeight="200.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <Button fx:id="uploadButton" layoutX="270.0" layoutY="328.0" mnemonicParsing="false" onAction="#handleUploadButton" text="Button" />
-        <ImageView fx:id="uploadedImageView" fitHeight="227.0" fitWidth="287.0" layoutX="157.0" layoutY="36.0" pickOnBounds="true" preserveRatio="true" />
-        <ComboBox fx:id="bodypartSelector" layoutX="226.0" layoutY="284.0" prefWidth="150.0" />
+        <Button fx:id="uploadButton" layoutX="357.0" layoutY="135.0" mnemonicParsing="false" onAction="#handleUploadButton" text="Select" />
+        <ImageView fx:id="uploadedImageView" fitHeight="99.0" fitWidth="178.0" layoutX="146.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true" />
+        <ComboBox fx:id="bodypartSelector" layoutX="160.0" layoutY="135.0" onAction="#handleSelectBodyPart" prefWidth="150.0" />
+      <Button fx:id="backButton" layoutX="29.0" layoutY="21.0" mnemonicParsing="false" onAction="#handleBackButton" text="Back" />
+      <Button fx:id="addDataButton" layoutX="461.0" layoutY="135.0" mnemonicParsing="false" onAction="#handleAddDataButton" text="Add Image" />
     </children>
 </AnchorPane>
