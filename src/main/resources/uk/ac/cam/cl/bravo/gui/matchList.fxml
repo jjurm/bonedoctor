@@ -3,4 +3,4 @@
 <?import javafx.scene.control.ListView?>
 
 
-<ListView fx:id="matches" minHeight="250.0" orientation="HORIZONTAL"  xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" />
+<ListView fx:id="matches" minHeight="220.0" orientation="HORIZONTAL"  xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" />

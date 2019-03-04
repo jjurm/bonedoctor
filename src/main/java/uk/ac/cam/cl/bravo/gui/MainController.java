@@ -30,11 +30,17 @@ public class MainController {
     @FXML
     AnchorPane container;
 
-
+    /**
+     * Constructor: initialises non-FXML-dependant elements. Call before launcher.
+     * */
     public MainController(Stage stage) {
         this.stage = stage;
     }
 
+    /**
+     * Get main pipeline, responsible for supplying all child componenets with the same mainPipeline object.
+     * @return
+     */
     public MainPipeline getMainPipeline() {
         return this.mainPipeline;
     }
@@ -56,11 +62,8 @@ public class MainController {
 
             // Child controller actions
             analysisController.setMainController(this);
-
             analysisController.setPaneImage(analysisController.pane1, img, View.INPUT);
-
             analysisController.showThirdExplorer(false);
-
             analysisController.launch();
 
 
@@ -94,16 +97,26 @@ public class MainController {
         }
     }
 
-
+    /**
+     * Launcher: initialises FXML-dependent elements. Call after constructor.
+     */
     public void launch() {
         loadUpload();
     }
 
-
+    /**
+     * Getter for input image.
+     * @return
+     */
     public Image getInputImage() {
         return inputImage;
     }
 
+
+    /**
+     * Setter for input image.
+     * @param image
+     */
     public void setInputImage(Image image) {
         this.inputImage = image;
     }
