@@ -37,6 +37,13 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
     ExecutorService parallelExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
+    /**
+     * Computes the bodypart view object wrapped in an uncertain class indicating the confidence of the prediction,
+     * given an image to classify and its corresponding body part
+     * @param image image for prediction
+     * @param bodypart corresponding bodypart of the image
+     * @return Uncertain class wrapping the bodypartview object
+     */
     @NotNull
     @Override
     public Uncertain<BodypartView> classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart) {
@@ -558,22 +565,6 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
         }
 
         return bestImageFilename;
-    }
-
-
-    public static void main(String[] args) throws IOException {
-        // Test
-        BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
-
-        String testImage = "/home/kwotsin/Desktop/group_project/python/data/MURA-v1.1 (copy 1)/train/XR_HAND/patient10943/study1_negative/image2.png";
-//        String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient10943/study1_negative/image2.png";
-        BufferedImage image = ImageIO.read(new File(testImage));
-
-        // Test getting the closest N images
-        System.out.println(classifier.getClosestImages(
-                image,
-                Bodypart.HAND,
-                30));
     }
 
 }

@@ -28,6 +28,11 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
     private final String outputNodeName = "dense_1/Sigmoid";
     private String graphDefFilename = "python/abnormality_classifier/BoneConditionClassifier.pb";
 
+    /**
+     * Given an image, performs inference using tensorflow and obtain output image tensor
+     * @param image image to perform inference on
+     * @return Uncertain object wrapping Bone Condition representing the output and its corresponding confidence.
+     */
     @Override
     @NotNull
     public Uncertain<BoneCondition> classify(@NotNull BufferedImage image) {
