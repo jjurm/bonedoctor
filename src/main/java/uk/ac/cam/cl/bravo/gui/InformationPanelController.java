@@ -33,6 +33,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +56,11 @@ public class InformationPanelController {
     @FXML
     FlowPane inputFlow;
     @FXML
+    FlowPane highlightFlow;
+    @FXML
     FlowPane bestMatchFlow;
+    @FXML
+    Slider gradient;
     @FXML
     Label boneCondition;
     @FXML
@@ -146,16 +151,30 @@ public class InformationPanelController {
             inputFlow.setManaged(true);
             bestMatchFlow.setVisible(false);
             bestMatchFlow.setManaged(false);
+            highlightFlow.setManaged(false);
+            highlightFlow.setVisible(false);
             matchListController.hide();
-        } else {
+        } else if (view == View.NORMAL){
             inputFlow.setVisible(false);
             inputFlow.setVisible(false);
             bestMatchFlow.setVisible(true);
             bestMatchFlow.setManaged(true);
+            highlightFlow.setManaged(false);
+            highlightFlow.setVisible(false);
             if (view == View.NORMAL ) {
                 System.out.println("Normal");
                 matchListController.show();
             }
+        } else if (view == View.HIGHLIGHT){
+            inputFlow.setVisible(false);
+            inputFlow.setManaged(false);
+            bestMatchFlow.setVisible(false);
+            bestMatchFlow.setManaged(false);
+            matchListController.hide();
+            highlightFlow.setManaged(true);
+            highlightFlow.setVisible(true);
+            gradient.setVisible(true);
+            gradient.setOnDragDone(e -> mainController.getMainPipeline().getHighlightGradient().onNext(gradient.getValue()));
         }
     }
 
