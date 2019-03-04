@@ -6,6 +6,7 @@ import uk.ac.cam.cl.bravo.dataset.Dataset
 import uk.ac.cam.cl.bravo.gui.DisplayImage
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline
 import java.awt.Point
+import java.lang.IllegalArgumentException
 
 const val PLANE_WIDTH = 520
 const val PLANE_HEIGHT = PLANE_WIDTH
@@ -18,15 +19,27 @@ fun main(args: Array<String>) {
     //    "images/in/train_XR_SHOULDER_patient00037_study1_positive_image1_edit.png" to "images/in/train_XR_SHOULDER_patient01449_study1_negative_image2_edit.png"
     //tryOverlay(file1, file2)
 
-    val dataset = Dataset()
-    val imageSample = dataset.training.values
-        //.filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 276 && it.boneCondition == BoneCondition.ABNORMAL }.get(1)
-        //.filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 1863 && it.boneCondition == BoneCondition.ABNORMAL }.get(2)
-        //.filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 1870 && it.boneCondition == BoneCondition.ABNORMAL }.get(0)
+    val (filename, bodypart) = when (args.size) {
+        0 -> {
+            val dataset = Dataset()
+            val imageSample = dataset.training.values
+                //.filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 276 && it.boneCondition == BoneCondition.ABNORMAL }.get(1)
+                //.filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 1863 && it.boneCondition == BoneCondition.ABNORMAL }.get(2)
+                //.filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 1870 && it.boneCondition == BoneCondition.ABNORMAL }.get(0)
 
-        // Hand with metal part
-        .filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 1928 && it.boneCondition == BoneCondition.ABNORMAL }.get(1)
-    mainPipeline(imageSample.path, imageSample.bodypartView.bodypart)
+                // Hand with metal part
+                .filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 1928 && it.boneCondition == BoneCondition.ABNORMAL }.get(1)
+            imageSample.path to imageSample.bodypartView.bodypart
+        }
+        2 -> {
+            args[0] to Bodypart.valueOf(args[1].toUpperCase())
+        }
+        else -> {
+            throw IllegalArgumentException("need 2 arguments: <filename> <bodypart>")
+        }
+    }
+
+    mainPipeline(filename, bodypart)
 }
 
 /*fun preprocessPipeline() {

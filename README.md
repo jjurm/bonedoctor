@@ -24,6 +24,18 @@ Pre-processing is a prerequisite for running the application and consists of the
 
 `./gradlew run` (or set your IDE appropriately)
 
+### Preview of the pipeline
+
+`./gradlew preview --args "<input image filename> <bodypart>"`
+
+For example:
+
+`./gradlew preview --args "input_image.png forearm"`
+
+You can also preview a default input image:
+
+`./gradlew preview`
+
 ## The Graphical User Interface
 
 ##### Primary Contributor: Ane K Espeseth
