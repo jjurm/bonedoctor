@@ -38,6 +38,8 @@ public class AnalysisController {
     private ImageExplorerController activeExplorerController;
     private DatasetUploaderController datasetUploaderController;
 
+    private BufferedImage highlightedImage;
+
     @FXML
     private GridPane grid;
     @FXML
@@ -87,11 +89,13 @@ public class AnalysisController {
             informationPanelController.launch();
             informationPanelController.setAnalysisController(this);
 
-            ObservableList<View> items = FXCollections.observableArrayList(View.INPUT, View.NORMAL, View.NORMAL_OVER);
+        ObservableList<View> items = FXCollections.observableArrayList(View.INPUT, View.NORMAL, View.NORMAL_OVER, View.HIGHLIGHT);
 
             pane1choice.setItems(items);
             pane2choice.setItems(items);
             pane3choice.setItems(items);
+
+            mainController.getMainPipeline().getFracturesHighlighted().subscribe(image -> highlightedImage = image);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -272,8 +276,10 @@ public class AnalysisController {
         } else if (choice.equals(View.NORMAL)) {
             if (!(getBestMatchNormal() == null)) {
                 imgS = getBestMatchNormal().getValue();
-                setPaneImage(pane2, imgS, choice, false);
+                setPaneImage(pane3, imgS, choice, false);
             }
+        } else if (choice.equals(View.INPUT.HIGHLIGHT)){
+            setPaneImage(pane3, SwingFXUtils.toFXImage(highlightedImage, null), choice);
         }
     }
 
