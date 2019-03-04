@@ -65,7 +65,6 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
             final int W = 320;
             final float mean = 117f;
             final float scale = 1f;
-            // TODO: placeholder for multiple images
             final Output<String> input = b.constant("input", imageBytes);
             final Output<Float> output =
                     b.div(
