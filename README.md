@@ -122,6 +122,8 @@ The above 2 images show a close match based on having the best cosine similarity
 
 *Figure 3: Bad matching image in the same cluster due to low cosine similarity score*
 
+To optimize the inference of the graph, TensorFlow's graph transform tool is then used to optimize matrix operations like fusing batch normalisation layers with convolution layers into a single operation.
+
 ### 5. Overlaying of Images
 
 ##### Primary Contributor: Juraj Micko
