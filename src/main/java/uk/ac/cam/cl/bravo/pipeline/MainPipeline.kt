@@ -53,18 +53,11 @@ class MainPipeline {
     /**
      * A value between 0.0 and 1.0
      */
-    val highlightGradient: Subject<Double> = BehaviorSubject.createDefault(0.5)
+    val highlightGradient: Subject<Double> = BehaviorSubject.createDefault(0.7)
 
     /** A pair of (input image path, bodypart of the input image) */
     val userInput: Subject<Pair<String, Bodypart>> = BehaviorSubject.create()
 
-    /**
-     * An image to overlay the user image with.
-     *
-     * As soon as the list of similar images is computed, the first one is put to this subject.
-     * If the user chooses another ImageSample for overlay, call imageToOverlay.onNext(imageChosenByUser)
-     */
-    val imageToOverlay: Subject<ImageSample> = BehaviorSubject.create<ImageSample>()
 
     // ===== OBSERVABLES =====
     // One can subscribe to an observable to get updates/results from it,
@@ -82,15 +75,16 @@ class MainPipeline {
     /** Classified BoneCondition, taking the 'preprocessed' image as the input */
     val boneCondition: Observable<Uncertain<BoneCondition>>
 
-    /** List of matched images (similar to 'preprocessed') that are NORMAL */
+    @Deprecated("use similarWithOverlays instead")
     val similarNormal: Observable<List<Rated<ImageSample>>>
 
-    /** The result of the overlay algorithm, taking 'imageToOverlay' as the input. */
-    val transformedAndOverlaid: Observable<Rated<Pair<BufferedImage, BufferedImage>>>
+    /**
+     * List of matched images (similar to 'preprocessed') that are NORMAL.
+     * Each entry of the list is a pair of (matched image, overlay producer).
+     */
+    val similarWithOverlays: Observable<List<Pair<ImageSample, OverlayProducer>>>
 
-    /** Intermediate results of the overlay algorithm */
-    val transformedAndOverlaidOriginal: Observable<Rated<Pair<BufferedImage, BufferedImage>>>
-    val transformedAndOverlaidMirrored: Observable<Rated<Pair<BufferedImage, BufferedImage>>>
+    val firstOverlaid: Observable<Rated<Pair<BufferedImage, BufferedImage>>>
 
     /** Image highlighting the difference between the two overlaid images */
     val overlaidDifferences: Observable<BufferedImage>
@@ -180,6 +174,11 @@ class MainPipeline {
 
         val preprocessedVal = preprocessed.map(Uncertain<BufferedImage>::value)
 
+        val preprocessedNormalised = preprocessedVal
+            .observeOn(Schedulers.computation())
+            .map(imageOverlay::normalise)
+            .withCache()
+
         boneCondition = inputImage
             .observeOn(Schedulers.newThread())
             .map(boneConditionClassifier::classify.withTag("BoneCondition classifier"))
@@ -225,79 +224,59 @@ class MainPipeline {
             .mapDestructing(preciseImageMatcher::findMatchingImages.withTag("PreciseImageMatcher"))
             .withCache()
 
-        similarNormal.map { it.get(0).value }.subscribe(imageToOverlay)
-        imageToOverlay.doneMeans(0.6, "Overlaying images")
-
-        val imageToOverlayLoaded = imageToOverlay
-            .observeOn(Schedulers.io())
-            .map(ImageSample::loadPreprocessedImage)
-            .withCache()
-
-        val imageToOverlayLoadedMirrored = imageToOverlayLoaded
-            .observeOn(Schedulers.newThread())
-            .map { FlipFilter(FlipFilter.FLIP_H).filter(it, null) }
-            .withCache()
-
-        transformedAndOverlaidOriginal = combineObservables(
+        similarWithOverlays = combineObservables(
+            similarNormal,
             preprocessedVal,
             bodypartViewVal,
-            imageToOverlayLoaded,
             downsample,
             overlayPrecision
         )
-            .observeOn(Schedulers.newThread())
-            .mapDestructing(imageOverlay::fitImage.withTag("OverlayOriginal"))
-            .withCache()
-
-        transformedAndOverlaidMirrored = combineObservables(
-            preprocessedVal,
-            bodypartViewVal,
-            imageToOverlayLoadedMirrored,
-            downsample,
-            overlayPrecision
-        )
-            .observeOn(Schedulers.newThread())
-            .mapDestructing(imageOverlay::fitImage.withTag("OverlayMirrored"))
-            .withCache()
-
-        transformedAndOverlaid = combineObservables(transformedAndOverlaidOriginal, transformedAndOverlaidMirrored)
-            .mapDestructing { a, b -> listOf(a, b).minBy { it.score }!! }
-        transformedAndOverlaid.doneMeans(0.8, "Highlighting differences")
-
-        val preprocessedNormalised = preprocessedVal
             .observeOn(Schedulers.computation())
-            .map(imageOverlay::normalise)
+            .mapDestructing { similarNormal, base, bodypartView_, downsample_, overlayPrecision_ ->
+                similarNormal.map { rated ->
+                    val imageToOverlay = rated.value
+                    val producer: OverlayProducer = OverlayProducerImpl(
+                        imageOverlay,
+                        base,
+                        bodypartView_,
+                        imageToOverlay,
+                        downsample_,
+                        overlayPrecision_
+                    )
+                    imageToOverlay to producer
+                }.toList()
+            }
             .withCache()
+
+        val bestMatch =
+            similarNormal
+                .map { it.first().value }
+
+        firstOverlaid = similarWithOverlays
+            .flatMap { list ->
+                list.first().second.requestOverlay()
+            }
+            .map { it.map { it.toKtPair() } }
 
         overlaidDifferences = combineObservables(
             preprocessedNormalised,
-            transformedAndOverlaid.map { it.value.first }
+            firstOverlaid.map { it.value.first }
         )
             .observeOn(Schedulers.computation())
             .mapDestructing(overlayDifference::apply)
             .withCache()
 
         combineObservables(
-            inputImage, imageToOverlayLoaded, highlightAmount, highlightGradient
+            inputImage,
+            bestMatch.map { it.loadImage() },
+            highlightAmount,
+            highlightGradient
         )
             .observeOn(Schedulers.newThread())
             .mapDestructing(fractureHighlighter::highlight.withTag("FractureHighlighter"))
             .subscribe()
 
         fracturesHighlighted = fractureHighlighter.partialResults
-
-        val done = combineObservables(transformedAndOverlaid, fracturesHighlighted, boneCondition).map { Unit }
-        done.doneMeans(1.0, "Done!")
-    }
-
-    /**
-     * This passively mediates many subscriptions by using only a single subscription to the receiver Observable.
-     * Passively because 'subscribe' calls to the returned Observable do not propagate back to the receiver Observable.
-     */
-    private fun <T> Observable<T>.withCache(): Observable<T> {
-        val subject = BehaviorSubject.create<T>()
-        subscribe(subject)
-        return subject
     }
 
     // --- Functions for easier debugging ---
@@ -321,3 +300,15 @@ class MainPipeline {
         { a, b, c, d, e -> tag(s) { this(a, b, c, d, e) } }
 
 }
+
+/**
+ * This passively mediates many subscriptions by using only a single subscription to the receiver Observable.
+ * Passively because 'subscribe' calls to the returned Observable do not propagate back to the receiver Observable.
+ */
+fun <T> Observable<T>.withCache(): Observable<T> {
+    val subject = BehaviorSubject.create<T>()
+    subscribe(subject)
+    return subject
+}
+
+fun <A, B> javafx.util.Pair<A, B>.toKtPair() = Pair(this.key, this.value)

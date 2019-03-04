@@ -9,4 +9,6 @@ class Rated<T>(val value: T, val score: Double) : Comparable<Rated<T>> {
 
     override fun compareTo(other: Rated<T>) = score.compareTo(other.score)
 
+    fun <R> map(mapper: (T) -> R) = Rated(mapper(value), score)
+
 }

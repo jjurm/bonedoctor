@@ -65,7 +65,7 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
 
     //pipeline.transformedAndOverlaidOriginal.subscribe {DisplayImage(it.value.second, "OverlaidOriginal (score: ${it.score}")}
     //pipeline.transformedAndOverlaidMirrored.subscribe {DisplayImage(it.value.second, "OverlaidMirrored (score: ${it.score}")}
-    pipeline.transformedAndOverlaid.subscribe {
+    pipeline.firstOverlaid.subscribe {
         //DisplayImage(it.value.first, "Transformed (score: ${it.score})")
         DisplayImage(it.value.second, "Overlaid (score: ${it.score})")
     }
