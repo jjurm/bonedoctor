@@ -61,18 +61,21 @@ Using Sobel’s edge detection, the points of maximum gradient are identified in
 By using the histogram of colours within the hull a black threshold - the colour below which all pixels must be set to black as the background - and a white threshold - the colour above which all pixels must be set to white as the bones - are established. The remaining pixels’ colours are scaled into this range.The black threshold is taken to be a 5 more than the background value. To calculate the white threshold,the pixels that are lighter than the black threshold are considered, and the lightest colour with an above average frequency is identified and used as the white threshold. 
 
 After this stage a black band is constructed on the convex hull from the edge detection phase. The image is cropped by removing rows and columns from the edges of the image that are completely black (grey-scale value of 0).
-
-### 2. Clustering of Images
-
+#### Stage 2
 ##### Primary Contributor: Kwot Sin Lee
+<img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter0.png" width="300" height="300"/>  <img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter2.png" width="300" height="300"/>
 
-In order to facilitate the downstream processing of the images for greater performance, the images could be filtered by finding the views in which they were first taken. Since the MURA dataset has only binary labels of 1 and 0 indicating a presence and absence of a fracture respectively, an unsupervised learning approach is taken. Unsupervised learning in this context is the most _scalable_ way to perform this task, instead of handcrafting feature detectors or manually labelling the images and then performing supervised learning. Specifically, we want to find clusters of images such that given a new image, we can know which cluster it belongs to, and so apply the corresponding algorithms on these filtered set of images belonging to that cluster.
+*Figure 1: Original image input to find matching image.*
 
-An InceptionV3 network is used to act as an image encoder that takes in an image and produce high level features of the image. This helps to extract the most significant features and represent them in a vector form suitable for clustering. Congruent with standard research practice, we first use model weights pre-trained on the ImageNet dataset for object recognition, which gives us a model capable of understanding high level features such as edges, colours and textures. Subsequently, for each input image,  take the mixed_10 layer output of the network, and ignore the last fully-connected layer output. This produces a _8 x 8 x 2048_ shaped output tensor, which we subsequently reshape into a vector of shape _131072 x 1_ representing the high level features of this one image.
+*Figure 2: Visually closest image found based on cosine similarity*
 
-Through performing this inference step for all images, we effectively obtain an _(N,M)_ matrix, where _N_ represents the number of all images used and _M = 131072_ represents the dimensions of each feature vector. Standard K-means clustering is then applied to cluster this feature matrix, producing 2 distinct clusters (see Figure 1 and Figure 2 in test results).
+A precise image matching algorithm is created to further refine the matches obtained, based on visual similarity. As each image has a corresponding encoded image vector, we find the visual similarity amongst images by computing the cosine similarity between any two vectors. Through computing cosine similarity, we could compare how similar the image vectors are in the high dimensional space they are encoded in, with 1.0 being the best score and -1.0 being the worst (i.e. the two vectors are pointing in diametrically opposite directions).
 
-Finally, in order to know what cluster an image belongs to, we perform inference on the image to extract its high level features and compare the L2 distance to the centroids of the clusters obtained. The closest L2 distance to one cluster label will determine which set of images the new image belongs to.
+The above 2 images show a close match based on having the best cosine similarity of a select n images provided from the previous pipeline. The next image shows a bad example with the lowest cosine similarity **despite being in the same cluster**. Thus, using cosine similarity is a good indicator of compute visual similarity of images using their feature vectors.
+
+<img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter1.png" width="300" height="300"/>
+
+*Figure 3: Bad matching image in the same cluster due to low cosine similarity score*
 
 ### 3. Classification of Bone Condition
 
