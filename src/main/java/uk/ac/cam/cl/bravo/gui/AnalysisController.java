@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.gui;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -9,6 +10,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
@@ -38,7 +41,6 @@ public class AnalysisController {
     private InformationPanelController informationPanelController;
     private ImageExplorerController activeExplorerController;
     private DatasetUploaderController datasetUploaderController;
-
     private BufferedImage highlightedImage;
 
     @FXML
@@ -61,6 +63,9 @@ public class AnalysisController {
     private ComboBox pane2choice;
     @FXML
     private ComboBox pane3choice;
+    @FXML
+    private ProgressBar progressBar;
+
     private List<Rated<ImageSample>> normalList;
 
     /**
@@ -96,6 +101,7 @@ public class AnalysisController {
             pane2choice.setItems(items);
             pane3choice.setItems(items);
 
+            subscribe();
             mainController.getMainPipeline().getFracturesHighlighted().subscribe(image -> highlightedImage = image);
 
         } catch (IOException e) {
@@ -124,6 +130,10 @@ public class AnalysisController {
      */
     public void setPaneImage(GridPane pane, ImageSample imgFile, View view, boolean usePreProcessed) {
         try {
+
+            if (pane.getChildren().size()>1)
+                pane.getChildren().remove(1);
+
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
             imageExplorerController = new ImageExplorerController(stage, view, pane);
@@ -380,5 +390,22 @@ public class AnalysisController {
 //        BufferedImage buffImg = mainController.getMainPipeline().getImageToOverlay().onNext(activeExplorerController.getCurrentImage());
 //        Image img = SwingFXUtils.toFXImage(buffImg, null);
 //        setPaneImage(activeExplorerController.getCurrentPane(), img, View.NORMAL_OVER);
+    }
+
+
+    private void updateProgressBar(double progress) {
+        progressBar.setProgress(progress);
+    }
+
+    /**
+     * Threading function, makes sure UI calls don't interfere with mainPipeline.
+     * @param progress
+     */
+    private void startUIChange(double progress) {
+        Platform.runLater(() -> updateProgressBar(progress));
+    }
+
+    private void subscribe() {
+        mainController.getMainPipeline().getProgress().subscribe(item -> {startUIChange(item);});
     }
 }

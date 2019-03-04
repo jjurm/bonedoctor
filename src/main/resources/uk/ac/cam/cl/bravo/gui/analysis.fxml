@@ -3,12 +3,13 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
-
 
 <GridPane fx:id="grid" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
@@ -70,9 +71,22 @@
                      </FlowPane.margin></Button>
                </children>
             </FlowPane>
+            <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" GridPane.rowIndex="1">
+               <padding>
+                  <Insets top="40.0" />
+               </padding>
+            </ProgressBar>
+            <Label text="Looking for matches... This might take a minute." GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin>
+               <padding>
+                  <Insets bottom="40.0" />
+               </padding>
+            </Label>
          </children>
          <columnConstraints>
-            <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
@@ -108,8 +122,14 @@
          <children>
             <FlowPane alignment="CENTER">
                <children>
-                  <ComboBox fx:id="pane3choice" minHeight="30.0" onAction="#handleSelectViewPane3" promptText="- Select View -" />
-                  <Button alignment="CENTER" ellipsisString="Export" minHeight="30.0" mnemonicParsing="false" onAction="#handleSaveFile" text="Export" textAlignment="CENTER" />
+                  <ComboBox fx:id="pane3choice" minHeight="30.0" onAction="#handleSelectViewPane3" promptText="- Select View -">
+                     <FlowPane.margin>
+                        <Insets top="15.0" />
+                     </FlowPane.margin></ComboBox>
+                  <Button alignment="CENTER" ellipsisString="Export" minHeight="30.0" mnemonicParsing="false" onAction="#handleSaveFile" text="Export" textAlignment="CENTER">
+                     <FlowPane.margin>
+                        <Insets top="15.0" />
+                     </FlowPane.margin></Button>
                </children>
             </FlowPane>
          </children>

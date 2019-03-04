@@ -66,8 +66,6 @@ public class MainController {
             analysisController.showThirdExplorer(false);
             analysisController.launch();
 
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }

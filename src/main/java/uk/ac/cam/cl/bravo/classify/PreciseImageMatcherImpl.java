@@ -20,12 +20,19 @@ import static uk.ac.cam.cl.bravo.classify.Utils.computeCosineSimilarity;
 public class PreciseImageMatcherImpl implements PreciseImageMatcher {
     private BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
 
+    /**
+     * Given an image and list of images to find, find the visually closest image to the given image and output them
+     * in a list rated by similarity
+     * @param image input image, not preprocessed
+     * @param domain list of images to choose from. They must all have the bodypart view equal to bodypartView.
+     * @param n number of images to return
+     * @return list of rated objects representing image samples and their corresponding score. higher better. This is
+     *         different from cosine similarity since rated score must be universally understandable by other components
+     *         and so the interpretation of cosine similarity is changed to fit this rated class.
+     */
     @NotNull
     @Override
     public List<Rated<ImageSample>> findMatchingImages(@NotNull BufferedImage image, @NotNull List<ImageSample> domain, int n) {
-//        String imageDirectory = Dataset.DIR;
-//        String imageDirectory = "/home/kwotsin/Desktop/group_project/data/MURA/";
-
         // Run inference once on the image to get the array's features
         Tensor<Float> preprocessedImage = classifier.executePreprocessingGraph(bufferedImageToByteArray(image));
         float[] outputArray = classifier.executeInferenceGraph(preprocessedImage);
@@ -37,7 +44,6 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
         for (ImageSample imageSample : domain){
             try {
                 BufferedImage currImage = ImageIO.read(new File(imageSample.getPath()));
-
 
                 // Get preprocessed input
                 Tensor<Float> preprocessedInput = classifier.executePreprocessingGraph(bufferedImageToByteArray(currImage));
@@ -54,7 +60,6 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
         // Find the float outputs of preprocessed inputs, but use this function
         // so that inference graph is built only once (costly).
         Map<ImageSample, float[]> outputImagesMap = classifier.executeInferenceGraphConcurrently(imageInferenceMap);
-//        Map<ImageSample, float[]> outputImagesMap = classifier.executeInferenceGraphConsecutively(imageInferenceMap);
 
         // Build a PQ to find the best results. Order: best matches first. Size limit will discard worst matches.
         Queue<Rated<ImageSample>> PQ = MinMaxPriorityQueue.maximumSize(n).create();
@@ -69,31 +74,5 @@ public class PreciseImageMatcherImpl implements PreciseImageMatcher {
         ArrayList<Rated<ImageSample>> list = new ArrayList<>(n);
         while (!PQ.isEmpty()) list.add(PQ.remove());
         return list;
-    }
-
-    public static void main(String[] args) throws IOException {
-        PreciseImageMatcherImpl matcher = new PreciseImageMatcherImpl();
-        String testImage = "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient10943/study1_negative/image2.png";
-
-        List<ImageSample> testDomain = new ArrayList<>();
-        testDomain.add(new ImageSample(
-                "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient11162/study1_negative/image2.png",
-                new BodypartView(Bodypart.HAND, 1)));
-
-        testDomain.add(new ImageSample(
-                "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient11168/study1_negative/image2.png",
-                new BodypartView(Bodypart.HAND, 1)));
-
-        testDomain.add(new ImageSample(
-                "/home/kwotsin/Desktop/group_project/data/MURA/train/XR_HAND/patient11171/study1_negative/image3.png",
-                new BodypartView(Bodypart.HAND, 1)));
-
-        BufferedImage image = ImageIO.read(new File(testImage));
-        List<Rated<ImageSample>> PQ = matcher.findMatchingImages(image, testDomain, 30);
-
-        for (Rated<ImageSample> item : PQ){
-            System.out.println(item.getValue().getPath());
-            System.out.println(item.getScore());
-        }
     }
 }
