@@ -87,6 +87,7 @@ public class InformationPanelController {
             matchListLoader.setController(matchListController);
             Parent matchListFXML = matchListLoader.load();
 
+            // TODO: Is this needed?
             matchListController.getMatches().setPrefHeight(200);
 
             infoGrid.add(matchListFXML, 0, 2);
@@ -100,20 +101,38 @@ public class InformationPanelController {
         }
     }
 
+    /**
+     * Set mainController. Important for accessing mainPipeline.
+     * @param mainController
+     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
 
+    /**
+     * Set analysisController. Important for making changes to analysisController layout based on actions from this class.
+     * Eg. when "Add to dataset" button is clicked.
+     * @param analysisController
+     */
     public void setAnalysisController(AnalysisController analysisController) {
         this.analysisController = analysisController;
         matchListController.setAnalysisController(analysisController);
     }
 
+    /**
+     * Handle function for "Add to dataset" button.
+     * Will replace information panel with upload to dataset panel.
+     */
     @FXML
     public void handleUpload() {
         analysisController.startDatasetUpload();
     }
 
+    /**
+     * Called when the used selects a different view from the dropdown menues in analysisController.
+     * Will change between view for information panel to view for matches.
+     * @param view
+     */
     public void setView(View view) {
         this.view = view;
         matchListController.setView(view);
@@ -137,41 +156,57 @@ public class InformationPanelController {
         }
     }
 
-    public MatchListController getMatchListController() {
-        return matchListController;
-    }
-
+    /**
+     * Set bone condition label
+     * @param boneCondition
+     */
     public void setBoneCondition(Uncertain<BoneCondition> boneCondition) {
 //        this.boneCondition.setText(boneCondition.getValue().getLabel());
 //        this.boneConditionConfidence.setText(boneCondition.getConfidence().toString());
     }
 
+    /**
+     * Called from analysisController on a change from a ImageExplorerController.
+     * Will make sure the informationPanel shows information related to the active explorer.
+     * @param active
+     */
     public void setActiveController(ImageExplorerController active) {
         this.setView(active.getView());
         this.activeController = active;
         this.matchListController.setActiveController(active);
     }
 
+
     public void subscribe() {
         MainPipeline mainPipeline = mainController.getMainPipeline();
         mainPipeline.getBoneCondition().subscribe(item -> {reportBoneCondition(item);});
     }
 
+
     public void reportBoneCondition(@NotNull Uncertain<BoneCondition> boneCondition) {
         this.setBoneCondition(boneCondition);
     }
 
-
+    /**
+     * Hide whole panel
+     */
     public void hide() {
         infoGrid.setVisible(false);
         infoGrid.setManaged(false);
     }
 
+    /**
+     * Show whole panel
+     */
     public void unhide(){
         infoGrid.setVisible(true);
         infoGrid.setManaged(true);
     }
 
+    /**
+     * Handle button for "Enhance image" checkbox
+     * Will set the active explorer to a preprocessed version of the image if selected.
+     */
     @FXML
     protected void usePreprocessed() {
         ImageSample currImage = activeController.getCurrentImage();

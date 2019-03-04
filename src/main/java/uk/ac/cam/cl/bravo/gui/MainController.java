@@ -37,6 +37,10 @@ public class MainController {
         this.stage = stage;
     }
 
+    /**
+     * Get main pipeline, responsible for supplying all child componenets with the same mainPipeline object.
+     * @return
+     */
     public MainPipeline getMainPipeline() {
         return this.mainPipeline;
     }
@@ -100,12 +104,19 @@ public class MainController {
         loadUpload();
     }
 
-
+    /**
+     * Getter for input image.
+     * @return
+     */
     public Image getInputImage() {
         return inputImage;
     }
 
 
+    /**
+     * Setter for input image.
+     * @param image
+     */
     public void setInputImage(Image image) {
         this.inputImage = image;
     }

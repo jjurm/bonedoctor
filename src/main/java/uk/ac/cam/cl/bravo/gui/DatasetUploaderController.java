@@ -28,11 +28,6 @@ public class DatasetUploaderController {
     private AnalysisController analysisController;
     private MainController mainController;
 
-    /**
-     * Constructor: initialises non-FXML-dependant elements.
-     * Call before launcher.
-     * */
-
     @FXML
     AnchorPane datasetUploadPane;
 
@@ -51,7 +46,10 @@ public class DatasetUploaderController {
     @FXML
     ImageView uploadedImageView;
 
-
+    /**
+     * Constructor: initialises non-FXML-dependant elements.
+     * Call before launcher.
+     * */
     public DatasetUploaderController(Stage stage){
         this.stage = stage;
     }
