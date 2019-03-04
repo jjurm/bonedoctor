@@ -212,8 +212,6 @@ public class InformationPanelController {
     }
 
 
-
-
     /**
      * Hide whole panel
      */
