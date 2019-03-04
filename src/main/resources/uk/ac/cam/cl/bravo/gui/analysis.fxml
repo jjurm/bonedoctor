@@ -122,8 +122,14 @@
          <children>
             <FlowPane alignment="CENTER">
                <children>
-                  <ComboBox fx:id="pane3choice" minHeight="30.0" onAction="#handleSelectViewPane3" promptText="- Select View -" />
-                  <Button alignment="CENTER" ellipsisString="Export" minHeight="30.0" mnemonicParsing="false" onAction="#handleSaveFile" text="Export" textAlignment="CENTER" />
+                  <ComboBox fx:id="pane3choice" minHeight="30.0" onAction="#handleSelectViewPane3" promptText="- Select View -">
+                     <FlowPane.margin>
+                        <Insets top="15.0" />
+                     </FlowPane.margin></ComboBox>
+                  <Button alignment="CENTER" ellipsisString="Export" minHeight="30.0" mnemonicParsing="false" onAction="#handleSaveFile" text="Export" textAlignment="CENTER">
+                     <FlowPane.margin>
+                        <Insets top="15.0" />
+                     </FlowPane.margin></Button>
                </children>
             </FlowPane>
          </children>

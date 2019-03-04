@@ -28,6 +28,11 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
     private final String outputNodeName = "dense_1/Sigmoid";
     private String graphDefFilename = "python/abnormality_classifier/BoneConditionClassifier.pb";
 
+    /**
+     * Given an image, performs inference using tensorflow and obtain output image tensor
+     * @param image image to perform inference on
+     * @return Uncertain object wrapping Bone Condition representing the output and its corresponding confidence.
+     */
     @Override
     @NotNull
     public Uncertain<BoneCondition> classify(@NotNull BufferedImage image) {
@@ -57,6 +62,11 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
         }
     }
 
+    /**
+     * The graph used to preprocess the input image and output a tensor float object
+     * @param image Image to preprocess
+     * @return Output float tensor object representing preprocessed image
+     */
     private Tensor<Float> preprocess(BufferedImage image) {
         byte[] imageBytes = bufferedImageToByteArray(image);
         try (Graph g = new Graph()) {
@@ -83,6 +93,11 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
         }
     }
 
+    /**
+     * Performs inference on the preprocessed input image
+     * @param input preprocessed input image in the form a float tensor
+     * @return predicted output array
+     */
     private Tensor<Float> predict(Tensor<Float> input) {
         byte[] graphDef = readAllBytesOrExit(Paths.get(graphDefFilename));
         Graph g = new Graph();
@@ -92,6 +107,12 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
         return output;
     }
 
+
+    /**
+     * Read bytes from files for getting graph def
+     * @param path path to graph def
+     * @return byte array of file read
+     */
     private static byte[] readAllBytesOrExit(Path path) {
         try {
             return Files.readAllBytes(path);
@@ -102,91 +123,4 @@ public class BoneConditionClassifierImpl implements BoneConditionClassifier {
         return null;
     }
 
-    /* testing
-
-    private static BoneCondition classify(Path imagePath) {
-        Tensor<Float> input = preprocess(imagePath);
-        Tensor<Float> output = predict(input);
-        float[][] result = new float[1][1];
-        output.copyTo(result);
-        System.out.println(result[0][0]);
-        return result[0][0] > 0.5 ? BoneCondition.ABNORMAL : BoneCondition.NORMAL;
-    }
-
-    private static Tensor<Float> predict(Tensor<Float> input) {
-        byte[] graphDef = readAllBytesOrExit(Paths.get("/Users/leonmlodzian/Desktop/uni/bonedoctor/python/abnormality_classifier/BoneConditionClassifier.pb"));
-        Graph g = new Graph();
-        g.importGraphDef(graphDef);
-        Session s = new Session(g);
-        Tensor<Float> output = s.runner().feed("densenet169_input", input).fetch("dense_1/Sigmoid").run().get(0).expect(Float.class);
-        return output;
-    }
-
-    private static Tensor<Float> preprocess(Path imagePath) {
-        byte[] imageBytes = readAllBytesOrExit(imagePath);
-        try (Graph g = new Graph()) {
-            GraphBuilder b = new GraphBuilder(g);
-            final int H = 320;
-            final int W = 320;
-            final float mean = 117f;
-            final float scale = 1f;
-            final Output<String> input = b.constant("input", imageBytes);
-            final Output<Float> output =
-                    b.div(
-                            b.sub(
-                                    b.resizeBilinear(
-                                            b.expandDims(
-                                                    b.cast(b.decodeJpeg(input, 3), Float.class),
-                                                    b.constant("make_batch", 0)),
-                                            b.constant("size", new int[] {H, W})),
-                                    b.constant("mean", mean)),
-                            b.constant("scale", scale));
-            try (Session s = new Session(g)) {
-                // Generally, there may be multiple output tensors, all of them must be closed to prevent resource leaks.
-                return s.runner().fetch(output.op().name()).run().get(0).expect(Float.class);
-            }
-        }
-    }
-
-
-    private static byte[] readAllBytesOrExit(Path path) {
-        try {
-            return Files.readAllBytes(path);
-        } catch (IOException e) {
-            System.err.println("Failed to read [" + path + "]: " + e.getMessage());
-            System.exit(1);
-        }
-        return null;
-    }
-
-    public static void main(String[] args) {
-        int abnormal = 0;
-        int normal = 0;
-        File[] files = new File ("/Users/leonmlodzian/Desktop/uni/Group Project/MURA-v1.1/train/XR_HAND").listFiles();
-        for (int i = 0; i < 50; i++) {
-            File[] f2 = new File(files[i].getAbsolutePath()).listFiles();
-            for (File file : f2) {
-                File[] f3 = new File(file.getAbsolutePath()).listFiles();
-                if (file.getAbsolutePath().endsWith("positive")) {
-                    System.out.println("Positive study");
-                } else if (file.getAbsolutePath().endsWith("negative")) {
-                    System.out.println("Negative study");
-                    continue;
-                } else {
-                    continue;
-                }
-                if (f3 == null || f3.length < 1) {
-                    continue;
-                }
-                BoneCondition bc = classify(Paths.get(f3[0].getAbsolutePath()));
-                if (bc == BoneCondition.ABNORMAL)
-                    abnormal++;
-                else
-                    normal++;
-            }
-        }
-        System.out.println("Number of positive images classified as ...");
-        System.out.println("abnormal: " + abnormal);
-        System.out.println("normal: " + normal);
-    }*/
 }
