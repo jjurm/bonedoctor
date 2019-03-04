@@ -154,8 +154,7 @@ The 'precision' argument also affects the 'Stopping trust region radius' of the 
 
 The goal of this stage is to help clinicians identify where a fracture could potentially be located. This was a part of our project that we originally dismissed as being too difficult to implement. However, after using the hashing approach to find matching images, we realised that it could be extented to highlight fractures. We do this by hashing each pixel and some parts of it's surroundings. In this way we can find pixels that do not have another similar pixel in an sample healthy images and highlight them. In some cases this works very well automatically but in others the user is required to do tune two parameters which define what is considered similar.
 
-<img src="https://github.com/jjurm/bonedoctor/blob/master/images/read/Screenshot%202019-02-13%20at%2017.17.11.png" width="300" height="300"/> 
-<img src="https://github.com/jjurm/bonedoctor/blob/master/images/read/Highlight.png" width="300" height="300"/> 
+<img src="https://github.com/jjurm/bonedoctor/blob/master/images/read/Screenshot%202019-02-13%20at%2017.17.11.png" width="300"/> <img src="https://github.com/jjurm/bonedoctor/blob/master/images/read/Highlight.png" width="300" /> 
 
 ## Authors
 
