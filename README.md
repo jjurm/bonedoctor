@@ -107,10 +107,20 @@ The image hasher class uses an implementation of the average hash perceptual has
 The pixel hashing approach was inspired by image hashing. Instead of taking an image as an input, we compared each pixel to its surrounding pixels and encoded the results of this comparison as a long. We did this in such a way that we could easily test for rotated versions of the same encoding were just bit shifts of each other and thus could easily be found. We also optimised the match search so that in the case where a match with a Hamming distance of $0$ was required, it would be found with a lookup into a hashmap instead of an iteration through all hashes.
 
 #### Stage 2
-
 ##### Primary Contributor: Kwot Sin Lee
+<img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter0.png" width="300" height="300"/>  <img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter2.png" width="300" height="300"/>
+
+*Figure 1: Original image input to find matching image.*
+
+*Figure 2: Visually closest image found based on cosine similarity*
 
 A precise image matching algorithm is created to further refine the matches obtained, based on visual similarity. As each image has a corresponding encoded image vector, we find the visual similarity amongst images by computing the cosine similarity between any two vectors. Through computing cosine similarity, we could compare how similar the image vectors are in the high dimensional space they are encoded in, with 1.0 being the best score and -1.0 being the worst (i.e. the two vectors are pointing in diametrically opposite directions).
+
+The above 2 images show a close match based on having the best cosine similarity of a select n images provided from the previous pipeline. The next image shows a bad example with the lowest cosine similarity **despite being in the same cluster**. Thus, using cosine similarity is a good indicator of compute visual similarity of images using their feature vectors.
+
+<img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter1.png" width="300" height="300"/>
+
+*Figure 3: Bad matching image in the same cluster due to low cosine similarity score*
 
 ### 5. Overlaying of Images
 
