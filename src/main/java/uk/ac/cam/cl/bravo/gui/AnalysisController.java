@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
@@ -119,6 +120,9 @@ public class AnalysisController {
      */
     public void setPaneImage(GridPane pane, ImageSample imgFile, View view, boolean usePreProcessed) {
         try {
+            if (pane.getChildren().size()>1)
+                pane.getChildren().remove(1);
+
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
             imageExplorerController = new ImageExplorerController(stage, view, pane);
@@ -171,7 +175,6 @@ public class AnalysisController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -368,9 +371,12 @@ public class AnalysisController {
      */
     @FXML
     public void showTrans() {
-
 //        BufferedImage buffImg = mainController.getMainPipeline().getImageToOverlay().onNext(activeExplorerController.getCurrentImage());
 //        Image img = SwingFXUtils.toFXImage(buffImg, null);
 //        setPaneImage(activeExplorerController.getCurrentPane(), img, View.NORMAL_OVER);
+    }
+
+    public void setLoadingText() {
+        this.pane2.getChildren().add(new Label("Loading matches..."));
     }
 }

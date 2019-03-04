@@ -38,3 +38,12 @@
 .label {
   -fx-text-fill: white;
 }
+
+.text {
+    -fx-text-fill: white;
+}
+
+#datasetUploadPane {
+ -fx-border-width: 2px;
+ -fx-border-color: black;
+}

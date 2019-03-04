@@ -63,6 +63,7 @@ public class MainController {
             // Child controller actions
             analysisController.setMainController(this);
             analysisController.setPaneImage(analysisController.pane1, img, View.INPUT);
+            analysisController.setLoadingText();
             analysisController.showThirdExplorer(false);
             analysisController.launch();
 

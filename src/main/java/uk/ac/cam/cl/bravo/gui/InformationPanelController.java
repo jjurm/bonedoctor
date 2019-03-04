@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.bravo.gui;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.BoneCondition;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline;
+import uk.ac.cam.cl.bravo.pipeline.Rated;
 import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 import javafx.scene.control.CheckBox;
 
@@ -96,6 +98,7 @@ public class InformationPanelController {
             matchListController.setMainController(mainController);
             matchListController.launch();
             setView(View.INPUT);
+            subscribe();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -157,12 +160,20 @@ public class InformationPanelController {
     }
 
     /**
+     * Threading function, makes sure UI calls don't interfere with mainPipeline.
+     * @param boneCondition
+     */
+    private void startUIChange(Uncertain<BoneCondition> boneCondition) {
+        Platform.runLater(() -> setBoneCondition(boneCondition));
+    }
+
+    /**
      * Set bone condition label
      * @param boneCondition
      */
     public void setBoneCondition(Uncertain<BoneCondition> boneCondition) {
-//        this.boneCondition.setText(boneCondition.getValue().getLabel());
-//        this.boneConditionConfidence.setText(boneCondition.getConfidence().toString());
+        this.boneCondition.setText(boneCondition.getValue().getLabel());
+        this.boneConditionConfidence.setText(boneCondition.getConfidence().toString());
     }
 
     /**
@@ -179,13 +190,9 @@ public class InformationPanelController {
 
     public void subscribe() {
         MainPipeline mainPipeline = mainController.getMainPipeline();
-        mainPipeline.getBoneCondition().subscribe(item -> {reportBoneCondition(item);});
+        mainPipeline.getBoneCondition().subscribe(item -> {startUIChange(item);});
     }
 
-
-    public void reportBoneCondition(@NotNull Uncertain<BoneCondition> boneCondition) {
-        this.setBoneCondition(boneCondition);
-    }
 
     /**
      * Hide whole panel
