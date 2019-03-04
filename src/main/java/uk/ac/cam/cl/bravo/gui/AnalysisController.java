@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
@@ -290,6 +291,7 @@ public class AnalysisController {
             }
         } else if (choice.equals(View.INPUT.HIGHLIGHT)){
             setPaneImage(pane3, SwingFXUtils.toFXImage(highlightedImage, null), choice);
+            informationPanelController.setView(View.HIGHLIGHT);
         }
     }
 
