@@ -78,7 +78,7 @@ Finally, in order to know what cluster an image belongs to, we perform inference
 
 ##### Primary Contributor: Leon Mlodzian
 
-<img src="https://github.com/jjurm/bonedoctor/blob/master/python/abnormality_classifier/image1.png width="500" height="400"/>
+<img src="https://github.com/jjurm/bonedoctor/blob/master/python/abnormality_classifier/image1.png" width="250" height="400"/>
 
 A binary classification model was built using Keras to distinguish normal and abnormal X-ray images. The model used in the MURA paper (2017 Rajpurkar et al.) was implemented, the main component of which was a 169-layer DenseNet (2016 Huang et al.). The final layer of the DenseNet was replaced by a single-output fully connected layer with a sigmoid activation function. The model was trained using the Adam optimizer with a learning rate of 0.0001. The loss function used was weighted binary crossentropy. Training was performed via Google Colab, a free cloud computing service with GPU support. Due to the associated RAM constraint of around 12 GB, each bodypart had to be trained on individually, one after the other. The GPU memory contraint allowed for a batch size of 11. 3 epochs were run for each bodypart's subset of the MURA dataset before moving on to the next bodypart. 6 of these "bodypart-wise" iterations through the MURA dataset were performed essentially yielding 18 epochs of training in total on the entire dataset. The model was then evaluated on the validation dataset and achieved an accuracy of 70.2%. 
 
