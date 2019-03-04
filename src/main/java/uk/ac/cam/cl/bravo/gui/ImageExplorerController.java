@@ -10,6 +10,12 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 
+/**
+ *  Controls the operation (zoom, pan) and contains state about an image the user is "exploring".
+ *  Is loaded from AnalysisController.
+ *
+ *  A new ImageExplorerController is created when we change the image we want to display in one of the image panes.
+ */
 public class ImageExplorerController {
 
     private static final int MIN_PIXELS = 10;
@@ -29,17 +35,25 @@ public class ImageExplorerController {
     @FXML
     private ImageView imageView;
 
-
+    /**
+     * Constructor: initialises non-FXML-dependant elements.
+     * Call before launcher.
+     * */
     public ImageExplorerController(Stage stage, View view, GridPane pane) {
         this.stage = stage;
         this.view = view;
         this.pane = pane;
     }
 
+
     public void setImageSample(ImageSample image) {
         this.image = image;
     }
 
+    /**
+     * Puts the input image into a viewframe, and defines the necessary scroll to zoom, drag to pan functions.
+     * @param userInImg
+     */
     public void setImage(Image userInImg) {
         width = userInImg.getWidth();
         height = userInImg.getHeight() + 100;
@@ -124,13 +138,22 @@ public class ImageExplorerController {
     }
 
 
-    // reset to the top left:
+    /**
+     * Reset image to full size, no zoom no panning.
+     * @param imageView
+     * @param width
+     * @param height
+     */
     private void reset(ImageView imageView, double width, double height) {
         imageView.setViewport(new Rectangle2D(0, 0, width, height));
     }
 
-    // shift the viewport of the imageView by the specified delta, clamping so
-    // the viewport does not move off the actual image:
+    /**
+     * Shift the viewport of the imageView by the specified delta, clamping so
+     * the viewport does not move off the actual image
+     * @param imageView
+     * @param delta
+     */
     private void shift(ImageView imageView, Point2D delta) {
         Rectangle2D viewport = imageView.getViewport();
 
@@ -146,6 +169,13 @@ public class ImageExplorerController {
         imageView.setViewport(new Rectangle2D(minX, minY, viewport.getWidth(), viewport.getHeight()));
     }
 
+    /**
+     * Normal clamp function
+     * @param value
+     * @param min
+     * @param max
+     * @return
+     */
     private double clamp(double value, double min, double max) {
 
         if (value < min)
@@ -155,6 +185,12 @@ public class ImageExplorerController {
         return value;
     }
 
+    /**
+     * Converts coordinates in imageView to coordinates in image
+     * @param imageView
+     * @param imageViewCoordinates
+     * @return A Point2D
+     */
     private Point2D imageViewToImage(ImageView imageView, Point2D imageViewCoordinates) {
         double xProportion = imageViewCoordinates.getX() / imageView.getBoundsInLocal().getWidth();
         double yProportion = imageViewCoordinates.getY() / imageView.getBoundsInLocal().getHeight();
@@ -165,26 +201,52 @@ public class ImageExplorerController {
                 viewport.getMinY() + yProportion * viewport.getHeight());
     }
 
+    /**
+     * Set analysisController, used when ImageExplorer is loaded.
+     * Important for setting the active explorer in analysisController.
+     * @param analysisController
+     */
     public void setAnalysisController(AnalysisController analysisController){
         this.analysisController = analysisController;
     }
 
-    public void setActiveExplorer() {
+    /**
+     * Set activeExplorer in analysisController.
+     * Used to determine which image the user wants to interact with,
+     * and which information is shown in informationpanel.
+     */
+    private void setActiveExplorer() {
         analysisController.setActiveExplorer(this);
     }
 
+    /**
+     * Getter for view state
+     * @return view state
+     */
     public View getView() {
         return view;
     }
 
+    /**
+     * Set the main controller. Important to access the mainpipeline.
+     * @param mainController
+     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
     }
 
+    /**
+     * Getter for image state
+     * @return image state
+     */
     public ImageSample getCurrentImage() {
         return this.image;
     }
 
+    /**
+     * Getter for pane state
+     * @return pane state
+     */
     public GridPane getCurrentPane() {
         return this.pane;
     }

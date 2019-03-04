@@ -46,7 +46,10 @@ public class DatasetUploaderController {
     @FXML
     ImageView uploadedImageView;
 
-
+    /**
+     * Constructor: initialises non-FXML-dependant elements.
+     * Call before launcher.
+     * */
     public DatasetUploaderController(Stage stage){
         this.stage = stage;
     }

@@ -19,6 +19,10 @@ import uk.ac.cam.cl.bravo.pipeline.Rated;
 
 import java.util.*;
 
+/**
+ * Displays the list of matches. Loaded from InformationPanelController.
+ * Responsible for loading list of matches from the pipeline.
+ */
 public class MatchListController {
 
     @FXML
@@ -29,17 +33,30 @@ public class MatchListController {
 
     private View view;
     private MainController mainController;
+    private ImageExplorerController activeController;
 
+    /**
+     * Constructor: initialises non-FXML-dependant elements.
+     * Call before launcher.
+     * */
     public MatchListController(Stage stage) {
         this.stage = stage;
 
     }
 
+    /**
+     * Resets the list of matches when a new view is selected. May not be needed after we removed Abnormal matches.
+     * @param view
+     */
     public void setView(View view) {
         this.view = view;
         launch();
     }
 
+    /**
+     * Launcher. Initializes FXML dependant elements.
+     * Called after constructor.
+     */
     public void launch() {
         // ------ CREATE SCROLLABLE LIST VIEW --------
 
@@ -47,17 +64,27 @@ public class MatchListController {
 
         return;
     }
+    //TODO: Change bc of pipeline
 
+    /**
+     * Threading function, makes sure UI calls don't interfere with mainPipeline.
+     * @param normals
+     */
     private void startUIChange(List<Rated<ImageSample>> normals) {
         Platform.runLater(() -> createMatchList(normals));
     }
+    //TODO: Change bc of pipeline
 
+    /**
+     * Creates the listview, populated by the list of normal images.
+     * @param normals
+     */
     private void createMatchList(List<Rated<ImageSample>> normals) {
 
 
         analysisController.setNormalList(normals);
         ObservableList<String> list = FXCollections.observableArrayList();
-        for (Rated<ImageSample> r: normals){
+        for (Rated<ImageSample> r: normals){ // TODO: Change bc of pipeline
             list.add(r.getValue().getPath());
         }
 
@@ -79,6 +106,7 @@ public class MatchListController {
                     setGraphic(null);
                 } else {
 //                    matchView.setImage(normals.get(getIndex()));
+                    //TODO: Change bc of pipeline
                     Image img = SwingFXUtils.toFXImage(normals.get(getIndex()).getValue().loadImage(), null);
                     matchView.setImage(img);
                     setText(name);
@@ -97,31 +125,57 @@ public class MatchListController {
             int index = matches.getSelectionModel().getSelectedIndex();
 
             ImageSample img = normals.get(index).getValue();
-            analysisController.setPaneImage(analysisController.pane2, img, View.NORMAL);
+            analysisController.setPaneImage(activeController.getCurrentPane(), img, activeController.getView(), false);
 
         });
     }
 
+    /**
+     * Sets analysisController. Important for handing over the list of matches once it is loaded from the pipeline.
+     * @param analysisController
+     */
     public void setAnalysisController(AnalysisController analysisController) {
         this.analysisController = analysisController;
     }
 
+    /**
+     * Returns root component of the matchlist FXML.
+     * @return
+     */
     public ListView getMatches() {
         return this.matches;
     }
 
-
+    /**
+     * Hide list of matches
+     */
     public void hide() {
         matches.setManaged(false);
         matches.setVisible(false);
     }
 
+    /**
+     * Show list of matches
+     */
     public void show() {
         matches.setManaged(true);
         matches.setVisible(true);
     }
 
+    /**
+     * Sets main controller. Called from Information panel. Important for accessing the main pipeline.
+     * @param mainController
+     */
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+    }
+
+    /**
+     * Set activeController. Called from information panel.
+     * Important for knowing which panel to update once a different match is selected from the list.
+     * @param activeController
+     */
+    public void setActiveController(ImageExplorerController activeController) {
+        this.activeController = activeController;
     }
 }

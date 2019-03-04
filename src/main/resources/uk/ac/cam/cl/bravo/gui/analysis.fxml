@@ -6,7 +6,9 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+
 
 <GridPane fx:id="grid" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
@@ -19,9 +21,10 @@
   <rowConstraints>
     <RowConstraints minHeight="30.0" vgrow="ALWAYS" />
     <RowConstraints minHeight="150.0" vgrow="ALWAYS" />
-      <RowConstraints minHeight="200.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="250.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
+      <HBox prefHeight="100.0" prefWidth="200.0" />
       <GridPane fx:id="pane1" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.vgrow="ALWAYS">
          <children>
             <FlowPane id="flow-pane" alignment="CENTER" prefHeight="200.0" prefWidth="200.0">
