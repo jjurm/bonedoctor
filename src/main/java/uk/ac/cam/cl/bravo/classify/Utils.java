@@ -11,6 +11,11 @@ import java.nio.file.Files;
 import java.util.Map;
 
 public class Utils {
+    /**
+     * Computes mean of the feature vector
+     * @param feat feature vector to be computed on
+     * @return double representing the mean of the feature vector
+     */
     public static double computeMean(float[] feat){
         double mean = 0.0;
 
@@ -21,6 +26,13 @@ public class Utils {
         return mean/feat.length;
     }
 
+
+    /**
+     * Computes the standard deviation of the feature vector
+     * @param feat Feature vector to be computed for std
+     * @param mean mean of the feature vector, if it's previously computed
+     * @return standard deviation of the feature vector
+     */
     public static double computeStd(float[] feat, double mean){
         double std = 0.0;
 
@@ -33,6 +45,11 @@ public class Utils {
         return std;
     }
 
+
+    /**
+     * Perform standardization of the feature vector. In-place modification of vector for space efficiency.
+     * @param feat feature vector to compute standardization on
+     */
     public static void standardize(float[] feat){
         double mean = computeMean(feat);
         double std = computeStd(feat, mean);
@@ -41,6 +58,7 @@ public class Utils {
             feat[i] = (float) ((feat[i] - mean) / std);
         }
     }
+
 
     /**
      * Function to compute the euclidean distance between two float arrays, for finding to which centroid the current
@@ -59,6 +77,13 @@ public class Utils {
         return Math.sqrt(ret);
     }
 
+
+    /**
+     * Computes the L1 distance of two different feature vectors
+     * @param feat0 feature vector A for comparison
+     * @param feat1 feature vector B for comparison
+     * @return double representing the L1/Manhattan distance of the 2 feature vectors.
+     */
     public static double computeL1Distance(float[] feat0, float[] feat1){
         double ret = 0.0;
 
@@ -71,9 +96,11 @@ public class Utils {
 
     /**
      * Computes cosine similarity based on the formula (A dot B) / (norm(A) * norm(B))
+     * The maximum score is 1.0, which represent two feature vectors are most similar, and -1.0 representing the
+     * vectors are most dissimilar.
      * @param feat0
      * @param feat1
-     * @return
+     * @return the cosine similarity between two feature vectors.
      */
     public static double computeCosineSimilarity(float[] feat0, float[] feat1){
         double dotProduct = 0.0;
@@ -91,6 +118,7 @@ public class Utils {
 
         return dotProduct / (norm0 * norm1);
     }
+
 
     /**
      * Assesses the confidence of the label produced given the distance to each cluster centroid mean features
@@ -126,6 +154,11 @@ public class Utils {
     }
 
 
+    /**
+     * Helper function converting a buffered image to byte array for inference later
+     * @param image image to be converted to byte array
+     * @return byte array representation of the image
+     */
     protected static byte[] bufferedImageToByteArray(BufferedImage image){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -141,6 +174,11 @@ public class Utils {
     }
 
 
+    /**
+     * Read byte array from file
+     * @param filename filename with byte array
+     * @return byte array of file read
+     */
     protected static byte[] readBytesFromFile(String filename){
         try{
             return Files.readAllBytes(new File(filename).toPath());
