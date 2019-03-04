@@ -99,14 +99,14 @@ class MainPipeline {
     private val nPreciseSimilarImages = Observable.just(4)
 
     companion object {
-        const val PROGRESS_PREPROCESSING = 0
+        const val PROGRESS_PREPROCESSING = 0.3
     }
 
     // ===== COMPONENTS =====
 
     private val progress0: Subject<Double> = BehaviorSubject.createDefault(0.0)
 
-    private val preprocessor: ImagePreprocessor = ImagePreprocessorI { progress0.onNext(it * 0.2) }
+    private val preprocessor: ImagePreprocessor = ImagePreprocessorI { progress0.onNext(it * PROGRESS_PREPROCESSING) }
     private val boneConditionClassifier: BoneConditionClassifier = BoneConditionClassifierImpl()
     private val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl()
     private val imageMatcher: ImageMatcher = ImageMatcherImpl.getImageMatcher(File(Dataset.IMAGE_MATCHER_FILE))
@@ -170,7 +170,7 @@ class MainPipeline {
             .observeOn(Schedulers.newThread())
             .map(preprocessor::preprocess.withTag("Preprocessing"))
             .withCache()
-        preprocessed.doneMeans(0.2, "Classifying bone condition")
+        preprocessed.doneMeans(PROGRESS_PREPROCESSING, "Classifying bone condition")
 
         val preprocessedVal = preprocessed.map(Uncertain<BufferedImage>::value)
 
@@ -247,6 +247,7 @@ class MainPipeline {
                 }.toList()
             }
             .withCache()
+        similarWithOverlays.doneMeans(1.0, "Similar images found")
 
         val bestMatch =
             similarNormal

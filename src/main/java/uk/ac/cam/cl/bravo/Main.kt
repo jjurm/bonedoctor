@@ -54,7 +54,7 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
 
     val pipeline = MainPipeline()
 
-    pipeline.status.subscribe(::println)
+    pipeline.status.subscribe({status -> println("Status: $status")})
     pipeline.preprocessed.subscribe { DisplayImage(it.value, "Preprocessed (confidence: ${it.confidence})") }
     pipeline.boneCondition.subscribe { println("BoneCondition: ${it.value}, confidence: ${it.confidence}") }
 
