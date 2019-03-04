@@ -75,6 +75,7 @@ class MainPipeline {
     /** Classified BoneCondition, taking the 'preprocessed' image as the input */
     val boneCondition: Observable<Uncertain<BoneCondition>>
 
+    @Deprecated("use similarWithOverlays instead")
     val similarNormal: Observable<List<Rated<ImageSample>>>
 
     /**
