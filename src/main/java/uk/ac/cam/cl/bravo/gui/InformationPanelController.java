@@ -115,7 +115,7 @@ public class InformationPanelController {
     }
 
     public void setBoneCondition(Uncertain<BoneCondition> boneCondition) {
-//        this.boneCondition.setText(boneCondition.getValue().getLabel());
+// TODO:       this.boneCondition.setText(boneCondition.getValue().getLabel());
 //        this.boneConditionConfidence.setText(boneCondition.getConfidence().toString());
     }
 
