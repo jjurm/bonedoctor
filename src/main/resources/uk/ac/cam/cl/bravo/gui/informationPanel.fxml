@@ -47,7 +47,7 @@
                   <Insets top="5.0" />
                </padding>
             </Label>
-            <Label fx:id="boneConditionConfidence" text="Calculatin" textFill="WHITE">
+            <Label fx:id="boneConditionConfidence" text="Calculating..." textFill="WHITE">
                <font>
                   <Font size="18.0" />
                </font>
