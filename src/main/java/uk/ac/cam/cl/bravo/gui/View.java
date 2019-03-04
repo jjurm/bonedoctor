@@ -1,7 +1,7 @@
 package uk.ac.cam.cl.bravo.gui;
 
 enum View {
-    INPUT("Input Image"), NORMAL("Best Match"), NORMAL_OVER("Overlay");
+    INPUT("Input Image"), NORMAL("Best Match"), NORMAL_OVER("Overlay"), HIGHLIGHT("Highlight irregularities");
 
     private final String string;
 

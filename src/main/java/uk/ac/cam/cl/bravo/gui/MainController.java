@@ -104,7 +104,6 @@ public class MainController {
         return inputImage;
     }
 
-
     public void setInputImage(Image image) {
         this.inputImage = image;
     }
