@@ -87,6 +87,7 @@ public class InformationPanelController {
         try {
             addToDatasetButton.setOnAction(event -> handleUpload());
             preprocessedCheckBox.setOnAction(event -> usePreprocessed());
+            gradient.setOnDragDone(e -> mainController.getMainPipeline().getHighlightGradient().onNext(gradient.getValue()));
 
             // Initialize controller
             FXMLLoader matchListLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/matchList.fxml"));
@@ -174,7 +175,6 @@ public class InformationPanelController {
             highlightFlow.setManaged(true);
             highlightFlow.setVisible(true);
             gradient.setVisible(true);
-            gradient.setOnDragDone(e -> mainController.getMainPipeline().getHighlightGradient().onNext(gradient.getValue()));
         }
     }
 
