@@ -28,18 +28,16 @@ Pre-processing is a prerequisite for running the application and consists of the
 
 ##### Primary Contributor: Ane K Espeseth
 
-Using requirements analysis, we arrived at a minimum set of features that needed to be implemented. These include:
+Using requirements analysis, we have arrived at a minimum set of features that need to be implemented. These include: 
 * X-Ray selection screen: Select an image from the local computer to start the analysis and image matching process. 
 * X-Ray analysis result screen: Display the analysis result (normal/abnormal or broken/not broken), a confidence level, and the best matching case from the data set. 
-* X-Ray discovery, comparison and inspection panels: Explore the uploaded image (original/pre-processed), the matching X-Ray (side by side/overlay), and the other top image matches (list of images - new selected image replaces the top match in the inspection pane). Zooming and panning functions.
-* Image export options: Export image resulting from one or more of the back-end image processing tools - the original image pre-processed for better bone visibility, or one of the image matches.
+* X-Ray discovery, comparison and inspection screen: Explore the uploaded image (original/pre-processed), the matching X-Ray (side by side/overlay), and the other top image matches (list of images - new selected image replaces the top match in the inspection pane). Zooming and panning functions. This has now been merged together with the result analysis screen. 
+* Image export screen: Export image resulting from one or more of the back-end image processing tools - the original image pre-processed for better bone visibility, a side by side comparison of X-Rays or overlaid images. 
 * New data set item upload screen:  Add a new X-Ray image together with a case file / other relevant files which can be helpful to the user. Selection menus for parameters which will aid the algorithms' searches, most importantly which body part is displayed.
 
 JavaFx has been used to create the various components of the user interface, enabling rearrangement or elements for rough prototyping, and detailed CSS styling of elements for the later stages of the process.  
 
-The main user interface for our product contains an image display for the user input image. Here the user can zoom and pan around the image for exploration. The image information (including analysis results and confidence) and options - for uploading to the dataset or viewing the processed image - will also be available below in a separate "information panel". To the left of the input image display, the user can choose to add another image exploration screen for convenient image comparison. For each exploration screen they can select which category of images they want to be displayed - Input, Best Match, Overlay (functionality not implemented) or Highlight Irregularities. Furthermore, if a Best Match option is selected, the user can pick their desired image in that category, from a list of the highest scoring matches.
-
-To see the information panel for the image pane you want to interact with, click on the image, or select a new view from the drop down menu.
+The main user interface for our product contains an image display for the user input image. Here the user can zoom and pan around the image for exploration. The image information (including analysis results and confidence) and options - for uploading to the dataset or exporting the processed image - will also be available below in a separate frame. In the image frame is a button that allows the user to switch between the original input image and the one enhanced by pre-processing. To the left of the input image display, the user can choose to add up to two more image exploration screens for convenient image comparison. Here they can select which category of images they want to be displayed - Input, Best Match Normal, Best Match Abnormal, Overlay Input/Normal or Overlay Input/Abnormal. Furthermore, if a Best Match option is selected, the user can pick their desired image in that category in the action frame below, from a list of the highest scoring matches. 
 
 ## How Does it Work?
 
@@ -64,7 +62,14 @@ By using the histogram of colours within the hull a black threshold - the colour
 
 After this stage a black band is constructed on the convex hull from the edge detection phase. The image is cropped by removing rows and columns from the edges of the image that are completely black (grey-scale value of 0).
 
+
 ### 2. Clustering of Images
+<img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/cluster0.png" width="400" height="400"/>     |||     <img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/cluster1.png" width="400" height="400"/>
+
+*Figure 1: Cluster label 0 images with mostly flat hand images.*
+
+*Figure 2: Cluster label 1 images with mostly curved hand images.*
+
 
 ##### Primary Contributor: Kwot Sin Lee
 
@@ -72,7 +77,7 @@ In order to facilitate the downstream processing of the images for greater perfo
 
 An InceptionV3 network is used to act as an image encoder that takes in an image and produce high level features of the image. This helps to extract the most significant features and represent them in a vector form suitable for clustering. Congruent with standard research practice, we first use model weights pre-trained on the ImageNet dataset for object recognition, which gives us a model capable of understanding high level features such as edges, colours and textures. Subsequently, for each input image,  take the mixed_10 layer output of the network, and ignore the last fully-connected layer output. This produces a _8 x 8 x 2048_ shaped output tensor, which we subsequently reshape into a vector of shape _131072 x 1_ representing the high level features of this one image.
 
-Through performing this inference step for all images, we effectively obtain an _(N,M)_ matrix, where _N_ represents the number of all images used and _M = 131072_ represents the dimensions of each feature vector. Standard K-means clustering is then applied to cluster this feature matrix, producing 2 distinct clusters (see Figure 1 and Figure 2 in test results).
+Through performing this inference step for all images, we effectively obtain an _(N,M)_ matrix, where _N_ represents the number of all images used and _M = 131072_ represents the dimensions of each feature vector. Standard K-means clustering is then applied to cluster this feature matrix, producing 2 distinct clusters (see cluster figures above).
 
 Finally, in order to know what cluster an image belongs to, we perform inference on the image to extract its high level features and compare the L2 distance to the centroids of the clusters obtained. The closest L2 distance to one cluster label will determine which set of images the new image belongs to.
 
@@ -83,9 +88,9 @@ Finally, in order to know what cluster an image belongs to, we perform inference
 <img src="https://github.com/jjurm/bonedoctor/blob/master/python/abnormality_classifier/image1.png" width="300" height="400"/>
 <i>Abnormal X-ray image example</i>
 
-A binary classification model was built using Keras to distinguish normal and abnormal X-ray images. The model used in the MURA paper (2017 Rajpurkar et al.) was implemented, the main component of which was a 169-layer DenseNet (2016 Huang et al.). The final layer of the DenseNet was replaced by a single-output fully connected layer with a sigmoid activation function. The model was trained using the Adam optimizer with a learning rate of 0.0001. The loss function used was weighted binary crossentropy. Training was performed via Google Colab, a free cloud computing service with GPU support. Due to the associated RAM constraint of around 12 GB, each bodypart had to be trained on individually, one after the other. The GPU memory contraint allowed for a batch size of 11. 3 epochs were run for each bodypart's subset of the MURA dataset before moving on to the next bodypart. 6 of these "bodypart-wise" iterations through the MURA dataset were performed essentially yielding 18 epochs of training in total on the entire dataset. The model was then evaluated on the validation dataset and achieved an accuracy of 70.2%. 
+A binary classification model was built in Python using Keras to distinguish normal and abnormal X-ray images. The model used in the MURA paper (2017 Rajpurkar et al.) was implemented, the main component of which was a 169-layer DenseNet (2016 Huang et al.). The final layer of the DenseNet was replaced by a single-output fully connected layer with a sigmoid activation function. Some experimentation was done with training parameters like learning rate, number of epochs, batch size etc. The parameters that yielded the best results are as follows. The model was initialised with pre-trained weights from the ImageNet dataset. The model was trained using the Adam optimizer with a learning rate of 0.0001. The loss function used was weighted binary crossentropy. Training was performed via Google Colab, a free cloud computing service with GPU support. Due to the associated RAM constraint of around 12 GB, each bodypart had to be trained on individually, one after the other. The GPU memory constraint allowed for a batch size of 11. 3 epochs were run for each bodypart's subset of the MURA dataset before moving on to the next bodypart. 6 of these "bodypart-wise" iterations through the MURA dataset were performed essentially yielding 18 epochs of training in total on the entire dataset. The model was then evaluated on the validation dataset and achieved an accuracy of 70.2%.
 
-A binary classification model was built using Keras to distinguish normal and abnormal X-ray images. The model used in the MURA paper (2017 Rajpurkar et al.) was implemented, the main component of which was a 169-layer DenseNet (2016 Huang et al.). The final layer of the DenseNet was replaced by a single-output fully connected layer with a sigmoid activation function. Python scripts were written to load the dataset and labels, initialise the model with pre-trained weights based on the ImageNet dataset, carry out the training and save the results. In order to integrate the classifier written in Python into the main Java project the following was done. A Python script was used to convert the TensorFlow graph associated with the trained model into a protobuf file, from which the TensorFlow graph can be reconstructed by Java at runtime. Reconstruction of the graph and classification of a new image using the graph in Java were implemented.
+In order to integrate the model built and trained in Python into the Java pipeline the following was done. The TensorFlow graph associated with the model was frozen in Python yielding a Protobuf file. The TensorFlow Java API was used in the pipeline to reconstruct the model's graph at runtime from the Protobuf file, feed an input image through it and fetch the classification result.
 
 ### 4. Searching for Matching Images
 
@@ -102,10 +107,22 @@ The image hasher class uses an implementation of the average hash perceptual has
 The pixel hashing approach was inspired by image hashing. Instead of taking an image as an input, we compared each pixel to its surrounding pixels and encoded the results of this comparison as a long. We did this in such a way that we could easily test for rotated versions of the same encoding were just bit shifts of each other and thus could easily be found. We also optimised the match search so that in the case where a match with a Hamming distance of $0$ was required, it would be found with a lookup into a hashmap instead of an iteration through all hashes.
 
 #### Stage 2
-
 ##### Primary Contributor: Kwot Sin Lee
+<img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter0.png" width="300" height="300"/>  <img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter2.png" width="300" height="300"/>
+
+*Figure 1: Original image input to find matching image.*
+
+*Figure 2: Visually closest image found based on cosine similarity*
 
 A precise image matching algorithm is created to further refine the matches obtained, based on visual similarity. As each image has a corresponding encoded image vector, we find the visual similarity amongst images by computing the cosine similarity between any two vectors. Through computing cosine similarity, we could compare how similar the image vectors are in the high dimensional space they are encoded in, with 1.0 being the best score and -1.0 being the worst (i.e. the two vectors are pointing in diametrically opposite directions).
+
+The above 2 images show a close match based on having the best cosine similarity of a select n images provided from the previous pipeline. The next image shows a bad example with the lowest cosine similarity **despite being in the same cluster**. Thus, using cosine similarity is a good indicator of compute visual similarity of images using their feature vectors.
+
+<img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter1.png" width="300" height="300"/>
+
+*Figure 3: Bad matching image in the same cluster due to low cosine similarity score*
+
+To optimize the inference of the graph, TensorFlow's graph transform tool is then used to optimize matrix operations like fusing batch normalisation layers with convolution layers into a single operation.
 
 ### 5. Overlaying of Images
 
@@ -137,7 +154,9 @@ The 'precision' argument also affects the 'Stopping trust region radius' of the 
 
 ##### Primary Contributor: Shehab Alshehabi
 
-The goal of this stage is to help clinicians identify where a fracture could potentially be located. This was a part of our project that we originally dismissed as being too difficult to implement. However, after using the hashing approach to find matching images, we realised that it could be extented to highlight fractures. We do this by hashing each pixel and some parts of it's surroundings. In this way we can find pixels that do not have another similar pixel in an sample healthy images and highlight them. In some cases this works very well automatically but in others the user is required to do tune two parameters which define what is considered similar. As the highlights can be recomputed in less than a second, we believe that the flexibility of this approach gives the user the ability to maximise the usefulness of the program.
+The goal of this stage is to help clinicians identify where a fracture could potentially be located. This was a part of our project that we originally dismissed as being too difficult to implement. However, after using the hashing approach to find matching images, we realised that it could be extented to highlight fractures. We do this by hashing each pixel and some parts of it's surroundings. In this way we can find pixels that do not have another similar pixel in an sample healthy images and highlight them. In some cases this works very well automatically but in others the user is required to do tune two parameters which define what is considered similar.
+
+<img src="https://github.com/jjurm/bonedoctor/blob/master/images/read/Screenshot%202019-02-13%20at%2017.17.11.png" width="300"/> <img src="https://github.com/jjurm/bonedoctor/blob/master/images/read/Highlight.png" width="300" /> 
 
 ## Authors
 
