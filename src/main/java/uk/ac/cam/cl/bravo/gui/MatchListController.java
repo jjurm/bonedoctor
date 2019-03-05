@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 import uk.ac.cam.cl.bravo.pipeline.Rated;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -61,7 +62,6 @@ public class MatchListController {
         // ------ CREATE SCROLLABLE LIST VIEW --------
 
         mainController.getMainPipeline().getSimilarNormal().subscribe(normals -> startUIChange(normals));
-
         return;
     }
     //TODO: Change bc of pipeline
@@ -81,12 +81,13 @@ public class MatchListController {
      */
     private void createMatchList(List<Rated<ImageSample>> normals) {
 
-        String matchConf = "High";
 
         analysisController.setNormalList(normals);
         ObservableList<String> list = FXCollections.observableArrayList();
         for (Rated<ImageSample> r: normals){ // TODO: Change bc of pipeline
-            list.add("Patient: " + Integer.toString(r.getValue().getPatient()) + "  Match Confidence: " + matchConf);
+            double score = ((r.getScore() * -1.0) + 1)*100/2 ;
+            String matchConf = new DecimalFormat("#.#").format(score);
+            list.add("Patient: " + r.getValue().getPatient() + "  Match Confidence: " + matchConf + "%");
         }
 
         matches.setItems(list);
