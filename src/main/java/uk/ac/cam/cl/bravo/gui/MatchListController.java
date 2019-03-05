@@ -81,7 +81,7 @@ public class MatchListController {
      */
     private void createMatchList(List<Rated<ImageSample>> normals) {
 
-        String matchConf = "High"";
+        String matchConf = "High";
 
         analysisController.setNormalList(normals);
         ObservableList<String> list = FXCollections.observableArrayList();
