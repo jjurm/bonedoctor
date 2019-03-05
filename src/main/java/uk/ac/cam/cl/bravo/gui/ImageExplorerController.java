@@ -56,7 +56,7 @@ public class ImageExplorerController {
      */
     public void setImage(Image userInImg) {
         width = userInImg.getWidth();
-        height = userInImg.getHeight() + 100;
+        height = userInImg.getHeight();
 
         imageView.setImage(userInImg);
         reset(imageView, width, height);
