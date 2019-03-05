@@ -81,11 +81,12 @@ public class MatchListController {
      */
     private void createMatchList(List<Rated<ImageSample>> normals) {
 
+        String matchConf = "High"";
 
         analysisController.setNormalList(normals);
         ObservableList<String> list = FXCollections.observableArrayList();
         for (Rated<ImageSample> r: normals){ // TODO: Change bc of pipeline
-            list.add(r.getValue().getPath());
+            list.add("Patient: " + Integer.toString(r.getValue().getPatient()) + "  Match Confidence: " + matchConf);
         }
 
         matches.setItems(list);

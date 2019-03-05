@@ -3,18 +3,31 @@
     -fx-border-width: 2px;
 }
 
+#datasetUploadPane {
+  -fx-border-width: 2px;
+  -fx-border-color: black;
+}
+
 .list-view .list-cell:even {
     -fx-background-color: #545454;
-    -fx-text-fill: black;
+    -fx-text-fill: white;
 }
 
 .list-view .list-cell:odd {
     -fx-background-color: #444444;
-    -fx-text-fill: black;
+    -fx-text-fill: white;
+}
+
+.list-view .list-cell:empty {
+    -fx-visibility:hidden;
 }
 
 #matches .list-cell {
     -fx-alignment: center;
+}
+
+#matches:focused {
+    -fx-focus-color: transparent;
 }
 
 .image-view {

@@ -162,10 +162,9 @@ public class InformationPanelController {
             bestMatchFlow.setManaged(true);
             highlightFlow.setManaged(false);
             highlightFlow.setVisible(false);
-            if (view == View.NORMAL ) {
-                System.out.println("Normal");
-                matchListController.show();
-            }
+            addToDatasetButton.setVisible(false);
+            addToDatasetButton.setManaged(false);
+            matchListController.show();
         } else if (view == View.HIGHLIGHT){
             inputFlow.setVisible(false);
             inputFlow.setManaged(false);
