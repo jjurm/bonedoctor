@@ -23,16 +23,24 @@
         <RowConstraints maxHeight="279.0" minHeight="10.0" prefHeight="33.0" vgrow="SOMETIMES" />
         <RowConstraints maxHeight="279.0" minHeight="10.0" prefHeight="171.0" vgrow="SOMETIMES" />
     </rowConstraints>
-
-    <Label alignment="TOP_LEFT" contentDisplay="CENTER" text="Upload new X-Ray" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+   <Label text="Bone Doctor" textFill="WHITE" GridPane.halignment="CENTER">
       <GridPane.margin>
-         <Insets />
+         <Insets bottom="30.0" />
+      </GridPane.margin>
+      <font>
+         <Font name="System Bold" size="20.0" />
+      </font>
+   </Label>
+
+    <Label alignment="TOP_LEFT" contentDisplay="CENTER" text="Upload new X-Ray to get started" textAlignment="CENTER" textFill="WHITE" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+      <GridPane.margin>
+         <Insets top="30.0" />
       </GridPane.margin>
       <opaqueInsets>
          <Insets />
       </opaqueInsets>
       <font>
-         <Font name="System Bold" size="18.0" />
+         <Font name="System Bold" size="14.0" />
       </font></Label>
 
     <!-- Add Select File Button -->
