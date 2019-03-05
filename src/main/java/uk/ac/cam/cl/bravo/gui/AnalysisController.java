@@ -196,9 +196,11 @@ public class AnalysisController {
      */
     public void showThirdExplorer(boolean bool) {
         if (bool) {
-            grid.getColumnConstraints().get(0).setPercentWidth(30);
-            grid.getColumnConstraints().get(2).setPercentWidth(30);
-            grid.getColumnConstraints().get(4).setPercentWidth(30);
+            grid.getColumnConstraints().get(0).setPercentWidth(33.3);
+            grid.getColumnConstraints().get(1).setPercentWidth(0);
+            grid.getColumnConstraints().get(2).setPercentWidth(33.3);
+            grid.getColumnConstraints().get(3).setPercentWidth(0);
+            grid.getColumnConstraints().get(4).setPercentWidth(100-33.3-33.3);
         }
 
         addBox.setVisible(!bool);

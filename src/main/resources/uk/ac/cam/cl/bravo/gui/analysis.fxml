@@ -17,7 +17,7 @@
     <ColumnConstraints hgrow="SOMETIMES" minWidth="40.0" percentWidth="0" />
       <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0" percentWidth="45" />
       <ColumnConstraints hgrow="SOMETIMES" minWidth="40.0" percentWidth="10" />
-      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+      <ColumnConstraints hgrow="SOMETIMES" minWidth="0" />
   </columnConstraints>
   <rowConstraints>
     <RowConstraints minHeight="30.0" vgrow="ALWAYS" />
@@ -138,7 +138,7 @@
          </columnConstraints>
          <rowConstraints>
             <RowConstraints vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS"/>
          </rowConstraints>
       </GridPane>
    </children>

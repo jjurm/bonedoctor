@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<GridPane fx:id="infoGrid" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" GridPane.columnSpan="2147483647" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" prefHeight="250">
+<GridPane fx:id="infoGrid" prefHeight="250" stylesheets="/uk/ac/cam/cl/bravo/gui/style.css" GridPane.columnSpan="2147483647" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
    <rowConstraints>
       <RowConstraints minHeight="30.0" prefHeight="30.0" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
@@ -23,17 +23,11 @@
             <Label text="Bone Condition: " textFill="WHITE">
                <font>
                   <Font size="18.0" />
-               </font>
-               <padding>
-                  <Insets left="5.0" top="5.0" />
-               </padding></Label>
+               </font></Label>
             <Label fx:id="boneCondition" text="Calculating..." textFill="WHITE">
                <font>
                   <Font size="18.0" />
-               </font>
-               <padding>
-                  <Insets top="5.0" />
-               </padding></Label>
+               </font></Label>
             <Label text="Confidence: " textFill="WHITE">
                <opaqueInsets>
                   <Insets />
@@ -44,18 +38,15 @@
                <font>
                   <Font size="18.0" />
                </font>
-               <padding>
-                  <Insets top="5.0" />
-               </padding>
             </Label>
             <Label fx:id="boneConditionConfidence" text="Calculating..." textFill="WHITE">
                <font>
                   <Font size="18.0" />
-               </font>
-               <padding>
-                  <Insets top="5.0" />
-               </padding></Label>
-         </children></FlowPane>
+               </font></Label>
+         </children>
+         <GridPane.margin>
+            <Insets left="20.0" top="20.0" />
+         </GridPane.margin></FlowPane>
       <FlowPane fx:id="bestMatchFlow" prefHeight="200.0" prefWidth="200.0">
          <children>
             <Label text="We found these matches: " textFill="WHITE">
@@ -67,8 +58,11 @@
                </padding>
             </Label>
          </children>
+         <GridPane.margin>
+            <Insets left="20.0" top="20.0" />
+         </GridPane.margin>
       </FlowPane>
-      <FlowPane alignment="BOTTOM_RIGHT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+      <FlowPane alignment="TOP_RIGHT" prefHeight="200.0" prefWidth="200.0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
          <children>
             <Button fx:id="addToDatasetButton" mnemonicParsing="false" text="Add to dataset">
                 <FlowPane.margin>
@@ -90,11 +84,21 @@
                </opaqueInsets>
              </CheckBox>
          </children>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <GridPane.margin>
+            <Insets bottom="20.0" top="20.0" />
+         </GridPane.margin>
       </FlowPane>
       <FlowPane fx:id="highlightFlow" prefHeight="200.0" prefWidth="200.0">
          <children>
+            <Label text="Change parameter   " />
             <Slider fx:id="gradient" />
          </children>
+         <GridPane.margin>
+            <Insets left="20.0" top="20.0" />
+         </GridPane.margin>
       </FlowPane>
    </children>
    <columnConstraints>

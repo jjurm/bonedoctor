@@ -87,7 +87,7 @@ public class MatchListController {
         for (Rated<ImageSample> r: normals){ // TODO: Change bc of pipeline
             double score = ((r.getScore() * -1.0) + 1)*100/2 ;
             String matchConf = new DecimalFormat("#.#").format(score);
-            list.add("Patient: " + r.getValue().getPatient() + "  Match Confidence: " + matchConf + "%");
+            list.add("Patient: " + r.getValue().getPatient() + "    Match Confidence: " + matchConf + "%");
         }
 
         matches.setItems(list);
