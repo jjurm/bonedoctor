@@ -64,6 +64,7 @@ After this stage a black band is constructed on the convex hull from the edge de
 
 
 ### 2. Clustering of Images
+##### Primary Contributor: Kwot Sin Lee
 <img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/cluster0.png" width="400" height="400"/>     |||     <img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/cluster1.png" width="400" height="400"/>
 
 *Figure 1: Cluster label 0 images with mostly flat hand images.*
@@ -71,7 +72,7 @@ After this stage a black band is constructed on the convex hull from the edge de
 *Figure 2: Cluster label 1 images with mostly curved hand images.*
 
 
-##### Primary Contributor: Kwot Sin Lee
+
 
 In order to facilitate the downstream processing of the images for greater performance, the images could be filtered by finding the views in which they were first taken. Since the MURA dataset has only binary labels of 1 and 0 indicating a presence and absence of a fracture respectively, an unsupervised learning approach is taken. Unsupervised learning in this context is the most _scalable_ way to perform this task, instead of handcrafting feature detectors or manually labelling the images and then performing supervised learning. Specifically, we want to find clusters of images such that given a new image, we can know which cluster it belongs to, and so apply the corresponding algorithms on these filtered set of images belonging to that cluster.
 
