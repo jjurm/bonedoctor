@@ -32,7 +32,7 @@
       </font>
    </Label>
 
-    <Label alignment="TOP_LEFT" contentDisplay="CENTER" text="Upload new X-Ray to get started" textAlignment="CENTER" textFill="WHITE" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+    <Label alignment="TOP_LEFT" contentDisplay="CENTER" text="Select a new X-Ray to get started" textAlignment="CENTER" textFill="WHITE" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
       <GridPane.margin>
          <Insets top="30.0" />
       </GridPane.margin>
