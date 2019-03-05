@@ -38,3 +38,8 @@
 .label {
   -fx-text-fill: white;
 }
+
+.check-box {
+  -fx-text-fill: white;
+  -fx-margin-right: 10px;
+}
