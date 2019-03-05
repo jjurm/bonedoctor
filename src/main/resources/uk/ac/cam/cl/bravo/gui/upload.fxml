@@ -11,11 +11,11 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<GridPane alignment="CENTER" minHeight="700.0" minWidth="900.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
+<GridPane alignment="CENTER_RIGHT" minHeight="700.0" minWidth="900.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
     <padding> <Insets bottom="25" left="25" right="25" top="25" /> </padding>
     <columnConstraints>
         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      <ColumnConstraints />
     </columnConstraints>
     <rowConstraints>
         <RowConstraints maxHeight="198.0" minHeight="0.0" prefHeight="54.0" vgrow="SOMETIMES" />
@@ -24,9 +24,9 @@
         <RowConstraints maxHeight="279.0" minHeight="10.0" prefHeight="171.0" vgrow="SOMETIMES" />
     </rowConstraints>
 
-    <Label alignment="CENTER" contentDisplay="CENTER" text="Upload new X-Ray" textAlignment="CENTER">
+    <Label alignment="TOP_LEFT" contentDisplay="CENTER" text="Upload new X-Ray" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
       <GridPane.margin>
-         <Insets left="50.0" />
+         <Insets />
       </GridPane.margin>
       <opaqueInsets>
          <Insets />
@@ -36,32 +36,32 @@
       </font></Label>
 
     <!-- Add Select File Button -->
-    <Button fx:id="selectButton" mnemonicParsing="false" onAction="#handleSelectButtonAction" text="Select file " GridPane.rowIndex="1">
+    <Button fx:id="selectButton" mnemonicParsing="false" onAction="#handleSelectButtonAction" text="Select file " GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
       <GridPane.margin>
-         <Insets left="50.0" />
+         <Insets />
       </GridPane.margin></Button>
 
-    <Text fx:id="fileText" wrappingWidth="182.0" GridPane.rowIndex="2">
+    <Text fx:id="fileText" fill="WHITE" textAlignment="CENTER" wrappingWidth="182.0" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="TOP">
       <GridPane.margin>
-         <Insets bottom="100.0" left="50.0" />
+         <Insets />
       </GridPane.margin></Text>
 
-    <ImageView fx:id="imageView" fitHeight="158.0" fitWidth="169.0" pickOnBounds="true" preserveRatio="true" GridPane.rowIndex="3">
+    <ImageView fx:id="imageView" fitHeight="158.0" fitWidth="169.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="CENTER" GridPane.rowIndex="3">
       <GridPane.margin>
-         <Insets bottom="200.0" left="50.0" />
+         <Insets />
       </GridPane.margin></ImageView>
 
-    <Button fx:id="analyzeButton" mnemonicParsing="false" onAction="#handleAnalyzeButtonAction" text="Analyze" GridPane.columnIndex="1" GridPane.rowIndex="2">
+    <Button fx:id="analyzeButton" mnemonicParsing="false" onAction="#handleAnalyzeButtonAction" text="Analyze" GridPane.halignment="RIGHT" GridPane.rowIndex="3" GridPane.valignment="BOTTOM">
       <GridPane.margin>
-         <Insets left="50.0" />
+         <Insets bottom="30.0" right="30.0" />
       </GridPane.margin>
       <font>
          <Font size="22.0" />
       </font></Button>
-    <ComboBox fx:id="bodypartChoice" onAction="#handleSelectBodypart" prefWidth="150.0" promptText="- Select Bodypart - " GridPane.rowIndex="2">
+    <ComboBox fx:id="bodypartChoice" onAction="#handleSelectBodypart" promptText="- Select Bodypart - " GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
       <GridPane.margin>
-         <Insets left="50.0" />
+         <Insets />
       </GridPane.margin></ComboBox>
-   <Label fx:id="analyzeCheck" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+   <Label fx:id="analyzeCheck" minWidth="40.0" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="BOTTOM" />
 
 </GridPane>
