@@ -116,7 +116,7 @@
             <Insets top="30.0" />
          </GridPane.margin>
       </GridPane>
-      <GridPane fx:id="pane3" GridPane.columnIndex="4" GridPane.rowSpan="2">
+      <GridPane fx:id="pane3" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowSpan="2" GridPane.valignment="CENTER">
          <children>
             <FlowPane alignment="CENTER">
                <children>
@@ -130,6 +130,19 @@
                      </FlowPane.margin></Button>
                </children>
             </FlowPane>
+            <ProgressBar fx:id="progressBar2" prefWidth="200.0" progress="0.0" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+               <padding>
+                  <Insets top="40.0" />
+               </padding>
+            </ProgressBar>
+            <Label text="Looking for matches... This might take a minute." GridPane.halignment="CENTER" GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin>
+               <padding>
+                  <Insets bottom="40.0" />
+               </padding>
+            </Label>
          </children>
          <columnConstraints>
             <ColumnConstraints hgrow="ALWAYS" />

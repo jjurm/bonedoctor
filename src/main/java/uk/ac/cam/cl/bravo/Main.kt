@@ -29,6 +29,12 @@ fun main(args: Array<String>) {
 
                 // Hand with metal part
                 .filter { it.bodypartView.bodypart == Bodypart.HAND && it.patient == 1928 && it.boneCondition == BoneCondition.ABNORMAL }.get(1)
+
+                // Wrist
+                //.filter { it.bodypartView.bodypart == Bodypart.WRIST && it.patient == 604 && it.boneCondition == BoneCondition.ABNORMAL }.get(3)
+
+                // Forearm
+                //.filter { it.bodypartView.bodypart == Bodypart.FOREARM && it.patient == 4221 && it.boneCondition == BoneCondition.ABNORMAL }.get(0)
             imageSample.path to imageSample.bodypartView.bodypart
         }
         2 -> {
@@ -79,7 +85,7 @@ fun mainPipeline(inputFile: String, bodypart: Bodypart) {
     //pipeline.transformedAndOverlaidOriginal.subscribe {DisplayImage(it.value.second, "OverlaidOriginal (score: ${it.score}")}
     //pipeline.transformedAndOverlaidMirrored.subscribe {DisplayImage(it.value.second, "OverlaidMirrored (score: ${it.score}")}
     pipeline.firstOverlaid.subscribe {
-        //DisplayImage(it.value.first, "Transformed (score: ${it.score})")
+        DisplayImage(it.value.first, "Transformed (score: ${it.score})")
         DisplayImage(it.value.second, "Overlaid (score: ${it.score})")
     }
     //pipeline.overlaid.subscribe { DisplayImage(it.value, "Overlaid (best) (score: ${it.score})") }
