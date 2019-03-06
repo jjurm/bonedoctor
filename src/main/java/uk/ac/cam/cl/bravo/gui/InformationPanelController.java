@@ -1,42 +1,23 @@
 package uk.ac.cam.cl.bravo.gui;
 
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import org.jetbrains.annotations.NotNull;
 import uk.ac.cam.cl.bravo.dataset.BoneCondition;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 import uk.ac.cam.cl.bravo.pipeline.MainPipeline;
-import uk.ac.cam.cl.bravo.pipeline.Rated;
 import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 import javafx.scene.control.CheckBox;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
-import java.awt.image.VolatileImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Contains information about the currently selected image panel.
@@ -60,7 +41,13 @@ public class InformationPanelController {
     @FXML
     FlowPane bestMatchFlow;
     @FXML
-    Slider gradient;
+    GridPane highlightGrid;
+    @FXML
+    Button highlightButton;
+    @FXML
+    Slider highlightSlider;
+    @FXML
+    Slider searchSlider;
     @FXML
     Label boneCondition;
     @FXML
@@ -87,7 +74,6 @@ public class InformationPanelController {
         try {
             addToDatasetButton.setOnAction(event -> handleUpload());
             preprocessedCheckBox.setOnAction(event -> usePreprocessed());
-            gradient.setOnDragDone(e -> mainController.getMainPipeline().getHighlightGradient().onNext(gradient.getValue()));
 
             // Initialize controller
             FXMLLoader matchListLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/matchList.fxml"));
@@ -106,6 +92,11 @@ public class InformationPanelController {
             matchListController.launch();
             setView(View.INPUT);
             subscribe();
+
+            highlightButton.setOnMouseClicked(e -> {
+                mainController.getMainPipeline().getHighlightGradient().onNext(highlightSlider.getValue());
+                mainController.getMainPipeline().getHighlightAmount().onNext(searchSlider.getValue());
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -173,7 +164,7 @@ public class InformationPanelController {
             matchListController.hide();
             highlightFlow.setManaged(true);
             highlightFlow.setVisible(true);
-            gradient.setVisible(true);
+            highlightGrid.setVisible(true);
         }
 
         if (!(activeController == null)) {
@@ -244,6 +235,9 @@ public class InformationPanelController {
         ImageSample currImageSample = activeController.getCurrentImage();
         GridPane pane = activeController.getCurrentPane();
         View view = activeController.getView();
+        if (pane.getChildren().size()>1)
+            pane.getChildren().remove(1);
+        if (preprocessedCheckBox.isSelected()) {
         if (this.activeController.getCurrentImage() == null) {
             Image img = activeController.getCurrentPlainImage();
             if (preprocessedCheckBox.isSelected()) {

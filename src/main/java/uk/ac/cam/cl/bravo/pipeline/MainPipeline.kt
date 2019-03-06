@@ -48,12 +48,17 @@ class MainPipeline {
     /**
      * A value between 0.0 and 1.0
      */
-    val highlightAmount: Subject<Double> = BehaviorSubject.createDefault(0.0)
+    val highlightAmount: Subject<Double> = BehaviorSubject.create()
 
     /**
      * A value between 0.0 and 1.0
      */
-    val highlightGradient: Subject<Double> = BehaviorSubject.createDefault(0.7)
+    val highlightGradient: Subject<Double> = BehaviorSubject.create()
+
+    /**
+     * (highlight amount, highlight gradient)
+     */
+    val highlightParameters: Subject<Pair<Double, Double>> = BehaviorSubject.createDefault(Pair(0.0, 0.7))
 
     /** A pair of (input image path, bodypart of the input image) */
     val userInput: Subject<Pair<String, Bodypart>> = BehaviorSubject.create()
@@ -100,6 +105,7 @@ class MainPipeline {
 
     companion object {
         const val PROGRESS_PREPROCESSING = 0.3
+        const val PROGRESS_CLUSTER = 0.1;
     }
 
     // ===== COMPONENTS =====
@@ -108,7 +114,7 @@ class MainPipeline {
 
     private val preprocessor: ImagePreprocessor = ImagePreprocessorI { progress0.onNext(it * PROGRESS_PREPROCESSING) }
     private val boneConditionClassifier: BoneConditionClassifier = BoneConditionClassifierImpl()
-    private val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl()
+    private val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl({ progress -> progress0.onNext(progress * PROGRESS_CLUSTER + PROGRESS_PREPROCESSING)})
     private val imageMatcher: ImageMatcher = ImageMatcherImpl.getImageMatcher(File(Dataset.IMAGE_MATCHER_FILE))
     private val preciseImageMatcher: PreciseImageMatcher = PreciseImageMatcherImpl()
     private val imageOverlay: ImageOverlay = ImageOverlayImpl(
@@ -158,6 +164,9 @@ class MainPipeline {
         }
 
         userInput.doneMeans(0.0, "Pre-processing the input x-ray")
+
+        val highlightParameters0 = combineObservables(highlightAmount, highlightGradient)
+        highlightParameters0.subscribe(highlightParameters)
 
         val path = userInput.map(Pair<String, *>::first)
         val bodypart = userInput.map(Pair<*, Bodypart>::second)
@@ -270,8 +279,8 @@ class MainPipeline {
         combineObservables(
             inputImage,
             bestMatch.map { it.loadImage() },
-            highlightAmount,
-            highlightGradient
+            highlightParameters.map { it.first },
+            highlightParameters.map { it.second }
         )
             .observeOn(Schedulers.newThread())
             .mapDestructing(fractureHighlighter::highlight.withTag("FractureHighlighter"))

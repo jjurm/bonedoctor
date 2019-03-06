@@ -2,11 +2,14 @@ package uk.ac.cam.cl.bravo.classify;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import org.apache.commons.math3.ml.clustering.Cluster;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.tensorflow.*;
 import uk.ac.cam.cl.bravo.dataset.*;
 import uk.ac.cam.cl.bravo.pipeline.Confidence;
 import uk.ac.cam.cl.bravo.pipeline.Uncertain;
+import uk.ac.cam.cl.bravo.preprocessing.ImagePreprocessorI;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -18,6 +21,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static uk.ac.cam.cl.bravo.classify.Utils.*;
@@ -37,6 +41,14 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
     ExecutorService parallelExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
+    // Progress update
+    @Nullable Consumer<Double> progressObserver;
+
+    public BodypartViewClassifierImpl(@Nullable Consumer<Double> obs) {
+        progressObserver = obs;
+    }
+
+
     /**
      * Computes the bodypart view object wrapped in an uncertain class indicating the confidence of the prediction,
      * given an image to classify and its corresponding body part
@@ -47,10 +59,13 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
     @NotNull
     @Override
     public Uncertain<BodypartView> classify(@NotNull BufferedImage image, @NotNull Bodypart bodypart) {
+        progressObserver.accept(0.0);
+
         // First load the results into the hashmaps if haven't already
         if (bodyPartToLabelToMeanFeaturesMap.get(bodypart) == null && bodyPartToLabelToFilenamesMap.get(bodypart) == null){
             decodeBodyPartFolder(bodypart, outputDir);
         }
+        progressObserver.accept(0.3);
 
         // Convert image to byte array for inference
         byte[] imageBytes = bufferedImageToByteArray(image);
@@ -60,6 +75,8 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         // Obtained flattened array as output
         float[] outputArray = executeInferenceGraph(preprocessedImage);
+
+        progressObserver.accept(0.8);
 
         // Obtain the right hashmaps for this bodypart for comparison
         Map<Integer, List<String>> labelToFilenamesMap = bodyPartToLabelToFilenamesMap.get(bodypart);
@@ -81,6 +98,8 @@ public class BodypartViewClassifierImpl implements BodypartViewClassifier {
 
         // Obtain the confidence for the prediction
         Confidence confidenceLevel = getConfidenceLevel(minL2Distance, outputArray, labelToMeanFeaturesMap);
+
+        progressObserver.accept(1.0);
 
         return new Uncertain<>(new BodypartView(bodypart, topLabel), confidenceLevel);
     }
