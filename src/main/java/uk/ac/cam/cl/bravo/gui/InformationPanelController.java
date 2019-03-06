@@ -238,18 +238,19 @@ public class InformationPanelController {
         if (pane.getChildren().size()>1)
             pane.getChildren().remove(1);
         if (preprocessedCheckBox.isSelected()) {
-        if (this.activeController.getCurrentImage() == null) {
-            Image img = activeController.getCurrentPlainImage();
-            if (preprocessedCheckBox.isSelected()) {
-                analysisController.setPaneImage(pane, img, view, true);
+            if (this.activeController.getCurrentImage() == null) {
+                Image img = activeController.getCurrentPlainImage();
+                if (preprocessedCheckBox.isSelected()) {
+                    analysisController.setPaneImage(pane, img, view, true);
+                } else {
+                    analysisController.setPaneImage(pane, img, view, false);
+                }
             } else {
-                analysisController.setPaneImage(pane, img, view, false);
-            }
-        } else {
-            if (preprocessedCheckBox.isSelected()) {
-                analysisController.setPaneImage(pane, currImageSample, view, true);
-            } else {
-                analysisController.setPaneImage(pane, currImageSample, view, false);
+                if (preprocessedCheckBox.isSelected()) {
+                    analysisController.setPaneImage(pane, currImageSample, view, true);
+                } else {
+                    analysisController.setPaneImage(pane, currImageSample, view, false);
+                }
             }
         }
     }
