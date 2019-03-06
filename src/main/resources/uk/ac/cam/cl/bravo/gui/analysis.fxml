@@ -24,27 +24,40 @@
       <RowConstraints minHeight="250.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <GridPane fx:id="pane1" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.vgrow="ALWAYS">
+      <GridPane fx:id="pane1" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowSpan="2" GridPane.valignment="CENTER">
          <children>
-            <FlowPane id="flow-pane" alignment="CENTER" prefHeight="200.0" prefWidth="200.0">
+            <FlowPane alignment="CENTER">
                <children>
-                  <ComboBox fx:id="pane1choice" minHeight="30.0" onAction="#handleSelectViewPane1" prefHeight="30.0" promptText="- Select View -">
+                  <ComboBox fx:id="pane1choice" minHeight="30.0" onAction="#handleSelectViewPane1" promptText="- Select View -">
                      <FlowPane.margin>
-                        <Insets top="30.0" />
+                        <Insets top="15.0" />
                      </FlowPane.margin></ComboBox>
                   <Button alignment="CENTER" ellipsisString="Export" minHeight="30.0" mnemonicParsing="false" onAction="#handleSaveFile" text="Export" textAlignment="CENTER">
                      <FlowPane.margin>
-                        <Insets top="30.0" />
+                        <Insets top="15.0" />
                      </FlowPane.margin></Button>
                </children>
             </FlowPane>
+            <ProgressBar fx:id="progressBar1" prefWidth="200.0" progress="0.0" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+               <padding>
+                  <Insets top="40.0" />
+               </padding>
+            </ProgressBar>
+            <Label text="Looking for matches... This might take a minute." GridPane.halignment="CENTER" GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets />
+               </GridPane.margin>
+               <padding>
+                  <Insets bottom="40.0" />
+               </padding>
+            </Label>
          </children>
          <columnConstraints>
-            <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
          </columnConstraints>
          <rowConstraints>
-            <RowConstraints maxHeight="30.0" minHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="30.0" prefHeight="30.0" vgrow="ALWAYS" />
+            <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
          </rowConstraints>
       </GridPane>
       <GridPane fx:id="linkBox1" prefWidth="30.0" GridPane.columnIndex="1" GridPane.rowSpan="2">
@@ -145,10 +158,10 @@
             </Label>
          </children>
          <columnConstraints>
-            <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" />
          </columnConstraints>
          <rowConstraints>
-            <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints valignment="CENTER" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
          </rowConstraints>
       </GridPane>
