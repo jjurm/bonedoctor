@@ -263,7 +263,10 @@ public class ImageExplorerController {
     }
 
     public boolean isPreprocessed() {
-        return this.isPreprocessed;
+        if (this!=null)
+            return this.isPreprocessed;
+        else
+            return false;
     }
 
     public Image getCurrentPlainImage() {
