@@ -65,6 +65,7 @@ public class MainController {
             analysisController.setPaneImage(analysisController.pane1, img, View.INPUT, false);
             analysisController.showThirdExplorer(false);
             analysisController.launch();
+            analysisController.setInputImage(img);
             analysisController.setPaneImage(analysisController.pane1, img, View.INPUT, false);
         } catch (IOException e) {
             e.printStackTrace();

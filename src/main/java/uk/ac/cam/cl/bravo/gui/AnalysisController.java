@@ -44,6 +44,7 @@ public class AnalysisController {
     private DatasetUploaderController datasetUploaderController;
     private BufferedImage highlightedImage;
     private Image inputPreProcessed;
+    private Image input;
     private BufferedImage overlayImage;
 
     @FXML
@@ -191,9 +192,19 @@ public class AnalysisController {
             // Child controller actions
             Image img = null;
             if (usePreprocessed) {
-                img = inputPreProcessed;
-            } else
-                img = imgFile;
+                if (!(inputPreProcessed==null))
+                    img = inputPreProcessed;
+                else {
+                    img = imgFile;
+                }
+            } else {
+                if (!(input==null))
+                    img = input;
+                else {
+                    img = imgFile;
+                }
+            }
+
             imageExplorerController.setAnalysisController(this);
             imageExplorerController.setImage(img);
             imageExplorerController.setMainController(this.mainController);
@@ -418,6 +429,10 @@ public class AnalysisController {
         progressBar2.setProgress(progress);
     }
 
+    private void updatePreprocessed(Uncertain<BufferedImage> pp) {
+        this.inputPreProcessed = SwingFXUtils.toFXImage(pp.getValue(), null);
+    }
+
     /**
      * Threading function, makes sure UI calls don't interfere with mainPipeline.
      * @param progress
@@ -427,7 +442,7 @@ public class AnalysisController {
     }
 
     private void startUIChange(Uncertain<BufferedImage> pp) {
-        Platform.runLater(() -> {this.inputPreProcessed = SwingFXUtils.toFXImage(pp.getValue(), null);});
+        Platform.runLater(() -> updatePreprocessed(pp));
     }
 
     private void subscribe() {
@@ -436,4 +451,7 @@ public class AnalysisController {
     }
 
 
+    public void setInputImage(Image img) {
+        this.input = img;
+    }
 }
