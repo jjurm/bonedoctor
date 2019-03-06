@@ -2,6 +2,12 @@
 
 A Part IB Group Project, created for TPP for the **Computer Science Tripos** at the **University of Cambridge**.
 
+This project was awarded the **Best Technical Achievement** prize.
+
+The PDF containing the Final presentation slides can be found <a href="https://github.com/jjurm/bonedoctor/blob/master/Bravo - final presentation.pdf">here</a>.
+
+<a href="https://github.com/jjurm/bonedoctor/blob/master/Bravo - final presentation.pdf"><img src="https://raw.githubusercontent.com/jjurm/bonedoctor/master/images/read/intro_slide.png" width="480" height="270" /></a>
+
 ## Problem Statement
 
 Large databases of labelled X-ray images such as the MURA dataset of broken bones can be used to train AI systems for medical advice. An intelligent clinical assistant should be able to take a previously unseen X-ray image and link it directly to cases that can guide possible treatment. Your task is to train a neural network that will find a variety of other cases that are clinically similar, but visually distinct, presented in a visual overlay that highlights local differences for a clinician to review. 
