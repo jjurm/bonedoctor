@@ -62,10 +62,10 @@ public class MainController {
 
             // Child controller actions
             analysisController.setMainController(this);
-            analysisController.setPaneImage(analysisController.pane1, img, View.INPUT);
+            analysisController.setPaneImage(analysisController.pane1, img, View.INPUT, false);
             analysisController.showThirdExplorer(false);
             analysisController.launch();
-            analysisController.setPaneImage(analysisController.pane1, img, View.INPUT);
+            analysisController.setPaneImage(analysisController.pane1, img, View.INPUT, false);
         } catch (IOException e) {
             e.printStackTrace();
         }

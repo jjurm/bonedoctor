@@ -241,13 +241,22 @@ public class InformationPanelController {
      */
     @FXML
     protected void usePreprocessed() {
-        ImageSample currImage = activeController.getCurrentImage();
+        ImageSample currImageSample = activeController.getCurrentImage();
         GridPane pane = activeController.getCurrentPane();
         View view = activeController.getView();
-        if (preprocessedCheckBox.isSelected()) {
-            analysisController.setPaneImage(pane, currImage, view, true);
+        if (this.activeController.getCurrentImage() == null) {
+            Image img = activeController.getCurrentPlainImage();
+            if (preprocessedCheckBox.isSelected()) {
+                analysisController.setPaneImage(pane, img, view, true);
+            } else {
+                analysisController.setPaneImage(pane, img, view, false);
+            }
         } else {
-            analysisController.setPaneImage(pane, currImage, view, false);
+            if (preprocessedCheckBox.isSelected()) {
+                analysisController.setPaneImage(pane, currImageSample, view, true);
+            } else {
+                analysisController.setPaneImage(pane, currImageSample, view, false);
+            }
         }
     }
 }

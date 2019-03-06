@@ -19,6 +19,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import uk.ac.cam.cl.bravo.dataset.ImageSample;
 import uk.ac.cam.cl.bravo.pipeline.Rated;
+import uk.ac.cam.cl.bravo.pipeline.Uncertain;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -42,6 +43,7 @@ public class AnalysisController {
     private ImageExplorerController activeExplorerController;
     private DatasetUploaderController datasetUploaderController;
     private BufferedImage highlightedImage;
+    private Image inputPreProcessed;
 
     @FXML
     private GridPane grid;
@@ -69,6 +71,7 @@ public class AnalysisController {
     private ProgressBar progressBar2;
 
     private List<Rated<ImageSample>> normalList;
+
 
     /**
      * Constructor: initialises non-FXML-dependant elements.
@@ -169,7 +172,7 @@ public class AnalysisController {
      * @param imgFile: which image to insert
      * @param view: View.INPUT, View.NORMAL or View.NORMAL_OVER (overlay)
      */
-    public void setPaneImage(GridPane pane, Image imgFile, View view) {
+    public void setPaneImage(GridPane pane, Image imgFile, View view, boolean usePreprocessed) {
         try {
 
             if (pane.getChildren().size()>1)
@@ -177,15 +180,20 @@ public class AnalysisController {
 
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
-            imageExplorerController = new ImageExplorerController(stage, view, pane, false);
+            imageExplorerController = new ImageExplorerController(stage, view, pane, usePreprocessed);
             imageExplorerLoader.setController(imageExplorerController);
             Parent imageExplorerFXML = imageExplorerLoader.load();
 
             pane.add(imageExplorerFXML, 0, 1);
 
             // Child controller actions
+            Image img = null;
+            if (usePreprocessed) {
+                img = inputPreProcessed;
+            } else
+                img = imgFile;
             imageExplorerController.setAnalysisController(this);
-            imageExplorerController.setImage(imgFile);
+            imageExplorerController.setImage(img);
             imageExplorerController.setMainController(this.mainController);
         } catch (IOException e) {
             e.printStackTrace();
@@ -237,7 +245,7 @@ public class AnalysisController {
         ImageSample imgS = null;
         if (!(mainController.getInputImage() == null)) {
             img = mainController.getInputImage();
-            setPaneImage(pane1, img, choice);
+            setPaneImage(pane1, img, choice, false);
         } else if (choice.equals(View.NORMAL)) {
             if (!(getBestMatchNormal() == null)) {
                 imgS = getBestMatchNormal().getValue();
@@ -259,7 +267,7 @@ public class AnalysisController {
         if (choice.equals(View.INPUT)) {
             if (!(mainController.getInputImage() == null)) {
                 img = mainController.getInputImage();
-                setPaneImage(pane2, img, choice);
+                setPaneImage(pane2, img, choice, false);
             }
         } else if (choice.equals(View.NORMAL)) {
             if (!(getBestMatchNormal() == null)) {
@@ -269,7 +277,7 @@ public class AnalysisController {
         } else if (choice.equals(View.NORMAL_OVER)) {
             if (!(getBestMatchNormal() == null)) {
                 img = SwingFXUtils.toFXImage(getBestMatchNormal().getValue().loadImage(), null);
-                setPaneImage(pane2, img, choice);
+                setPaneImage(pane2, img, choice, false);
             }
         }
 
@@ -288,7 +296,7 @@ public class AnalysisController {
         if (choice == View.INPUT) {
             if (!(mainController.getInputImage() == null)) {
                 img = mainController.getInputImage();
-                setPaneImage(pane3, img, choice);
+                setPaneImage(pane3, img, choice, false);
             }
         } else if (choice.equals(View.NORMAL)) {
             if (!(getBestMatchNormal() == null)) {
@@ -296,7 +304,7 @@ public class AnalysisController {
                 setPaneImage(pane3, imgS, choice, false);
             }
         } else if (choice.equals(View.INPUT.HIGHLIGHT)){
-            setPaneImage(pane3, SwingFXUtils.toFXImage(highlightedImage, null), choice);
+            setPaneImage(pane3, SwingFXUtils.toFXImage(highlightedImage, null), choice, false);
             informationPanelController.setView(View.HIGHLIGHT);
         }
     }
@@ -412,7 +420,14 @@ public class AnalysisController {
         Platform.runLater(() -> updateProgressBar(progress));
     }
 
+    private void startUIChange(Uncertain<BufferedImage> pp) {
+        Platform.runLater(() -> {this.inputPreProcessed = SwingFXUtils.toFXImage(pp.getValue(), null);});
+    }
+
     private void subscribe() {
         mainController.getMainPipeline().getProgress().subscribe(item -> {startUIChange(item);});
+        mainController.getMainPipeline().getPreprocessed().subscribe(pp -> startUIChange(pp));
     }
+
+
 }

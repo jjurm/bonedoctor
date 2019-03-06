@@ -35,6 +35,7 @@ public class ImageExplorerController {
 
     @FXML
     private ImageView imageView;
+    private Image plainImage;
 
     /**
      * Constructor: initialises non-FXML-dependant elements.
@@ -60,6 +61,7 @@ public class ImageExplorerController {
     public void setImage(Image userInImg) {
 
         analysisController.setActiveExplorer(this);
+        this.plainImage = userInImg;
 
         width = userInImg.getWidth();
         height = userInImg.getHeight();
@@ -261,5 +263,9 @@ public class ImageExplorerController {
 
     public boolean isPreprocessed() {
         return this.isPreprocessed;
+    }
+
+    public Image getCurrentPlainImage() {
+        return this.plainImage;
     }
 }
