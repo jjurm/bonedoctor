@@ -26,6 +26,7 @@
     -fx-alignment: center;
 }
 
+
 #matches:focused {
     -fx-focus-color: transparent;
 }
