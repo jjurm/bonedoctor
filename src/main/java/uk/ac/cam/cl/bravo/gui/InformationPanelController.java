@@ -237,8 +237,12 @@ public class InformationPanelController {
         GridPane pane = activeController.getCurrentPane();
         View view = activeController.getView();
         if (preprocessedCheckBox.isSelected()) {
+            if (pane.getChildren().size()>1)
+                pane.getChildren().remove(1);
             analysisController.setPaneImage(pane, currImage, view, true);
         } else {
+            if (pane.getChildren().size()>1)
+                pane.getChildren().remove(1);
             analysisController.setPaneImage(pane, currImage, view, false);
         }
     }
