@@ -109,7 +109,7 @@ The pixel hashing approach was inspired by image hashing. Instead of taking an i
 
 #### Stage 2
 ##### Primary Contributor: Kwot Sin Lee
-<img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter0.png" width="300" height="300"/>  <img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter2.png" width="300" height="300"/>
+<img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter0.png" width="300" height="300"/>  <img src="https://github.com/jjurm/bonedoctor/blob/master/python/view_clustering/images/filter2.png" width="200" height="300"/>
 
 *Figure 1: Original image input to find matching image.*
 
