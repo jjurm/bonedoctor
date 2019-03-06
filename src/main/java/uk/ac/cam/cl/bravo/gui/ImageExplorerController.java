@@ -61,7 +61,8 @@ public class ImageExplorerController {
     public void setImage(Image userInImg) {
 
         analysisController.setActiveExplorer(this);
-        this.plainImage = userInImg;
+        if (!isPreprocessed)
+            this.plainImage = userInImg;
 
         width = userInImg.getWidth();
         height = userInImg.getHeight();
