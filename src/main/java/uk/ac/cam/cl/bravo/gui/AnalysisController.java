@@ -65,6 +65,8 @@ public class AnalysisController {
     private ComboBox pane3choice;
     @FXML
     private ProgressBar progressBar;
+    @FXML
+    private ProgressBar progressBar2;
 
     private List<Rated<ImageSample>> normalList;
 
@@ -397,6 +399,7 @@ public class AnalysisController {
 
     private void updateProgressBar(double progress) {
         progressBar.setProgress(progress);
+        progressBar2.setProgress(progress);
     }
 
     /**

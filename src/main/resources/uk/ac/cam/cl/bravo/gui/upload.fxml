@@ -28,13 +28,13 @@
          <Insets bottom="30.0" />
       </GridPane.margin>
       <font>
-         <Font name="System Bold" size="20.0" />
+         <Font name="System Bold" size="36.0" />
       </font>
    </Label>
 
     <Label alignment="TOP_LEFT" contentDisplay="CENTER" text="Select a new X-Ray to get started" textAlignment="CENTER" textFill="WHITE" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
       <GridPane.margin>
-         <Insets top="30.0" />
+         <Insets top="50.0" />
       </GridPane.margin>
       <opaqueInsets>
          <Insets />
@@ -64,7 +64,7 @@
          <Insets bottom="30.0" right="30.0" />
       </GridPane.margin>
       <font>
-         <Font size="22.0" />
+         <Font size="14.0" />
       </font></Button>
     <ComboBox fx:id="bodypartChoice" onAction="#handleSelectBodypart" promptText="- Select Bodypart - " GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
       <GridPane.margin>

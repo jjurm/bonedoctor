@@ -125,12 +125,14 @@ public class ImageExplorerController {
             explorerContainer.setStyle("-fx-background-color: #545454"); // test
         });
 
+
+
         GridPane.setVgrow(explorerContainer, Priority.ALWAYS);
         GridPane.setHgrow(explorerContainer, Priority.ALWAYS);
-        ReadOnlyDoubleProperty gridWidth = ((GridPane) explorerContainer.getParent()).widthProperty();
-        ReadOnlyDoubleProperty gridHeight = ((GridPane) explorerContainer.getParent()).heightProperty();
+        ReadOnlyDoubleProperty gridWidth = (explorerContainer).widthProperty();
+        ReadOnlyDoubleProperty gridHeight = (explorerContainer).heightProperty();
         imageView.fitWidthProperty().bind(gridWidth);
-        imageView.fitHeightProperty().bind(gridHeight.add(-30));
+        imageView.fitHeightProperty().bind(gridHeight.add(-100));
 
         System.out.println("Height:" + explorerContainer.heightProperty());
         System.out.println("Width:" + explorerContainer.widthProperty());
