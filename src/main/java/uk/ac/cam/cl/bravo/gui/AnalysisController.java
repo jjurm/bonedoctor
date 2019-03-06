@@ -44,6 +44,7 @@ public class AnalysisController {
     private DatasetUploaderController datasetUploaderController;
     private BufferedImage highlightedImage;
     private Image inputPreProcessed;
+    private BufferedImage overlayImage;
 
     @FXML
     private GridPane grid;
@@ -109,6 +110,7 @@ public class AnalysisController {
 
             subscribe();
             mainController.getMainPipeline().getFracturesHighlighted().subscribe(image -> highlightedImage = image);
+            mainController.getMainPipeline().getOverlaidDifferences().subscribe(image -> overlayImage = image);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -306,7 +308,11 @@ public class AnalysisController {
         } else if (choice.equals(View.INPUT.HIGHLIGHT)){
             setPaneImage(pane3, SwingFXUtils.toFXImage(highlightedImage, null), choice, false);
             informationPanelController.setView(View.HIGHLIGHT);
+        } else if (choice.equals(View.INPUT.NORMAL_OVER)){
+            setPaneImage(pane3, SwingFXUtils.toFXImage(overlayImage, null), choice, false);
+            informationPanelController.setView(View.NORMAL_OVER);
         }
+
     }
 
     /**

@@ -145,6 +145,7 @@ public class InformationPanelController {
             bestMatchFlow.setManaged(false);
             highlightFlow.setManaged(false);
             highlightFlow.setVisible(false);
+            preprocessedCheckBox.setVisible(true);
             matchListController.hide();
         } else if (view == View.NORMAL){
             inputFlow.setVisible(false);
@@ -156,6 +157,7 @@ public class InformationPanelController {
             addToDatasetButton.setVisible(false);
             addToDatasetButton.setManaged(false);
             matchListController.show();
+            preprocessedCheckBox.setVisible(true);
         } else if (view == View.HIGHLIGHT){
             inputFlow.setVisible(false);
             inputFlow.setManaged(false);
@@ -165,14 +167,25 @@ public class InformationPanelController {
             highlightFlow.setManaged(true);
             highlightFlow.setVisible(true);
             highlightGrid.setVisible(true);
+            preprocessedCheckBox.setVisible(false);
+        } else if (view == View.NORMAL_OVER){
+            inputFlow.setVisible(false);
+            inputFlow.setManaged(false);
+            bestMatchFlow.setVisible(false);
+            bestMatchFlow.setManaged(false);
+            matchListController.hide();
+            highlightFlow.setManaged(true);
+            highlightFlow.setVisible(true);
+            highlightGrid.setVisible(true);
+            preprocessedCheckBox.setVisible(false);
         }
-
         if (!(activeController == null)) {
             if (activeController.isPreprocessed()) {
                 preprocessedCheckBox.setSelected(true);
             } else {
                 preprocessedCheckBox.setSelected(false);
             }
+
         }
     }
 
@@ -237,21 +250,20 @@ public class InformationPanelController {
         View view = activeController.getView();
         if (pane.getChildren().size()>1)
             pane.getChildren().remove(1);
-        if (preprocessedCheckBox.isSelected()) {
-            if (this.activeController.getCurrentImage() == null) {
-                Image img = activeController.getCurrentPlainImage();
-                if (preprocessedCheckBox.isSelected()) {
-                    analysisController.setPaneImage(pane, img, view, true);
-                } else {
-                    analysisController.setPaneImage(pane, img, view, false);
-                }
+        if (this.activeController.getCurrentImage() == null) {
+            Image img = activeController.getCurrentPlainImage();
+            if (preprocessedCheckBox.isSelected()) {
+                analysisController.setPaneImage(pane, img, view, true);
             } else {
-                if (preprocessedCheckBox.isSelected()) {
-                    analysisController.setPaneImage(pane, currImageSample, view, true);
-                } else {
-                    analysisController.setPaneImage(pane, currImageSample, view, false);
-                }
+                analysisController.setPaneImage(pane, img, view, false);
+            }
+        } else {
+            if (preprocessedCheckBox.isSelected()) {
+                analysisController.setPaneImage(pane, currImageSample, view, true);
+            } else {
+                analysisController.setPaneImage(pane, currImageSample, view, false);
             }
         }
+
     }
 }
