@@ -13,12 +13,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static uk.ac.cam.cl.bravo.classify.Utils.bufferedImageToByteArray;
 import static uk.ac.cam.cl.bravo.classify.Utils.computeCosineSimilarity;
 
 public class PreciseImageMatcherImpl implements PreciseImageMatcher {
-    private BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl();
+    private BodypartViewClassifierImpl classifier = new BodypartViewClassifierImpl(t -> {});
 
     /**
      * Given an image and list of images to find, find the visually closest image to the given image and output them

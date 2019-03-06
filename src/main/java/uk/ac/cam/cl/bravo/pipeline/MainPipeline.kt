@@ -100,6 +100,7 @@ class MainPipeline {
 
     companion object {
         const val PROGRESS_PREPROCESSING = 0.3
+        const val PROGRESS_CLUSTER = 0.1;
     }
 
     // ===== COMPONENTS =====
@@ -108,7 +109,7 @@ class MainPipeline {
 
     private val preprocessor: ImagePreprocessor = ImagePreprocessorI { progress0.onNext(it * PROGRESS_PREPROCESSING) }
     private val boneConditionClassifier: BoneConditionClassifier = BoneConditionClassifierImpl()
-    private val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl()
+    private val bodypartViewClassifier: BodypartViewClassifier = BodypartViewClassifierImpl({ progress -> progress0.onNext(progress * PROGRESS_CLUSTER + PROGRESS_PREPROCESSING)})
     private val imageMatcher: ImageMatcher = ImageMatcherImpl.getImageMatcher(File(Dataset.IMAGE_MATCHER_FILE))
     private val preciseImageMatcher: PreciseImageMatcher = PreciseImageMatcherImpl()
     private val imageOverlay: ImageOverlay = ImageOverlayImpl(
