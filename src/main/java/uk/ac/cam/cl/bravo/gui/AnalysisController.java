@@ -111,7 +111,9 @@ public class AnalysisController {
 
             subscribe();
             mainController.getMainPipeline().getFracturesHighlighted().subscribe(image -> highlightedImage = image);
-            mainController.getMainPipeline().getOverlaidDifferences().subscribe(image -> overlayImage = image);
+            mainController.getMainPipeline().getFirstOverlaid().subscribe(image -> overlayImage = image.getValue().getSecond());
+
+
 
         } catch (IOException e) {
             e.printStackTrace();

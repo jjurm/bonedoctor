@@ -145,6 +145,10 @@ public class InformationPanelController {
             bestMatchFlow.setManaged(false);
             highlightFlow.setManaged(false);
             highlightFlow.setVisible(false);
+            if (activeController!=null)
+                preprocessedCheckBox.setSelected(activeController.isPreprocessed());
+            else
+                preprocessedCheckBox.setSelected(false);
             preprocessedCheckBox.setVisible(true);
             matchListController.hide();
         } else if (view == View.NORMAL){
@@ -157,6 +161,10 @@ public class InformationPanelController {
             addToDatasetButton.setVisible(false);
             addToDatasetButton.setManaged(false);
             matchListController.show();
+            if (activeController!=null)
+                preprocessedCheckBox.setSelected(activeController.isPreprocessed());
+            else
+                preprocessedCheckBox.setSelected(false);
             preprocessedCheckBox.setVisible(true);
         } else if (view == View.HIGHLIGHT){
             inputFlow.setVisible(false);
@@ -248,20 +256,26 @@ public class InformationPanelController {
         ImageSample currImageSample = activeController.getCurrentImage();
         GridPane pane = activeController.getCurrentPane();
         View view = activeController.getView();
+
         if (pane.getChildren().size()>1)
             pane.getChildren().remove(1);
+
         if (this.activeController.getCurrentImage() == null) {
             Image img = activeController.getCurrentPlainImage();
             if (preprocessedCheckBox.isSelected()) {
                 analysisController.setPaneImage(pane, img, view, true);
+                preprocessedCheckBox.setSelected(true);
             } else {
                 analysisController.setPaneImage(pane, img, view, false);
+                preprocessedCheckBox.setSelected(false);
             }
         } else {
             if (preprocessedCheckBox.isSelected()) {
                 analysisController.setPaneImage(pane, currImageSample, view, true);
+                preprocessedCheckBox.setSelected(true);
             } else {
                 analysisController.setPaneImage(pane, currImageSample, view, false);
+                preprocessedCheckBox.setSelected(false);
             }
         }
 
