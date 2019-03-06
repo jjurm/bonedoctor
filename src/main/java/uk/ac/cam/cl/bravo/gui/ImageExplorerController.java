@@ -25,6 +25,7 @@ public class ImageExplorerController {
     private View view;
     private ImageSample image;
     private GridPane pane;
+    private boolean isPreprocessed;
 
     double width;
     double height;
@@ -39,10 +40,12 @@ public class ImageExplorerController {
      * Constructor: initialises non-FXML-dependant elements.
      * Call before launcher.
      * */
-    public ImageExplorerController(Stage stage, View view, GridPane pane) {
+    public ImageExplorerController(Stage stage, View view, GridPane pane, boolean usePreprocessed) {
         this.stage = stage;
         this.view = view;
         this.pane = pane;
+        this.isPreprocessed = usePreprocessed;
+
     }
 
 
@@ -55,6 +58,9 @@ public class ImageExplorerController {
      * @param userInImg
      */
     public void setImage(Image userInImg) {
+
+        analysisController.setActiveExplorer(this);
+
         width = userInImg.getWidth();
         height = userInImg.getHeight();
 
@@ -251,5 +257,9 @@ public class ImageExplorerController {
      */
     public GridPane getCurrentPane() {
         return this.pane;
+    }
+
+    public boolean isPreprocessed() {
+        return this.isPreprocessed;
     }
 }

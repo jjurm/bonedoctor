@@ -94,8 +94,9 @@ public class AnalysisController {
 
             // Child controller actions
             informationPanelController.setMainController(mainController);
-            informationPanelController.launch();
             informationPanelController.setAnalysisController(this);
+            informationPanelController.launch();
+
 
         ObservableList<View> items = FXCollections.observableArrayList(View.INPUT, View.NORMAL, View.NORMAL_OVER, View.HIGHLIGHT);
 
@@ -119,7 +120,8 @@ public class AnalysisController {
      */
     public void setActiveExplorer(ImageExplorerController active) {
         activeExplorerController = active;
-        informationPanelController.setActiveController(active);
+        if (!(informationPanelController == null))
+            informationPanelController.setActiveController(active);
     }
 
     /**
@@ -138,11 +140,12 @@ public class AnalysisController {
 
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
-            imageExplorerController = new ImageExplorerController(stage, view, pane);
+            imageExplorerController = new ImageExplorerController(stage, view, pane, usePreProcessed);
             imageExplorerLoader.setController(imageExplorerController);
             Parent imageExplorerFXML = imageExplorerLoader.load();
 
             pane.add(imageExplorerFXML, 0, 1);
+            imageExplorerController.setAnalysisController(this);
 
             // Child controller actions
             Image img = null;
@@ -152,7 +155,6 @@ public class AnalysisController {
                 img = SwingFXUtils.toFXImage(imgFile.loadImage(), null);
             imageExplorerController.setImage(img);
             imageExplorerController.setImageSample(imgFile);
-            imageExplorerController.setAnalysisController(this);
             imageExplorerController.setMainController(this.mainController);
         } catch (IOException e) {
             e.printStackTrace();
@@ -175,15 +177,15 @@ public class AnalysisController {
 
             // Initialize controller
             FXMLLoader imageExplorerLoader = new FXMLLoader(getClass().getResource("/uk/ac/cam/cl/bravo/gui/imageExplorer.fxml"));
-            imageExplorerController = new ImageExplorerController(stage, view, pane);
+            imageExplorerController = new ImageExplorerController(stage, view, pane, false);
             imageExplorerLoader.setController(imageExplorerController);
             Parent imageExplorerFXML = imageExplorerLoader.load();
 
             pane.add(imageExplorerFXML, 0, 1);
 
             // Child controller actions
-            imageExplorerController.setImage(imgFile);
             imageExplorerController.setAnalysisController(this);
+            imageExplorerController.setImage(imgFile);
             imageExplorerController.setMainController(this.mainController);
         } catch (IOException e) {
             e.printStackTrace();

@@ -102,6 +102,7 @@ public class InformationPanelController {
 
             // Child controller actions
             matchListController.setMainController(mainController);
+            matchListController.setAnalysisController(analysisController);
             matchListController.launch();
             setView(View.INPUT);
             subscribe();
@@ -125,7 +126,6 @@ public class InformationPanelController {
      */
     public void setAnalysisController(AnalysisController analysisController) {
         this.analysisController = analysisController;
-        matchListController.setAnalysisController(analysisController);
     }
 
     /**
@@ -174,6 +174,14 @@ public class InformationPanelController {
             highlightFlow.setManaged(true);
             highlightFlow.setVisible(true);
             gradient.setVisible(true);
+        }
+
+        if (!(activeController == null)) {
+            if (activeController.isPreprocessed()) {
+                preprocessedCheckBox.setSelected(true);
+            } else {
+                preprocessedCheckBox.setSelected(false);
+            }
         }
     }
 

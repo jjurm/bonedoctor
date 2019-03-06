@@ -1,5 +1,6 @@
 #container {
-    -fx-background-color: #545454;;
+ /*   -fx-background-color: #545454; */
+    -fx-background-color: pink;
     -fx-border-width: 2px;
 }
 
@@ -9,12 +10,14 @@
 }
 
 .list-view .list-cell:even {
-    -fx-background-color: #545454;
+/*    -fx-background-color: #545454; */
+    -fx-background-color: pink;
     -fx-text-fill: white;
 }
 
 .list-view .list-cell:odd {
-    -fx-background-color: #444444;
+ /*   -fx-background-color: #444444; */
+    -fx-background-color: red;
     -fx-text-fill: white;
 }
 

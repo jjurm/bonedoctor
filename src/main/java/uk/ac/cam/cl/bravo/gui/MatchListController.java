@@ -30,8 +30,8 @@ public class MatchListController {
     private ListView matches;
     private Stage stage;
     private AnalysisController analysisController;
-    private List<Image> imgNormalList = new ArrayList<>();
 
+    private List<Rated<ImageSample>> normals = null;
     private View view;
     private MainController mainController;
     private ImageExplorerController activeController;
@@ -81,55 +81,58 @@ public class MatchListController {
      */
     private void createMatchList(List<Rated<ImageSample>> normals) {
 
+        if (this.normals == null) {
 
-        analysisController.setNormalList(normals);
-        ObservableList<String> list = FXCollections.observableArrayList();
-        for (Rated<ImageSample> r: normals){ // TODO: Change bc of pipeline
-            double score = ((r.getScore() * -1.0) + 1)*100/2 ;
-            String matchConf = new DecimalFormat("#.#").format(score);
-            list.add("Patient: " + r.getValue().getPatient() + "    Match Confidence: " + matchConf + "%");
-        }
+            this.normals = normals;
+            analysisController.setNormalList(normals);
+            ObservableList<String> list = FXCollections.observableArrayList();
+            for (Rated<ImageSample> r : normals) { // TODO: Change bc of pipeline
+                double score = ((r.getScore() * -1.0) + 1) * 100 / 2;
+                String matchConf = new DecimalFormat("#.#").format(score);
+                list.add("Patient: " + r.getValue().getPatient() + "    Match Confidence: " + matchConf + "%");
+            }
 
-        matches.setItems(list);
+            matches.setItems(list);
 
-        matches.setCellFactory(param -> new ListCell<String>() {
-            private ImageView matchView = new ImageView();
+            matches.setCellFactory(param -> new ListCell<String>() {
+                private ImageView matchView = new ImageView();
 
-            @Override
-            public void updateItem(String name, boolean empty) {
-                super.updateItem(name, empty);
+                @Override
+                public void updateItem(String name, boolean empty) {
+                    super.updateItem(name, empty);
 
-                matchView.setFitHeight(180);
-                matchView.setFitWidth(180);
-                matchView.setPreserveRatio(true);
+                    matchView.setFitHeight(180);
+                    matchView.setFitWidth(180);
+                    matchView.setPreserveRatio(true);
 
-                if (empty) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
+                    if (empty) {
+                        setText(null);
+                        setGraphic(null);
+                    } else {
 //                    matchView.setImage(normals.get(getIndex()));
-                    //TODO: Change bc of pipeline
-                    Image img = SwingFXUtils.toFXImage(normals.get(getIndex()).getValue().loadImage(), null);
-                    matchView.setImage(img);
-                    setText(name);
-                    setGraphic(matchView);
+                        //TODO: Change bc of pipeline
+                        Image img = SwingFXUtils.toFXImage(normals.get(getIndex()).getValue().loadImage(), null);
+                        matchView.setImage(img);
+                        setText(name);
+                        setGraphic(matchView);
+                    }
                 }
-            }
-        });
+            });
 
-        // ----- ENABLE SELECT NEW MATCH -----
+            // ----- ENABLE SELECT NEW MATCH -----
 
-        matches.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) {
-                System.out.println("Clicked on " + matches.getSelectionModel().getSelectedIndex());
-            }
+            matches.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2) {
+                    System.out.println("Clicked on " + matches.getSelectionModel().getSelectedIndex());
+                }
 
-            int index = matches.getSelectionModel().getSelectedIndex();
+                int index = matches.getSelectionModel().getSelectedIndex();
 
-            ImageSample img = normals.get(index).getValue();
-            analysisController.setPaneImage(activeController.getCurrentPane(), img, activeController.getView(), false);
+                ImageSample img = normals.get(index).getValue();
+                analysisController.setPaneImage(activeController.getCurrentPane(), img, activeController.getView(), false);
 
-        });
+            });
+        }
     }
 
     /**
