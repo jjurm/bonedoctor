@@ -1,8 +1,8 @@
 # Bone Doctor
 
-A Part IB Group Project, created for TPP for the **Computer Science Tripos** at the **University of Cambridge**.
+A Part IB Group Project, created for TPP for the **Computer Science Tripos** at the **University of Cambridge**. This project was awarded the **Best Technical Achievement** prize.
 
-This project was awarded the **Best Technical Achievement** prize.
+Publication in <a href="https://www.cl.cam.ac.uk/downloads/ring/ring-2019-05.pdf">*The Ring*</a>, the journal of the Cambridge Computer Lab Ring.
 
 The PDF containing the Final presentation slides can be found <a href="https://github.com/jjurm/bonedoctor/blob/master/Bravo - final presentation.pdf">here</a>.
 
