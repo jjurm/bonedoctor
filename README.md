@@ -4,7 +4,7 @@ A Part IB Group Project, created for TPP for the **Computer Science Tripos** at 
 
 Publication in <a href="https://www.cl.cam.ac.uk/downloads/ring/ring-2019-05.pdf">*The Ring*</a>, the journal of the Cambridge Computer Lab Ring.
 
-The PDF containing the Final presentation slides can be found <a href="https://github.com/jjurm/bonedoctor/blob/master/Bravo - final presentation.pdf">here</a>.
+The PDF containing the Final presentation slides can be found <a href="https://github.com/jjurm/bonedoctor/blob/master/Bravo - final presentation.pdf">here</a>. See the final presentation on [Youtube](https://www.youtube.com/watch?v=W22kYBsc4nY&list=PLstyePOvf2d39LYQ3YBcdWUdREimYF8e4&ab_channel=CambridgeComputerLab).
 
 <a href="https://github.com/jjurm/bonedoctor/blob/master/Bravo - final presentation.pdf"><img src="https://raw.githubusercontent.com/jjurm/bonedoctor/master/images/read/intro_slide.png" width="480" height="270" /></a>
 
